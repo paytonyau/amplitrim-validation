@@ -1,0 +1,28 @@
+vsearch v2.27.0_linux_x86_64, 3.9GB RAM, 1 cores
+vsearch --fastq_mergepairs /tmp/sim_data/primer_trimmed/sampleA_R1.fastq.gz --reverse /tmp/sim_data/primer_trimmed/sampleA_R2.fastq.gz --fastqout vs_merged.fq --fastq_minovlen 12 --fastq_maxdiffs 0 --fastq_allowmergestagger --fastqout_notmerged_fwd vs_nm_fwd.fq --eetabbedout vs_ee.txt --log vs_log.txt
+Started  Fri Oct  2 23:07:38 2026
+     10000  Pairs
+      4944  Merged (49.4%)
+      5056  Not merged (50.6%)
+
+Pairs that failed merging due to various reasons:
+        24  too few kmers found on same diagonal
+      4975  too many differences
+        57  alignment score too low, or score drop too high
+
+Statistics of all reads:
+    229.00  Mean read length
+
+Statistics of merged reads:
+    426.35  Mean fragment length
+      3.17  Standard deviation of fragment length
+      0.20  Mean expected error in forward sequences
+      0.96  Mean expected error in reverse sequences
+      0.59  Mean expected error in merged sequences
+      0.00  Mean observed errors in merged region of forward sequences
+      0.00  Mean observed errors in merged region of reverse sequences
+      0.00  Mean observed errors in merged region
+
+Finished Fri Oct  2 23:07:38 2026
+Elapsed time 00:00
+Max memory 6.9MB

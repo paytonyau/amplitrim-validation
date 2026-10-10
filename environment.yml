@@ -1,0 +1,16 @@
+# conda environment for AmpliTrim.   conda env create -f environment.yml && conda activate amplitrim
+# vsearch is not installed here: on Linux/macOS run `conda install -c bioconda vsearch`;
+# on Windows download its Windows build (see the README, "Install").
+name: amplitrim
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - numpy
+  - pandas
+  - matplotlib
+  - pytest
+  - pip:
+      - -e .
+      - cutadapt        # removes primers and adapters before AmpliTrim
