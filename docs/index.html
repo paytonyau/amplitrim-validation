@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How well does AmpliTrim work? Test results on 12 datasets</title>
+<meta name="description" content="What held and what did not when AmpliTrim was tested against real DADA2 runs on 12 public datasets.">
+<meta name="theme-color" content="#1b201d">
+<meta property="og:type" content="website">
+<meta property="og:title" content="How well does AmpliTrim work? Test results on 12 datasets">
+<meta property="og:description" content="What held and what did not when AmpliTrim was tested against real DADA2 runs on 12 public datasets.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231b201d'/%3E%3Ctext x='16' y='24' font-size='24' text-anchor='middle' fill='%23e8ebe6' font-family='Georgia,serif' font-weight='700'%3EA%3C/text%3E%3C/svg%3E">
+<script>(function(){try{var t=localStorage.getItem('amplitrim-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
+<style>
+:root{--bg:#e8ebe6;--fg:#1b201d;--muted:#4a534d;--accent:#2f3c8f;--accent-fg:#f4f6f2;--card:#dde2da;--line:#b3bcb1;--code:#dfe4dc;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b211e;--fg:#e3e8e1;--muted:#a6b0a8;--accent:#a9b8ff;--accent-fg:#141a2e;--card:#252d29;--line:#3c4741;--code:#29322d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1b211e;--fg:#e3e8e1;--muted:#a6b0a8;--accent:#a9b8ff;--accent-fg:#141a2e;--card:#252d29;--line:#3c4741;--code:#29322d;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:4.5rem;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.62 "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Charter,"Source Serif Pro",Georgia,serif}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:.18em}
+.trim{color:var(--accent);font-weight:700}
+.note{font:.88rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--muted);margin:.4rem 0 .8rem}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.theme{font:700 .72rem/1.2 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase;padding:.3rem .65rem;margin:0 0 0 1.2rem;border:1px solid var(--fg);border-radius:0;background:none;color:var(--fg);cursor:pointer;white-space:nowrap}
+.theme:hover{border-color:var(--accent);color:var(--accent)}
+.skip{position:absolute;left:-999px;top:0}
+.skip:focus{left:1rem;top:1rem;background:var(--bg);padding:.5rem .75rem;border:1px solid var(--fg);z-index:10}
+.wrap{max-width:56rem;margin:0 auto;padding:0 1.4rem}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+header.site{position:sticky;top:0;z-index:5;background:var(--bg);border-top:4px solid var(--fg);border-bottom:1px solid var(--line)}
+.bar{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;padding-top:.55rem;padding-bottom:.5rem}
+.brand{font-size:1.25rem;text-decoration:none;color:var(--fg);margin-right:1rem}
+nav ul{display:flex;flex-wrap:wrap;align-items:baseline;list-style:none;margin:0;padding:0}
+nav li{margin:0 0 0 1.2rem}
+nav a{text-decoration:none;color:var(--muted);font:700 .74rem/1.4 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase}
+nav a:hover{color:var(--accent)}
+.hero{padding:3.4rem 0 1.2rem}
+h1{font-size:clamp(2.6rem,7.5vw,4.2rem);line-height:1.04;margin:0 0 .5rem;letter-spacing:-.025em;font-weight:400}
+.tagline{font-size:clamp(1.15rem,2.6vw,1.5rem);font-style:italic;font-weight:400;margin:0 0 1rem;line-height:1.4}
+.lead{color:var(--muted);max-width:42rem;margin:0 0 1.4rem}
+.actions{margin:0 0 .6rem}
+.btn{display:inline-block;margin:0 .7rem .7rem 0;padding:.5rem 1rem;border:1.5px solid var(--fg);border-radius:0;color:var(--fg);text-decoration:none;font:700 .74rem/1.4 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--fg);color:var(--bg)}
+.btn.primary:hover{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.badges{margin:0}
+.badges a{display:inline-block;margin:0 .4rem .4rem 0}
+.badges img{display:block;height:20px}
+section.wrap{padding-top:1.9rem;padding-bottom:.6rem}
+section.wrap>h2{border-top:1px solid var(--fg);padding-top:.65rem}
+h2{font-size:1.55rem;margin:0 0 .9rem;line-height:1.25;font-weight:400}
+h3{font-size:1.08rem;margin:1.4rem 0 .4rem;font-weight:700}
+.flow{list-style:none;display:flex;flex-wrap:wrap;align-items:center;margin:1.2rem 0 .7rem;padding:0}
+.flow li{display:flex;align-items:center;margin:0 .4rem .5rem 0}
+.step{display:inline-block;padding:.4rem .85rem;border:1px solid var(--fg);border-radius:0;background:none;font:600 .9rem/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+.step.me{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.arrow{color:var(--muted);margin-left:.5rem}
+.cards{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.4rem 2.2rem}
+@media (max-width:40rem){.cards{grid-template-columns:1fr}}
+.card{background:none;border:0;border-top:2px solid var(--fg);border-radius:0;padding:.7rem 0 .2rem}
+.card h3{margin:0 0 .3rem;font-size:1.05rem}
+.card p{margin:0;color:var(--muted)}
+code{font:.88em ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;background:var(--code);padding:.08em .3em;border-radius:0}
+.codeblock{position:relative;margin:.8rem 0}
+pre{margin:0;padding:1rem;background:var(--code);border-radius:0;overflow-x:auto;font:13.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;border:1px solid var(--line)}
+pre code{background:none;padding:0;font:inherit}
+.copy{position:absolute;top:.45rem;right:.45rem;font:700 .66rem/1.2 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase;padding:.25rem .55rem;border:1px solid var(--fg);border-radius:0;background:var(--bg);color:var(--fg);cursor:pointer}
+.copy:hover{border-color:var(--accent);color:var(--accent)}
+.scroll{overflow-x:auto;margin:.9rem 0}
+table{border-collapse:collapse;width:100%;font-size:.93rem;font-variant-numeric:lining-nums tabular-nums}
+th,td{border:0;border-bottom:1px solid var(--line);padding:.5rem .8rem .5rem 0;text-align:left;vertical-align:top}
+thead th{border-top:2px solid var(--fg);border-bottom:2px solid var(--fg);background:none;font:700 .7rem/1.35 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+tbody th{font-weight:700;background:none}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:2px solid var(--fg)}
+details{margin:.8rem 0}
+summary{cursor:pointer;font:700 .74rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+ul{padding-left:1.25rem}
+li{margin:.3rem 0}
+footer{margin-top:3rem;border-top:4px solid var(--fg);padding:1.2rem 0 2.5rem;color:var(--muted);font:.86rem/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+footer p{margin:.2rem 0}
+@media (max-width:34rem){.bar{padding-top:.4rem;padding-bottom:.4rem}.hero{padding-top:2rem}}
+:root{--rev:#86307a;--warn:#98380d;--ok:#2a6b3b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--rev:#e0a4d6;--warn:#f0a77d;--ok:#7fcf93}}
+:root[data-theme="dark"]{--rev:#e0a4d6;--warn:#f0a77d;--ok:#7fcf93}
+.intro{color:var(--muted);max-width:42rem}
+.trio,.cases{list-style:none;padding:0;margin:1rem 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.4rem 2rem}
+.trio li,.cases li{background:none;border:0;border-top:2px solid var(--fg);border-radius:0;padding:.7rem 0 0;margin:0}
+.trio h3,.cases h3{margin:.1rem 0 .3rem;font-size:1.05rem}
+.trio p,.cases p{margin:.3rem 0 0;color:var(--muted)}
+.chip{display:inline-block;position:relative;padding-left:.95em;font:700 .68rem/1.35 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap;border:0}
+.chip::before{content:"";position:absolute;left:0;top:.3em;width:.58em;height:.58em;background:currentColor}
+.chip.exact,.chip.held{color:var(--ok)}
+.chip.measured,.chip.design{color:var(--accent)}
+.chip.none,.chip.optimistic,.chip.timing,.chip.unvalidated{color:var(--warn)}
+.legend{display:flex;flex-wrap:wrap;margin:.4rem 0;color:var(--muted);font:.88rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.legend span{margin-right:1.2rem}
+.sw{display:inline-block;width:.8rem;height:.8rem;margin-right:.35rem;vertical-align:-.1rem}
+.sw.f{background:var(--accent)}.sw.r{background:var(--rev)}.sw.w{background:var(--warn)}.sw.o{background:var(--accent);opacity:.25}
+.steps{list-style:none;padding:0;margin:1rem 0;counter-reset:none}
+.step{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,19rem);gap:1rem 2rem;align-items:center;background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:1.1rem 0;margin:0;font:inherit}
+.step h3{margin:0 0 .4rem;font-size:1.12rem;display:flex;align-items:baseline}
+.num{display:inline-block;min-width:1.7rem;font-size:1.3rem;font-weight:700;color:var(--accent);margin-right:.4rem;flex:none}
+.step p{margin:.3rem 0}
+.where{font:.86rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--muted)}
+figure{margin:0}
+figcaption{font:.78rem/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--muted);text-align:left;margin-top:.25rem}
+svg{display:block;width:100%;height:auto}
+svg .t{fill:var(--fg);font:12px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+svg .tm{fill:var(--muted);font:11px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+svg .tw{fill:var(--warn);font:11px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-weight:700}
+svg .ta{fill:var(--accent);font:11px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-weight:700}
+svg .card{fill:var(--card);stroke:var(--line)}
+svg .grid{stroke:var(--line);fill:none}
+svg .ink{stroke:var(--fg);fill:none}
+svg .accs{stroke:var(--accent);fill:none}
+svg .warns{stroke:var(--warn);fill:none}
+svg .acc{fill:var(--accent)}svg .rev{fill:var(--rev)}svg .warn{fill:var(--warn)}svg .ok{fill:var(--ok)}
+svg .band{fill:var(--accent);opacity:.22}
+svg .dim{fill:var(--line)}
+svg rect{rx:0;ry:0}
+.decisions td,.decisions th{vertical-align:top}
+.decisions .chip{margin-bottom:.35rem}
+.decisions td p{margin:.2rem 0}
+.mods th:first-child{white-space:nowrap}
+@media (max-width:48rem){.trio,.cases{grid-template-columns:1fr}.step{grid-template-columns:1fr}}
+.crumb{font:.84rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--muted);margin:0 0 .5rem}
+.crumb a{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;margin:.4rem 0 .6rem}
+.chips .chip{margin:0 1.1rem .4rem 0}
+.chip.dev{color:var(--rev)}.chip.heldout{color:var(--accent)}.chip.case{color:var(--ok)}.chip.met{color:var(--ok)}.chip.notmet{color:var(--warn)}.chip.partly{color:var(--rev)}
+.facts{display:grid;grid-template-columns:minmax(0,11rem) minmax(0,1fr);gap:.35rem 1.2rem;margin:.8rem 0}
+.facts dt{color:var(--muted);font:700 .72rem/1.7 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+.facts dd{margin:0}
+.glance{list-style:none;padding:0;margin:1.2rem 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem 1.4rem}
+.glance li{background:none;border:0;border-top:2px solid var(--fg);border-radius:0;padding:.55rem 0 0;margin:0}
+.glance .big{display:block;font-size:1.5rem;font-weight:700;line-height:1.2;margin:.2rem 0;font-variant-numeric:lining-nums tabular-nums}
+.glance .lab{color:var(--muted);font:.82rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.chart{margin:1rem 0}
+.chart figcaption{text-align:left;font-size:.82rem}
+.dcards{list-style:none;padding:0;margin:1rem 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.4rem 2rem}
+.dcard{background:none;border:0;border-top:2px solid var(--fg);border-radius:0;padding:.65rem 0 0;margin:0}
+.dcard h3{margin:.1rem 0 .3rem;font-size:1.05rem}
+.dcard p{margin:.25rem 0;color:var(--muted);font-size:.92rem}
+.dcard .nums{color:var(--fg)}
+.pager{display:flex;justify-content:space-between;flex-wrap:wrap;margin:1.5rem 0 .5rem;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:.9rem}
+.pager a{margin-bottom:.4rem}
+.notebox{background:none;border:0;border-top:1px solid var(--fg);border-bottom:1px solid var(--line);border-radius:0;padding:.8rem 0;margin:1.3rem 0}
+.notebox p{margin:0}
+.pending{color:var(--muted)}
+svg .bar{fill:var(--accent)}svg .barn{fill:var(--warn)}svg .band2{fill:var(--accent);opacity:.16}
+@media (max-width:48rem){.glance{grid-template-columns:repeat(2,minmax(0,1fr))}.dcards{grid-template-columns:1fr}.facts{grid-template-columns:1fr}}
+@media (max-width:34rem){.glance{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap bar">
+<a class="brand" href="./">Ampli<span class="trim">Trim</span> results</a>
+<nav aria-label="Main"><ul>
+<li><a href="./">Overview</a></li>
+<li><a href="./#datasets">Datasets</a></li>
+<li><a href="./how-it-works/">How it works</a></li>
+<li><a href="https://github.com/paytonyau/amplitrim">Software</a></li>
+<li><a href="https://github.com/paytonyau/amplitrim-validation">Archive</a></li>
+</ul></nav>
+</div></header>
+<main id="main">
+<section class="hero" id="top"><div class="wrap">
+<h1>How well does AmpliTrim work?</h1>
+<p class="tagline">Test results on 12 public datasets, one page each.</p>
+<p class="lead">AmpliTrim chooses DADA2 settings for you. To find out how good its choices are, we tested it against real DADA2 runs on 12 public datasets: mock communities, real samples and one ITS case study. We wrote down what we expected before the runs. These pages show what held and what did not.</p>
+</div></section>
+<section class="wrap" id="how"><h2>How to read these pages</h2>
+<dl class="facts">
+<dt>Estimate and measurement</dt><dd>AmpliTrim <strong>estimates</strong> how many read pairs will pass DADA2's filter and merge. We then ran DADA2 and <strong>measured</strong> it. The pages compare the two.</dd>
+<dt>Points</dt><dd>Differences are in percentage points of the read pairs that went in. A difference of +2 means 2 more pairs in every 100.</dd>
+<dt>maxEE</dt><dd>The most expected errors DADA2 allows in a read. Reads over the limit are dropped. DADA2's default is 2.</dd>
+<dt>A cut</dt><dd>Where each read is cut: 247/199 means the forward reads at 247 nt and the reverse reads at 199 nt.</dd>
+<dt>The other tool</dt><dd>An existing automatic tool for choosing truncation lengths. We compare AmpliTrim with it; the findings name it.</dd>
+<dt>The shaded band</dt><dd>In the charts, the margin we set in advance. A result inside the band counts as equivalent.</dd>
+<dt>Colours</dt><dd>Blue: more than the comparison. Orange: fewer. Marks drawn in a single colour are plain measurements.</dd>
+<dt>Our datasets</dt><dd>9 datasets were kept aside and not used in the design (independent tests). 2 were used while designing AmpliTrim (Mock community A and Soil, V4), so they are shown but are not independent evidence. One is the ITS case study.</dd>
+<dt>Rounds of tests</dt><dd>We tested in three rounds. The first round called two cuts equivalent if they merged within 1 point of each other; later rounds used 2 points, which is what these pages show. A dataset's page says when the stricter margin changes the picture.</dd>
+</dl>
+</section>
+<section class="wrap" id="scoreboard"><h2>What held</h2>
+<div class="scroll"><table class="decisions"><thead><tr><th scope="col">What we tested</th><th scope="col">What happened</th></tr></thead><tbody><tr><th scope="row">AmpliTrim&#x27;s estimate of the share of pairs that pass DADA2&#x27;s filter</th><td><span class="chip met">Held</span><p>On all 12 datasets the estimate was within 0.8 points of what DADA2 measured. The target we set before testing was 2 points. The average miss was 0.2 points.</p></td></tr><tr><th scope="row">AmpliTrim&#x27;s estimate of the share of pairs that merge</th><td><span class="chip partly">Partly</span><p>On 9 of the 11 datasets where the order could be compared, it put the settings in exactly the order DADA2 did, and it did less well on Mock community A (0.90) and Wastewater, V3-V4 (0.80). The estimate is also off in size, because it stops before DADA2 denoises the reads: from 2.2 points too low to 32.1 points too high, depending on the dataset. Use it to compare settings, not as a forecast.</p></td></tr><tr><th scope="row">AmpliTrim&#x27;s cut against the other tool&#x27;s, at the same maxEE</th><td><span class="chip met">Held</span><p>AmpliTrim&#x27;s cut merged more pairs on 4 of 10 datasets, the same on 5 and fewer on 1 (average +0.4 points). Only one dataset differs by more than the 2-point margin we set, so the cuts are equivalent, not better.</p></td></tr><tr><th scope="row">Getting the same cut on other samples</th><td><span class="chip partly">Partly</span><p>Run on three separate sets of samples, AmpliTrim chose the same cut on 4 of 6 datasets and the other tool on 3 of 6. AmpliTrim&#x27;s misses are small moves along a flat stretch where the yield barely changes.</p></td></tr><tr><th scope="row">The maxEE rule</th><td><span class="chip partly">Sensible default, not independently tested</span><p>It follows the advice of DADA2&#x27;s author: maxEE 2 is a good general-purpose value, and relaxing it somewhat is also OK. The rule keeps 2 unless your reads need more. The numbers are ours: we chose the 75th percentile after seeing our test data, and the author gives no ceiling, so the rule has none; the report notes a limit above 5. So it is a sensible default that has not been tested on independent data, and it did not reach the result we had decided in advance would make us adopt it (that test used an earlier version of the rule, with a cap of 5, which merged 60.7% on average). On the five datasets where it differs from the default, DADA2 merged 45.0% of the pairs on average with the default maxEE, 61.2% with maxEE 2,5 and 64.9% with the released rule, measured afterwards. We did not apply the criteria again to the new numbers, because we had seen them first. We keep the rule and say so openly.</p></td></tr></tbody></table></div>
+<p>The full list of criteria and outcomes, written before the runs, is in the <a href="https://github.com/paytonyau/amplitrim-validation/blob/main/TEST_REGISTER.md">test register</a>.</p>
+</section>
+<section class="wrap" id="charts"><h2>All datasets at a glance</h2>
+<h3>How close was the pass-rate estimate?</h3>
+<figure class="chart"><svg viewBox="0 0 520 362" role="img" aria-label="How far AmpliTrim&#x27;s estimate of the pass rate was from the measured pass rate, in points, on each dataset"><title>How far AmpliTrim&#x27;s estimate of the pass rate was from the measured pass rate, in points, on each dataset</title><rect class="band2" x="262.5" y="16" width="190.0" height="290"/><line class="ink" x1="357.5" y1="14" x2="357.5" y2="308"/><text class="t" x="8" y="33" style="font-size:12px">Mock community A</text><line class="grid" x1="215" y1="29" x2="500" y2="29"/><circle class="acc" data-v="-0.8" cx="319.5" cy="29" r="5"/><text class="t" x="8" y="57" style="font-size:12px">Mock community B</text><line class="grid" x1="215" y1="53" x2="500" y2="53"/><circle class="acc" data-v="+0.1" cx="362.2" cy="53" r="5"/><text class="t" x="8" y="81" style="font-size:12px">Inter-laboratory mock, V1-V2</text><line class="grid" x1="215" y1="77" x2="500" y2="77"/><circle class="acc" data-v="-0.1" cx="352.8" cy="77" r="5"/><text class="t" x="8" y="105" style="font-size:12px">Inter-laboratory mock, V4-V6</text><line class="grid" x1="215" y1="101" x2="500" y2="101"/><circle class="acc" data-v="-0.2" cx="348.0" cy="101" r="5"/><text class="t" x="8" y="129" style="font-size:12px">ZymoBIOMICS D6300, V3-V4</text><line class="grid" x1="215" y1="125" x2="500" y2="125"/><circle class="acc" data-v="+0.1" cx="362.2" cy="125" r="5"/><text class="t" x="8" y="153" style="font-size:12px">ZymoBIOMICS D6300, V4-V5</text><line class="grid" x1="215" y1="149" x2="500" y2="149"/><circle class="acc" data-v="+0.2" cx="367.0" cy="149" r="5"/><text class="t" x="8" y="177" style="font-size:12px">Real samples, V1-V2</text><line class="grid" x1="215" y1="173" x2="500" y2="173"/><circle class="acc" data-v="0.0" cx="357.5" cy="173" r="5"/><text class="t" x="8" y="201" style="font-size:12px">Soil, V4</text><line class="grid" x1="215" y1="197" x2="500" y2="197"/><circle class="acc" data-v="0.0" cx="357.5" cy="197" r="5"/><text class="t" x="8" y="225" style="font-size:12px">Spring wheat, ITS</text><line class="grid" x1="215" y1="221" x2="500" y2="221"/><circle class="acc" data-v="+0.1" cx="362.2" cy="221" r="5"/><text class="t" x="8" y="249" style="font-size:12px">Wastewater, V3-V4</text><line class="grid" x1="215" y1="245" x2="500" y2="245"/><circle class="acc" data-v="+0.2" cx="367.0" cy="245" r="5"/><text class="t" x="8" y="273" style="font-size:12px">Mouse gut with spike-ins, V3-V4</text><line class="grid" x1="215" y1="269" x2="500" y2="269"/><circle class="acc" data-v="-0.5" cx="333.8" cy="269" r="5"/><text class="t" x="8" y="297" style="font-size:12px">Meat-processing swabs, V3-V4</text><line class="grid" x1="215" y1="293" x2="500" y2="293"/><circle class="acc" data-v="-0.1" cx="352.8" cy="293" r="5"/><text class="tm" x="215.0" y="322" text-anchor="middle">-3</text><text class="tm" x="357.5" y="322" text-anchor="middle">0</text><text class="tm" x="500.0" y="322" text-anchor="middle">+3</text><text class="tm" x="215" y="340">← estimate too low</text><text class="tm" x="500" y="340" text-anchor="end">estimate too high →</text><text class="ta" x="357.5" y="356" text-anchor="middle">shaded: within 2 points, the target we set in advance</text></svg><figcaption>Each mark is one dataset: how far AmpliTrim's estimate of the share of pairs passing DADA2's filter was from what DADA2 measured. Zero is exact. Every mark is inside the band.</figcaption></figure>
+<h3>AmpliTrim's cut against the other tool's, at the same maxEE</h3>
+<figure class="chart"><svg viewBox="0 0 520 374" role="img" aria-label="Pairs merged by DADA2: AmpliTrim&#x27;s cut minus the other tool&#x27;s, in points, by group"><title>Pairs merged by DADA2: AmpliTrim&#x27;s cut minus the other tool&#x27;s, in points, by group</title><rect class="band2" x="262.5" y="8" width="190.0" height="314"/><line class="ink" x1="357.5" y1="6" x2="357.5" y2="324"/><text class="ta" x="8" y="28">Real samples</text><text class="t" x="8" y="52" style="font-size:12px">Real samples, V1-V2</text><rect class="bar" data-v="+1.1" x="357.5" y="41" width="52.2" height="14" rx="2"/><text class="tm" x="415.8" y="52" text-anchor="start">+1.1</text><text class="t" x="8" y="76" style="font-size:12px">Soil, V4</text><rect class="bar" data-v="0.0" x="357.5" y="65" width="1.5" height="14" rx="2"/><text class="tm" x="363.5" y="76" text-anchor="start">0.0</text><text class="t" x="8" y="100" style="font-size:12px">Mouse gut with spike-ins, V3-V4</text><rect class="bar" data-v="+1.3" x="357.5" y="89" width="61.8" height="14" rx="2"/><text class="tm" x="425.2" y="100" text-anchor="start">+1.3</text><text class="t" x="8" y="124" style="font-size:12px">Meat-processing swabs, V3-V4</text><rect class="bar" data-v="0.0" x="357.5" y="113" width="1.5" height="14" rx="2"/><text class="tm" x="363.5" y="124" text-anchor="start">0.0</text><text class="ta" x="8" y="148">Mock communities</text><text class="t" x="8" y="172" style="font-size:12px">Mock community A</text><rect class="bar" data-v="0.0" x="357.5" y="161" width="1.5" height="14" rx="2"/><text class="tm" x="363.5" y="172" text-anchor="start">0.0</text><text class="t" x="8" y="196" style="font-size:12px">Mock community B</text><rect class="bar" data-v="+2.6" x="357.5" y="185" width="123.5" height="14" rx="2"/><text class="tm" x="487.0" y="196" text-anchor="start">+2.6</text><text class="t" x="8" y="220" style="font-size:12px">Inter-laboratory mock, V1-V2</text><rect class="bar" data-v="0.0" x="357.5" y="209" width="1.5" height="14" rx="2"/><text class="tm" x="363.5" y="220" text-anchor="start">0.0</text><text class="t" x="8" y="244" style="font-size:12px">Inter-laboratory mock, V4-V6</text><rect class="bar" data-v="+0.3" x="357.5" y="233" width="14.2" height="14" rx="2"/><text class="tm" x="377.8" y="244" text-anchor="start">+0.3</text><text class="t" x="8" y="268" style="font-size:12px">ZymoBIOMICS D6300, V3-V4</text><rect class="bar" data-v="0.0" x="357.5" y="257" width="1.5" height="14" rx="2"/><text class="tm" x="363.5" y="268" text-anchor="start">0.0</text><text class="ta" x="8" y="292">Wastewater*</text><text class="t" x="8" y="316" style="font-size:12px">Wastewater, V3-V4</text><rect class="barn" data-v="-1.0" x="310.0" y="305" width="47.5" height="14" rx="2"/><text class="tm" x="304.0" y="316" text-anchor="end">-1.0</text><text class="tm" x="215.0" y="338" text-anchor="middle">-3</text><text class="tm" x="357.5" y="338" text-anchor="middle">0</text><text class="tm" x="500.0" y="338" text-anchor="middle">+3</text><text class="tm" x="215" y="356">← AmpliTrim merged fewer</text><text class="tm" x="500" y="356" text-anchor="end">AmpliTrim merged more →</text><text class="ta" x="357.5" y="372" text-anchor="middle">shaded: within 2 points</text></svg><figcaption>The difference in the share of read pairs DADA2 merged, AmpliTrim's cut minus the other tool's. Blue: AmpliTrim merged more. Orange: fewer. Inside the shaded band, the cuts are equivalent.</figcaption></figure>
+<p>* Wastewater is the only real dataset in these tests with poor read quality: its reads are noisy (an estimated 54% of its pairs pass DADA2's default filter), and the loss is to read quality, not to short reads. Its reads were also trimmed to mixed lengths, and every pair was in reverse orientation. It is the one case where the other tool was ahead. Its page explains why.</p>
+<p>By group: real samples (4 datasets): ahead on 2, tied on 2 (average +0.6 points). Mock communities (5): ahead on 2, tied on 3 (average +0.6 points). Wastewater (1): behind by 1.0 point.</p>
+</section>
+<section class="wrap" id="datasets"><h2>The 12 datasets</h2>
+<ul class="dcards"><li class="dcard"><h3><a href="datasets/mock-a/">Mock community A</a></h3><p class="chips"><span class="chip dev">Used in the design</span></p><p>16S, V1-V3 (27F-YM/534R), MiSeq 2x300</p><p class="nums">Pass-rate estimate: 0.8 points too low. Same maxEE, against the other tool: the same.</p></li><li class="dcard"><h3><a href="datasets/mock-b/">Mock community B</a></h3><p class="chips"><span class="chip heldout">Independent test</span></p><p>16S, V1-V3, MiSeq 2x300</p><p class="nums">Pass-rate estimate: 0.1 points too high. Same maxEE, against the other tool: 2.6 points more.</p></li><li class="dcard"><h3><a href="datasets/interlab-v1v2/">Inter-laboratory mock, V1-V2</a></h3><p class="chips"><span class="chip heldout">Independent test</span></p><p>16S, V1-V2 (about 337 bp), MiSeq 2x300</p><p class="nums">Pass-rate estimate: 0.1 points too low. Same maxEE, against the other tool: the same.</p></li><li class="dcard"><h3><a href="datasets/interlab-v4v6/">Inter-laboratory mock, V4-V6</a></h3><p class="chips"><span class="chip heldout">Independent test</span></p><p>16S, V4-V6 (about 564 bp), MiSeq 2x300</p><p class="nums">Pass-rate estimate: 0.2 points too low. Same maxEE, against the other tool: 0.3 points more.</p></li><li class="dcard"><h3><a href="datasets/d6300-v3v4/">ZymoBIOMICS D6300, V3-V4</a></h3><p class="chips"><span class="chip heldout">Independent test</span></p><p>16S, V3-V4 (341F/805R), NovaSeq 6000, 2x250, primers removed by the submitter, binned qualities</p><p class="nums">Pass-rate estimate: 0.1 points too high. Same maxEE, against the other tool: the same.</p></li><li class="dcard"><h3><a href="datasets/d6300-v4v5/">ZymoBIOMICS D6300, V4-V5</a></h3><p class="chips"><span class="chip heldout">Independent test</span></p><p>16S, V4-V5 (515F/926R), MiSeq 2x300</p><p class="nums">Pass-rate estimate: 0.2 points too high. No comparison with the other tool.</p></li><li class="dcard"><h3><a href="datasets/v1v2/">Real samples, V1-V2</a></h3><p class="chips"><span class="chip heldout">Independent test</span></p><p>16S, V1-V2 (27F/338R), MiSeq 2x300</p><p class="nums">Pass-rate estimate: exact. Same maxEE, against the other tool: 1.1 points more.</p></li><li class="dcard"><h3><a href="datasets/soil-v4/">Soil, V4</a></h3><p class="chips"><span class="chip dev">Used in the design</span></p><p>16S, V4 (reads of 207 nt after trimming</p><p class="nums">Pass-rate estimate: exact. Same maxEE, against the other tool: the same.</p></li><li class="dcard"><h3><a href="datasets/its/">Spring wheat, ITS</a></h3><p class="chips"><span class="chip case">ITS case study</span></p><p>ITS (ITS1-Fl2/ITS2), MiSeq 2x250</p><p class="nums">Pass-rate estimate: 0.1 points too high. No comparison with the other tool.</p></li><li class="dcard"><h3><a href="datasets/wastewater/">Wastewater, V3-V4</a></h3><p class="chips"><span class="chip heldout">Independent test</span></p><p>16S, V3-V4 (341F/805R), MiSeq</p><p class="nums">Pass-rate estimate: 0.2 points too high. Same maxEE, against the other tool: 1.0 points fewer.</p></li><li class="dcard"><h3><a href="datasets/spike-in/">Mouse gut with spike-ins, V3-V4</a></h3><p class="chips"><span class="chip heldout">Independent test</span></p><p>16S, V3-V4, NovaSeq 6000, 2x250, binned qualities</p><p class="nums">Pass-rate estimate: 0.5 points too low. Same maxEE, against the other tool: 1.3 points more.</p></li><li class="dcard"><h3><a href="datasets/swabs/">Meat-processing swabs, V3-V4</a></h3><p class="chips"><span class="chip heldout">Independent test</span></p><p>16S, V3-V4, NovaSeq 6000 (the run that holds the D6300 V3-V4 mock)</p><p class="nums">Pass-rate estimate: 0.1 points too low. Same maxEE, against the other tool: the same.</p></li></ul>
+</section>
+<section class="wrap" id="more"><h2>Where the full record is</h2>
+<ul>
+<li><a href="https://github.com/paytonyau/amplitrim-validation/blob/main/docs/FINDINGS.md">The findings</a>: every table, with the method.</li>
+<li><a href="https://github.com/paytonyau/amplitrim-validation/blob/main/docs/validation.md">The validation page</a>: the evidence behind each recommendation of the released package.</li>
+<li><a href="https://github.com/paytonyau/amplitrim-validation/blob/main/TEST_REGISTER.md">The test register</a>: the criteria and predictions, written before the runs.</li>
+<li><a href="https://github.com/paytonyau/amplitrim-validation">The archive</a>: the scripts that reproduce the runs.</li>
+</ul>
+</section>
+</main>
+<footer><div class="wrap">
+<p><a href="./">Overview</a> · <a href="https://github.com/paytonyau/amplitrim">AmpliTrim on GitHub</a> · <a href="https://github.com/paytonyau/amplitrim-validation">Validation archive</a> · <a href="https://github.com/paytonyau/amplitrim-validation/blob/main/docs/FINDINGS.md">The findings</a> · <a href="https://github.com/paytonyau/amplitrim-validation/blob/main/TEST_REGISTER.md">Test register</a></p>
+<p>By <a href="https://orcid.org/0000-0002-3283-0370">Payton (Tung On) Yau</a>. The numbers come from the findings of the validation archive. The tool we compare with is not named on these pages; the findings name it.</p>
+</div></footer>
+<script>
+(function () {
+  var root = document.documentElement, list = document.querySelector('header.site nav ul');
+  if (!list) return;
+  var button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'theme';
+  button.id = 'theme-toggle';
+  var item = document.createElement('li');
+  item.appendChild(button);
+  list.appendChild(item);
+  var query = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  function current() {
+    var chosen = root.getAttribute('data-theme');
+    if (chosen) return chosen;
+    return query && query.matches ? 'dark' : 'light';
+  }
+  function show() {
+    var dark = current() === 'dark';
+    button.textContent = dark ? '\u2600 Light' : '\u263E Dark';
+    button.setAttribute('aria-label', dark ? 'Switch to the light theme' : 'Switch to the dark theme');
+  }
+  button.addEventListener('click', function () {
+    var next = current() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('amplitrim-theme', next); } catch (e) {}
+    show();
+  });
+  if (query && query.addEventListener) query.addEventListener('change', show);
+  show();
+})();
+
+</script>
+</body>
+</html>

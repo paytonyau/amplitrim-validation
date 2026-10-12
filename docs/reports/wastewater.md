@@ -1,0 +1,108 @@
+# Wastewater, V3-V4: evidence report
+
+*AmpliTrim validation archive. The numbers come from [`docs/FINDINGS.md`](../FINDINGS.md) and [`docs/validation.md`](../validation.md). The tool we compare with is not named here; the findings name it.*
+
+- **Marker, region, platform:** 16S, V3-V4 (341F/805R), MiSeq; trimmed reads of mixed length; every pair in reverse orientation
+- **Samples:** 9 wastewater samples
+- **Known truth:** none
+- **How we used it:** Independent test: kept aside and not used in the design
+- **Data:** [PRJEB75155](https://www.ebi.ac.uk/ena/browser/view/PRJEB75155)
+- **Source study:** to add
+- **Share of pairs passing DADA2's default filter (maxEE 2):** 54%
+
+## In short
+
+The only real dataset in these tests with poor read quality: its reads are noisy (an estimated 54% of its pairs pass DADA2's default filter), and the loss is to read quality, not to short reads (0.6% of its pairs are shorter than the cut). Its reads were also trimmed to mixed lengths and every pair was in reverse orientation. It is the one dataset where the other tool was ahead at the same maxEE: AmpliTrim chose a cut 6 nt longer (446 against 440 nt) because its estimate rewarded the extra overlap, and the extra length cost 0.9 points at the filter. AmpliTrim's cut was the most stable of any dataset across sample sets, which we had predicted would not be so. In the first round of tests, which used a stricter margin of 1.0 point, the difference was beyond the margin, against AmpliTrim.
+
+## How good was AmpliTrim's estimate?
+
+Before DADA2 runs, AmpliTrim estimates two things for each setting: the share of read pairs that will pass DADA2's quality filter, and the share that will go on to merge. We then ran DADA2 for real and compared.
+
+*How far AmpliTrim's estimate of the share of pairs passing the filter was from what DADA2 measured. Zero is exact; inside the shaded band meets the target.*
+
+| Samples | Pass-rate estimate off by (points) | Merge estimate off by (points; average and range over the settings tried) | Same order as DADA2 (1.00 = identical) | The other tool's pass-rate estimate off by (points) |
+|---|---|---|---|---|
+| 9 | +0.2 | +3.9 (-2.1 to +7.2) | 0.80 | -3.3 |
+
+The merge estimate is too high because it stops before DADA2 denoises the reads. Use it to compare settings, not as a forecast.
+
+## Compared with the other tool, at the same maxEE
+
+The other tool is an existing automatic tool for choosing truncation lengths. Given the same maxEE, we compared how many read pairs DADA2 merges with AmpliTrim's cut and with the other tool's cut. A cut such as 247/199 means the forward reads are cut to 247 nt and the reverse reads to 199 nt.
+
+*The difference in the share of read pairs DADA2 merged: AmpliTrim's cut minus the other tool's. Blue means AmpliTrim merged more, orange fewer. Inside the shaded band the two cuts are equivalent.*
+
+| Samples | The other tool's cut and maxEE | AmpliTrim's cut | Difference in pairs merged (points) |
+|---|---|---|---|
+| 9 | 247/193, 5 | 247/199 | -1.0 |
+
+## Choosing the maxEE limit
+
+maxEE is the most expected errors DADA2 allows in a read; reads over the limit are dropped. DADA2's default is 2. AmpliTrim's released rule sets the limit for each read direction from your own reads, never below 2, with no upper limit.
+
+**What the released rule does**
+
+On this dataset the rule changes the limit to **maxEE 4,3**. DADA2 merged this share of the read pairs:
+
+*The share of the input read pairs that DADA2 merged with three maxEE settings, from the final build of the software.*
+
+| Default maxEE 2 | maxEE 2,5 | Released rule | The rule's maxEE |
+|---|---|---|---|
+| 43.6% | 51.1% | 57.9% | 4,3 |
+
+**What a looser limit would do**
+
+We also tried relaxing the limit on the reverse read to 5 (maxEE 2,5) and measured the change in pairs merged, in points of the input pairs.
+
+*Changes in the share of pairs DADA2 merged, in points. Blue means more pairs merged, orange fewer. The lower group compares AmpliTrim with the other tool using its own choice of cut and maxEE.*
+
+| Change in pairs merged (points) | Quality of the extra reads kept | Accuracy (needs expected sequences) |
+|---|---|---|
+| +7.5 | mixed | no expected sequences |
+
+Against the other tool, which picks its own cut and maxEE, DADA2 merged this many more (+) or fewer (-) pairs, in points:
+
+| AmpliTrim setting | Difference from the other tool's own choice (points) |
+|---|---|
+| Default maxEE 2 | -23.1 |
+| maxEE 2,5 | -15.7 |
+
+## Amplicon length and the longest amplicons
+
+**The amplicon length the other tool needs**
+
+The other tool needs you to tell it the amplicon length. We tried the longest (428 nt) and the typical (402 nt); it chose different cuts. AmpliTrim measures the lengths from your reads, so it needs no such number.
+
+*The share of the input read pairs DADA2 merged with the cut each tool chose.*
+
+| Length given: longest / typical | Other tool, given the longest | Other tool, given the typical | AmpliTrim, default |
+|---|---|---|---|
+| 428 / 402 | 247/193, 66.7% | 234/180, 25.5% | 43.6% |
+
+**Leaving out the longest amplicons**
+
+AmpliTrim sets the shortest cut that can merge your amplicons, but it leaves out the very longest few so that a handful of outliers do not force long, noisy reads. By default it leaves out the longest 0.2%. DADA2's merged share, at maxEE 2, when the longest 0.2%, 1% and 5% are left out:
+
+*The share of the input read pairs DADA2 merged.*
+
+| Longest 0.2% left out (default) | Longest 1% | Longest 5% |
+|---|---|---|
+| 43.6% | 43.6% | 41.4% |
+
+## Would the choice change on other samples?
+
+Each tool chose a cut again on three separate sets of samples from this dataset. The choice counts as the same if the cuts differ by at most 10 nt and the maxEE is the same. Cuts are forward/reverse; the maxEE is in brackets.
+
+| AmpliTrim's cuts | Same each time? | The other tool's cuts | Same each time? |
+|---|---|---|---|
+| 254/186 in all three (2) | yes | 257/183 (5,4); 256/184 (5,4); 240/200 (4,5) | no |
+
+## Which tests it took part in
+
+This dataset was not part of: the accuracy scoring (it needs expected sequences).
+
+## Where the numbers come from
+
+Tables 1, 3, 4, 5, 7, 8, 9, 11 of the findings and the table of the final build on the validation page.
+
+The web page of this dataset is in the results site of the archive: `datasets/wastewater/`.

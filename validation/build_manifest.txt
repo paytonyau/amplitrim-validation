@@ -1,4 +1,4 @@
-build a75392d6f8: files that the build id covers (line endings ignored)
+build 6ed09943f6: files that the build id covers (line endings ignored)
 9144794401  amplitrim/__init__.py
 f24c706863  amplitrim/cli.py
 ec85be4d3d  amplitrim/config.py
@@ -37,6 +37,7 @@ b49f960849  validation/mock_check.py
 b451e09930  validation/night2.py
 0b45004505  validation/night3.py
 6fb26c424f  validation/night4.py
+7ec149862a  validation/nocap_check.py
 e5d9beeb29  validation/overmerge_real.py
 98f8ce7c60  validation/overnight.py
 76b56401f3  validation/peek_reads.py

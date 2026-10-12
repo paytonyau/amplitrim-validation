@@ -18,3 +18,8 @@ report/
 *.fasta
 *.qza
 *.qzv
+
+# development material stays on the C: data drive (C:\amplitrim_v2, C:\data): the local dataset paths and the run outputs are not committed
+# (the text outputs of the runs reach the archive only through validation/collect_results.py, into results/)
+amplitrim_paths.json
+nocap_check_out/

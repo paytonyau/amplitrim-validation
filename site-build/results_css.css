@@ -1,0 +1,27 @@
+.crumb{font:.84rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--muted);margin:0 0 .5rem}
+.crumb a{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;margin:.4rem 0 .6rem}
+.chips .chip{margin:0 1.1rem .4rem 0}
+.chip.dev{color:var(--rev)}.chip.heldout{color:var(--accent)}.chip.case{color:var(--ok)}.chip.met{color:var(--ok)}.chip.notmet{color:var(--warn)}.chip.partly{color:var(--rev)}
+.facts{display:grid;grid-template-columns:minmax(0,11rem) minmax(0,1fr);gap:.35rem 1.2rem;margin:.8rem 0}
+.facts dt{color:var(--muted);font:700 .72rem/1.7 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+.facts dd{margin:0}
+.glance{list-style:none;padding:0;margin:1.2rem 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem 1.4rem}
+.glance li{background:none;border:0;border-top:2px solid var(--fg);border-radius:0;padding:.55rem 0 0;margin:0}
+.glance .big{display:block;font-size:1.5rem;font-weight:700;line-height:1.2;margin:.2rem 0;font-variant-numeric:lining-nums tabular-nums}
+.glance .lab{color:var(--muted);font:.82rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.chart{margin:1rem 0}
+.chart figcaption{text-align:left;font-size:.82rem}
+.dcards{list-style:none;padding:0;margin:1rem 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.4rem 2rem}
+.dcard{background:none;border:0;border-top:2px solid var(--fg);border-radius:0;padding:.65rem 0 0;margin:0}
+.dcard h3{margin:.1rem 0 .3rem;font-size:1.05rem}
+.dcard p{margin:.25rem 0;color:var(--muted);font-size:.92rem}
+.dcard .nums{color:var(--fg)}
+.pager{display:flex;justify-content:space-between;flex-wrap:wrap;margin:1.5rem 0 .5rem;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:.9rem}
+.pager a{margin-bottom:.4rem}
+.notebox{background:none;border:0;border-top:1px solid var(--fg);border-bottom:1px solid var(--line);border-radius:0;padding:.8rem 0;margin:1.3rem 0}
+.notebox p{margin:0}
+.pending{color:var(--muted)}
+svg .bar{fill:var(--accent)}svg .barn{fill:var(--warn)}svg .band2{fill:var(--accent);opacity:.16}
+@media (max-width:48rem){.glance{grid-template-columns:repeat(2,minmax(0,1fr))}.dcards{grid-template-columns:1fr}.facts{grid-template-columns:1fr}}
+@media (max-width:34rem){.glance{grid-template-columns:1fr}}

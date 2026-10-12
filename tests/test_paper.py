@@ -60,9 +60,9 @@ def test_every_figure_of_the_paper_is_on_the_validation_page():
     assert not missing, f"in the paper but not on the validation page: {missing}"
     for rounded in ("+7.0", "+21.1", "+32.1", "11.5 points", "1.9%"):                               # what the allowed roundings stand for
         assert rounded in flat_page, rounded
-    for phrase in ("12 public datasets", "9 of the 11", "74 to 76%", "6.1 to 35.2", "8% and 98%", "49,720", "0.0 to 0.3 points"):
+    for phrase in ("12 public datasets", "9 of the 11", "74 to 76%", "6.1 to 50.4", "8% and 98%", "49,720", "0.0 to 0.3 points"):
         assert phrase in flat_page, phrase
-    assert "9 of 11" in flat_paper and "6.1 to 35.2" in flat_paper and "12 public datasets" in flat_paper
+    assert "9 of 11" in flat_paper and "6.1 to 50.4" in flat_paper and "12 public datasets" in flat_paper
 
 
 def test_what_the_author_has_to_confirm_is_marked_and_nothing_else_is():
@@ -73,7 +73,7 @@ def test_what_the_author_has_to_confirm_is_marked_and_nothing_else_is():
 
 def test_the_paper_states_the_design_it_describes():
     assert "two options, `--its` and `--verbose`" in TEXT
-    for claim in ("0.2%", "12 nt", "75th percentile", "never below 2 and never above 5"):
+    for claim in ("0.2%", "12 nt", "75th percentile", "never below 2. There is no upper limit"):
         assert claim in TEXT, claim
 
 
