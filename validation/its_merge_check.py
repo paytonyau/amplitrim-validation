@@ -87,7 +87,7 @@ def report_lines(f: dict, night3_merged, night3) -> list:
 def main(argv=None, run=subprocess.run, find_rscript=None, thin=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--config", type=Path, help="amplitrim_paths.json (default: the one next to the package)")
-    ap.add_argument("--night3", type=Path, help="the folder of night 3 (default: the newest night3_* in C:\\data\\runs)")
+    ap.add_argument("--night3", type=Path, help="the folder of night 3 (default: the newest night3_* or NN_night3_* in C:\\data\\runs)")
     ap.add_argument("--pairs", type=int, help="pairs per sample given to DADA2 (default: as in night 3)")
     ap.add_argument("--out", type=Path, default=Path("its_merge_check_out"))
     a = ap.parse_args(argv)

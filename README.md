@@ -2,25 +2,40 @@
 
 This is the research record behind AmpliTrim's validation: the scripts, the criteria written down before each run, the outcomes, the results of every run, and the write-up. **It is not the software.** To use AmpliTrim, install it from <https://github.com/paytonyau/amplitrim>, whose [`docs/validation.md`](https://github.com/paytonyau/amplitrim/blob/main/docs/validation.md) summarises what held and what did not.
 
+The folders are listed in the order to read them: the answer first, then the record of how it was reached, then the machinery that produced it.
+
+**1. The answer**
+
 | Path | Contents |
 |---|---|
-| `docs/FINDINGS.md` | The write-up: methods, the 12 datasets, results, limitations |
-| `docs/SUPPLEMENT.md` | The four development rounds that came first |
 | `docs/validation.md` | The evidence behind each recommendation of the released package: what held, what did not, and the limits. The software's README links here |
+| `docs/FINDINGS.md` | The write-up: methods, the 12 datasets, results, limitations |
 | `docs/index.html`, `docs/datasets/`, `docs/reports/` | The results site: an overview, one web page and one evidence report for each of the 12 datasets, all generated from `docs/FINDINGS.md` and `docs/validation.md` |
 | `docs/how-it-works/` | The how-it-works page of the software: the idea, each step with a schematic, why each choice was made and how well it held up. It lives here, next to the evidence, and the software's home page links to it |
-| `site-build/` | The builders of the software's home page, of the how-it-works page and of this results site, so they can be regenerated when the README, the code or the findings change |
-| `paper/` | The draft of the JOSS paper, with its tests (`tests/test_paper.py`) and a workflow that builds the PDF. It moves to the software repository for submission |
-| `TEST_REGISTER.md` | Every test: the criteria and predictions written before each run, and the outcomes (sections 1 to 24) |
+
+**2. The record: what was tested, and why**
+
+| Path | Contents |
+|---|---|
+| `TEST_REGISTER.md` | Every test: the criteria and predictions written before each run, and the outcomes (sections 1 to 26, in the order the work was done; a contents table is at its top) |
+| `docs/SUPPLEMENT.md` | The four development rounds that came first |
+| `results/` | The reports, protocols, logs and result tables of the runs, with `MANIFEST.tsv` (path, size, sha256); no reads |
 | `FUTURE.md` | What is planned or parked: the checks before and at the release, a simpler cut, the independent validation of the `maxEE` rule, a long-read mode. Nothing in it is implemented |
-| `validation/` | The scripts that produced every number; `validation/README.md` has the step-by-step protocol and a table of the later scripts |
+
+**3. The machinery: to reproduce it or to extend it**
+
+| Path | Contents |
+|---|---|
+| `validation/` | The scripts that produced every number; `validation/README.md` begins with an index of every script, by role and in the order of the nights, then the step-by-step protocol |
 | `amplitrim/` | The development build that was tested (not the released package; see below) |
 | `tests/` | The package's tests and the tests of the validation scripts |
-| `results/` | The reports, protocols, logs and result tables of the runs, with `MANIFEST.tsv` (path, size, sha256); no reads |
+| `site-build/` | The builders of the software's home page, of the how-it-works page and of this results site, so they can be regenerated when the README, the code or the findings change |
+| `paper/` | The draft of the JOSS paper, with its tests (`tests/test_paper.py`) and a workflow that builds the PDF. It moves to the software repository for submission |
+| `environment.yml`, `pyproject.toml`, `.github/workflows/` | The conda environment, the packaging of the development build, and the workflow that builds the draft PDF of the paper |
 
 ## Which software was tested
 
-The study ran a **development build** of AmpliTrim, which this folder holds in `amplitrim/`. Nights 1, 2 and 3 each ran the whole set of datasets. Night 1 was the standard battery (build `6b0c25b6e3`), night 2 the maxEE head-to-head (`b8469465fc`), and night 3 maxEE 2,5 and a careful manual cut (`194b5ebf74`). Night 4b (the percentile rule) and the ITS checks came after. **No file of the package (`amplitrim/`) changed between any of these runs;** only validation scripts were added, which is why the build id changed. This folder holds the last build (`6ed09943f6`), and `python validation/check_build.py` confirms that this copy is exactly that build and checks which tools your machine has.
+The study ran a **development build** of AmpliTrim, which this folder holds in `amplitrim/`. Nights 1, 2 and 3 each ran the whole set of datasets. Night 1 was the standard battery (build `6b0c25b6e3`), night 2 the maxEE head-to-head (`b8469465fc`), and night 3 maxEE 2,5 and a careful manual cut (`194b5ebf74`). Night 4b (the percentile rule) and the ITS checks came after. **No file of the package (`amplitrim/`) changed between any of these runs;** only validation scripts were added, which is why the build id changed. This folder holds the last build (`772a747f31`), and `python validation/check_build.py` confirms that this copy is exactly that build and checks which tools your machine has.
 
 The released package (0.1.0, in the main repository) is **not** identical to it. Compared with this build:
 

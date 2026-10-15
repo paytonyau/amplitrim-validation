@@ -1,0 +1,21 @@
+atcc_number	name_on_atcc_page	share_percent	assembly_name	accession	organism_at_ncbi	strain_field	level	replicons_or_contigs	tier	note
+ATCC 700926	Escherichia coli	18.0	ASM584v2	GCF_000005845.2	Escherichia coli str. K-12 substr. MG1655	K-12 substr. MG1655	Complete	1	A (designation to confirm)	reference genome; ATCC 700926 is said to be MG1655: confirm on the ATCC page
+ATCC 33277	Porphyromonas gingivalis	18.0	ASM1050v1	GCF_000010505.1	Porphyromonas gingivalis ATCC 33277	ATCC 33277	Complete	1	A	also GCF_002892575.1 (complete, 2018)
+ATCC 17029	Cereibacter sphaeroides	18.0	ASM1598v1	GCF_000015985.1	Cereibacter sphaeroides ATCC 17029	ATCC 17029	Complete	3	A	
+ATCC 12228	Staphylococcus epidermidis	18.0	ASM764v1	GCF_000007645.1	Staphylococcus epidermidis ATCC 12228	ATCC 12228	Complete	7	A	
+ATCC 700610	Streptococcus mutans	18.0	ASM746v2	GCF_000007465.2	Streptococcus mutans UA159	UA159	Complete	1	A (designation to confirm)	ATCC 700610 is said to be UA159: confirm on the ATCC page
+ATCC 10987	Bacillus pacificus	1.8	ASM800v1	GCF_000008005.1	Bacillus cereus ATCC 10987	ATCC 10987	Complete	2	A	NCBI files it as Bacillus cereus; 2 replicons (chromosome and a plasmid); the other record, GCA_002952795.1 (ASM295279v1, chromosome only), has no RefSeq copy in the list
+ATCC 35702	Clostridium beijerinckii	1.8	ASM76774v1	GCF_000767745.1	Clostridium beijerinckii ATCC 35702	SA-1	Complete	1	A	NCBI names the organism ATCC 35702; the strain field says SA-1
+ATCC 9027	Pseudomonas paraeruginosa	1.8	ASM260181v1	GCF_002601815.1	Pseudomonas paraeruginosa	ATCC 9027	Scaffold	56 contigs	A (draft)	draft: rRNA copies may be collapsed; others: GCF_002563335.1 (59), GCF_001294675.1 (80), GCF_001374975.1 (73), GCF_001402955.1 (145)
+ATCC BAA-1556	Staphylococcus aureus	1.8	ASM1346v1	GCF_000013465.1	Staphylococcus aureus subsp. aureus USA300_FPR3757	FPR3757	Complete	4	A	the ATCC page gives strain FPR3757; found by the researcher by searching USA300_FPR3757; the accession tried from memory (GCF_000013465.1) was the right one
+ATCC BAA-611	Streptococcus agalactiae	1.8	ASM726v1	GCF_000007265.1	Streptococcus agalactiae 2603V/R	2603V/R	Complete	1	A (designation to confirm)	BAA-611 is said to be 2603V/R: confirm on the ATCC page
+ATCC 17978	Acinetobacter baumannii	0.18	ASM1337208v1	GCF_013372085.1	Acinetobacter baumannii ATCC 17978	ATCC 17978	Complete	3	A	others: GCF_000015425.1 (the 2007 genome), GCF_026167805.1 and GCF_026167785.1 (2022)
+ATCC 11828	Cutibacterium acnes	0.18	ASM23121v1	GCF_000231215.1	Cutibacterium acnes subsp. defendens ATCC 11828	ATCC 11828	Complete	1	A	ATCC reports a Lysobacter contaminant at a very low level in this component
+ATCC 700392	Helicobacter pylori	0.18	ASM30779v1	GCF_000307795.1	Helicobacter pylori 26695	26695	Complete	1	A (designation to confirm)	ATCC 700392 is said to be 26695: confirm; the original 1999 genome is GCF_000008525.1 (ASM852v1)
+ATCC 33323	Lactobacillus gasseri	0.18	ASM1442v1	GCF_000014425.1	Lactobacillus gasseri ATCC 33323 = JCM 1131	ATCC 33323	Complete	1	A	reference genome
+ATCC BAA-335	Neisseria meningitidis	0.18	ASM880v1	GCF_000008805.1	Neisseria meningitidis MC58	MC58	Complete	1	A (designation to confirm)	BAA-335 is said to be MC58: confirm on the ATCC page
+ATCC 8482	Phocaeicola vulgatus	0.02	ASM1282v1	GCF_000012825.1	Phocaeicola vulgatus ATCC 8482	ATCC 8482	Complete	1	A	reference genome
+ATCC 15703	Bifidobacterium adolescentis	0.02	ASM1042v1	GCF_000010425.1	Bifidobacterium adolescentis ATCC 15703	ATCC 15703	Complete	1	A	reference genome
+ATCC BAA-816	Deinococcus radiodurans	0.02	ASM2054668v1	GCF_020546685.1	Deinococcus radiodurans R1 = ATCC 13939 = DSM 20539	ATCC 13939	Complete	4	B	the ATCC page says strain USUHS; no USUHS record in the list; this is R1 (ATCC 13939), the reference genome
+ATCC 47077	Enterococcus faecalis	0.02	ASM17257v2	GCF_000172575.2	Enterococcus faecalis OG1RF	OG1RF	Complete	1	A (designation to confirm)	a draft record in the list states 'OG1RF ATCC 47077' (JAJPFL01), which supports OG1RF = ATCC 47077
+ATCC 17982	Schaalia odontolytica	0.02	ASM15422v1	GCF_000154225.1	Schaalia dentiphila ATCC 17982	ATCC 17982	Scaffold	2 scaffolds	A (draft)	NCBI calls the organism Schaalia dentiphila; draft: rRNA copies may be collapsed

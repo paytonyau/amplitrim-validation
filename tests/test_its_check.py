@@ -115,6 +115,22 @@ def test_night3_tracks_are_found_by_the_method_key_and_the_newest_night_is_chose
     assert ic.newest_night3(tmp_path / "runs").name == "night3_2026-10-11" and ic.newest_night3(tmp_path / "missing") is None
 
 
+def test_the_newest_night_3_is_found_after_the_runs_have_been_numbered(tmp_path):
+    ic = load()
+    runs = tmp_path / "runs"
+    for name in ("05_night3_2026-10-09", "07_night4_2026-10-10", "13_night5_mockB", "notes"):
+        (runs / name).mkdir(parents=True)
+    assert ic.newest_night3(runs).name == "05_night3_2026-10-09"
+    (runs / "05_night3_2026-10-12").mkdir()
+    assert ic.newest_night3(runs).name == "05_night3_2026-10-12"                           # the date decides, not the number
+    (runs / "night3_2026-10-14").mkdir()
+    assert ic.newest_night3(runs).name == "night3_2026-10-14"                              # numbered and un-numbered names compare by their dates
+    (runs / "night33_2026-10-20").mkdir()
+    (runs / "mynight3_2026-10-20").mkdir()
+    assert ic.newest_night3(runs).name == "night3_2026-10-14"                              # a name that only contains night3 is not a night 3 folder
+    assert ic.newest_night3(tmp_path / "empty") is None
+
+
 def test_the_verdicts_follow_the_registered_criteria():
     ic = load()
     base = {"same_reads": True, "pass_amplitrim": 0.742, "pass_dada2": 0.743, "pass_gap": -0.1, "forward_amplitrim": 0.861, "forward_dada2": 0.86, "forward_gap": 0.1}

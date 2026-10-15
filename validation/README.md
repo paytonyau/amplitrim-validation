@@ -14,23 +14,101 @@ The checksum published with vsearch v2.32.0 does not match the file it serves, s
 accepts the file (its SHA256 is printed), and `--version 2.31.0` has no checksum to mismatch. Examples below use Windows `cmd`; on
 Linux or macOS use `/` in paths and `\` instead of `^` to continue a line.
 
-## The scripts
+## Which script is which
 
-**Real-data toolkit** (this folder)
+Every file of this folder, by what it is for. The scripts import one another by name and start one another by file name, so they stay together in this one folder; this index is the order. Section numbers are those of `TEST_REGISTER.md`. The step-by-step protocol and the details of each tool follow below.
 
-| Script | Purpose |
+**A. Set up, and check the machine and the build**
+
+| File | What it does |
 |---|---|
-| `check_environment.py` | Checks Python, AmpliTrim, vsearch, cutadapt, R + DADA2 and FIGARO, and says which route each enables. |
-| `install_vsearch_windows.py` | Windows: downloads and installs vsearch with a checksum. |
-| `example_data.py` | Copies the V4 example reads shipped with DADA2 (a self-test that needs no download). |
-| `download_ena.py` | Downloads the paired FASTQ files of SRA/ENA runs from the European Nucleotide Archive and verifies each against ENA's MD5. Takes a Run Selector CSV, a list, or accessions; header lines such as `acc` are ignored; interrupted transfers resume, and an ENA server error (HTTP 5xx) is retried for about 90 seconds before it is reported as ENA's, not your connection's. With `--dry-run` a run that cannot be listed does not hide the others. A saved ENA error page is recognised as a web page and named as such. `--max-runs N` takes N runs spread evenly over the list (a pilot, or a small set), and ENA's own run table (its `filereport`, with `run_accession` as the first column) works as the list and, for `--runinfo`, as the sample table. Needs no SRA Toolkit. |
-| `describe_reads.py` | One line per sample before you analyse: reads, length, distinct quality values, which primer the reads start with and after how many bases (barcodes), reversed pairs, and the **inferred start** of R1 and R2 (a primer shows up as a conserved string with ambiguity letters). `--primer SEQ` searches for a primer, `--lengths` gives the length distribution, `--positions N` the base composition. |
-| `real_data.py` + `dada2_real.R` | For one dataset: removes primers and read-through with cutadapt (optionally sorting mixed-orientation pairs; never quality-trimming), runs AmpliTrim and, optionally, real DADA2 (recommended settings and `--compare F,R`), and appends a row to `results.tsv`. Writes DADA2's per-sample counts and its ASVs. Stops early on a placeholder primer; records a DADA2 failure and carries on. |
-| `per_sample.py` | Per-sample yield at the recommended settings (pooled estimates can hide weak samples). With `--runinfo SraRunInfo.csv` it adds sample names and groups; with `--dada2-track` it adds DADA2's per-sample result and rank correlations. |
-| `dada2_merge_check.R` | Merges the same denoised pairs at 0-8 allowed mismatches and classifies why pairs fail to merge. |
-| `max_ee_sweep.py` | Runs real DADA2 at one truncation with several `maxEE` values and, with a mock community's expected sequences, scores each result: retention, expected sequences found, share of reads in identical ASVs, extra ASVs. |
-| `mock_check.py` | Compares the ASVs of a mock community with its expected sequences (identical, near, none; which expected sequences were recovered). |
-| `run_dataset.py` | All of the above for one dataset in one command, collected into one text file. |
+| `check_environment.py` | Checks Python, AmpliTrim, vsearch, cutadapt, R with DADA2 and FIGARO, and says how to fix what is missing |
+| `install_vsearch_windows.py` | Windows: installs vsearch into the active environment, with a checksum |
+| `check_build.py` | One place for the build and the run: the build id against `build_manifest.txt`, the machine, what is left to test, fetching and preparing datasets, running everything |
+| `example_data.py` | Copies the V4 example reads that ship with DADA2, for a self-test that needs no download |
+| `rtools.py` | A helper, not run on its own: finds `Rscript` when R's folder is not on the PATH (ten other scripts import it) |
+
+**B. Get, look at and prepare a dataset**
+
+| File | What it does |
+|---|---|
+| `select_runs.py` | Shows what a sequencing project contains and picks a small, evenly spaced set of runs |
+| `download_ena.py` | Downloads paired FASTQ files from ENA, each checked against ENA's MD5 sum; interrupted transfers resume |
+| `describe_reads.py` | Describes paired FASTQ files before analysis: reads, lengths, quality scheme, primers, reversed pairs |
+| `longread_describe.py` | The same for long single-end reads: primers and orientation, lengths, expected errors, quality at the ends (section 25) |
+| `longread_filter_check.py` | Test L4 (planned; not yet in the register): AmpliTrim's estimate of what a `maxEE` filter keeps against DADA2's `filterAndTrim` on long reads, and how many reads each way of removing primers loses (through `filter_check.R`) |
+| `peek_reads.py` | Shows what the reads of some samples look like, for example before and after trimming |
+| `real_data.py` | One dataset: removes primers, runs AmpliTrim and, optionally, DADA2 (through `dada2_real.R`) |
+| `run_dataset.py` | The whole test protocol on one dataset, collected into one text file to send back (uses `dada2_merge_check.R`) |
+| `make_reference.py`, `build_mockA_reference.py` | The expected sequences of a mock community, in the form the accuracy tests use |
+| `genome_amplicons.py` | Finds the 16S amplicons of a mock community's strains by searching their genomes with the primers (an in silico PCR) and turns the shares of genomic DNA into the expected share of reads from the copy numbers; writes the form `make_reference.py` writes (long-read truth tests; not yet in the register) |
+| `msa1003_genomes.tsv` | The 20 strains of ATCC MSA-1003 with their share of genomic DNA, the NCBI assembly chosen for each, its tier (A exact strain, B another strain) and the reason; read by `genome_amplicons.py` and `night7.py` |
+| `night7.py` | Night 7 (planned; not yet in the register): the long-read checks on the PacBio Kinnex-16S data of ATCC MSA-1003 in one run: downloads the genomes, finds the expected amplicons, runs test L4 on three Monomer and three Kinnex files, writes `NIGHT7_SUMMARY.md` (`--check`, `--list`, `--redo STEP` as in `night6.py`) |
+
+**C. Run DADA2, and score what it found**
+
+| File | What it does |
+|---|---|
+| `compare_methods.py` | Runs DADA2 on the same reads at the settings that different methods recommend (through `dada2_real.R`) |
+| `per_sample.py` | Per-sample yield at the recommended settings |
+| `max_ee_sweep.py` | DADA2 at one truncation with several `maxEE` values (section 5) |
+| `mock_check.py` | Compares the ASVs of a mock community with its expected sequences |
+| `classify_asvs.py` | What the ASVs that are not expected sequences are: chimeras, contaminants, error variants |
+| `mockA_dilutions.py` | Recovery against input for mock community A |
+| `overmerge_real.py` | How many pairs vsearch joins at the wrong place on real reads (section 22) |
+
+**D. The numbered runs, in the order they were run**
+
+The numbers are those of `python validation/organise_data.py --table`, and the same two digits start the folder of each run on the data drive (`05_night3_2026-10-09`). The sections are those of `TEST_REGISTER.md`.
+
+| Run | What | Scripts | Register sections |
+|---|---|---|---|
+| 01 | Development rounds | `filter_grid_check.py` (test D1), `real_data.py` | 1-8 |
+| 02 | Round 4 | `round4.py`, `round4_steps.py` | 9-10 |
+| 03 | Night 1 | `night1_v2.py` (not in this archive), `describe_reads.py`, `compare_methods.py` | 11 |
+| 04 | Night 2 | `night2.py`, `maxee_arms.py` | 12-13 |
+| 05 | Night 3 | `night3.py` | 14-15 |
+| 06 | Night 4 (offline) | `maxee_rules.py`, `maxee_frontier.py` | 16-17 |
+| 07 | Night 4b | `night4.py` | 18 |
+| 08 | ITS check | `its_check.py`, `its_filter_check.R` | 19 |
+| 09 | ITS merge check | `its_merge_check.py`, `its_merge_check.R` | 20 |
+| 10 | Release check | `release_check.py` | 21 |
+| 11 | Soil V4 | `overmerge_real.py`, `overnight.py` | 22 |
+| 12 | Merge estimates against DADA2 | `estimate_check.py` | 23 |
+| 13 | Night 5 | `nocap_check.py` | 24 |
+| 14 | Night 6 | `night6.py`, `longread_describe.py` | 25-26 |
+| | The long unattended battery that runs many of the tests above in one command | `overnight.py`, `run_overnight.bat` (the batch file starts it on Windows) | |
+
+`night1_v2.py`, which ran night 1 and prepared its datasets, is **not in this archive**; run 03 can be read from the register but not rerun from here.
+
+**E. Collect the results, and keep the data drive in order**
+
+| File | What it does |
+|---|---|
+| `collect_results.py` | Copies the reports, protocols, logs and tables of every run folder into the archive's `results/`, and no reads |
+| `organise_data.py` | Numbers the run folders and the dataset folders of the data drive in the order of the register, rewrites the folder names in `amplitrim_paths.json`, and finds the files that are stored twice and sets the extra copies aside (never deletes). It plans first and changes nothing without `--apply`; `--check-paths` lists every path of that file as ok or MISSING, before and after the numbering |
+
+**F. Data and the build record**
+
+| File | What it is |
+|---|---|
+| `PRJNA933120_pairs.csv` | The 26 pairs of runs (volunteer, body site, Illumina run, PacBio run) used by `night6.py` |
+| `build_manifest.txt` | The hash of every file the build id covers (`amplitrim/*.py`, `validation/*.py`, `validation/*.R`), read by `check_build.py` |
+| `simulated/` | Simulated ground truth: reads with chimeras, indels and repeats, and what scores them (see the section below) |
+
+The R scripts are started by the Python scripts named in the tables (`dada2_real.R` by `real_data.py` and `compare_methods.py`; `dada2_merge_check.R` by `run_dataset.py`; `its_filter_check.R` by `its_check.py`; `its_merge_check.R` by `its_merge_check.py`; `filter_check.R` by `longread_filter_check.py`) and are not run directly.
+
+## Notes on the tools
+
+What the index does not say. The first sentence of each tool is in the index above.
+
+- **`download_ena.py`**: takes a Run Selector CSV, a list, or accessions; header lines such as `acc` are ignored. An ENA server error (HTTP 5xx) is retried for about 90 seconds before it is reported as ENA's, not your connection's. With `--dry-run` a run that cannot be listed does not hide the others. A saved ENA error page is recognised as a web page and named as such. `--max-runs N` takes N runs spread evenly over the list (a pilot, or a small set), and ENA's own run table (its `filereport`, with `run_accession` as the first column) works as the list and, for `--runinfo`, as the sample table. Needs no SRA Toolkit. It takes **paired** runs only: `night6.py` fetches single-end runs with its own small function.
+- **`describe_reads.py`**: also gives the **inferred start** of R1 and R2 (a primer shows up as a conserved string with ambiguity letters) and, per sample, which primer the reads start with and after how many bases (barcodes). `--primer SEQ` searches for a primer, `--lengths` gives the length distribution, `--positions N` the base composition.
+- **`real_data.py`** (with `dada2_real.R`): removes primers and read-through with cutadapt (optionally sorting mixed-orientation pairs; never quality-trimming), runs AmpliTrim and, optionally, real DADA2 (recommended settings and `--compare F,R`), and appends a row to `results.tsv`. Writes DADA2's per-sample counts and its ASVs. Stops early on a placeholder primer; records a DADA2 failure and carries on.
+- **`per_sample.py`**: pooled estimates can hide weak samples. With `--runinfo SraRunInfo.csv` it adds sample names and groups; with `--dada2-track` it adds DADA2's per-sample result and rank correlations.
+- **`max_ee_sweep.py`**: with a mock community's expected sequences it scores each result: retention, expected sequences found, share of reads in identical ASVs, extra ASVs.
+- **`mock_check.py`**: classifies each ASV as identical, near or none, and says which expected sequences were recovered.
+- **`run_dataset.py`**: all of the real-data steps for one dataset in one command, collected into one text file; it runs `dada2_merge_check.R`, which merges the same denoised pairs at 0-8 allowed mismatches and classifies why pairs fail to merge.
 
 **Simulated ground truth** (`simulated/`)
 

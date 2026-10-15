@@ -215,7 +215,8 @@ class Dada2Error(Exception):
 def explain_dada2_failure(stderr: str) -> str:
     if "Error matrix is NULL" in stderr:
         return ("DADA2 could not learn an error model from these quality scores (it stopped with 'Error matrix is NULL'). "
-                "That happens when the quality scores take too few distinct values; AmpliTrim's own result above is unaffected.")
+                "That happens when the quality scores take too few distinct values, for example in a simplified-quality file such as the SRA 'lite' format: get the original FASTQ files. "
+                "AmpliTrim's own result is computed from the same scores, so it is no more informative than they are.")
     return f"DADA2 failed: {stderr.strip()[-300:]}"
 
 

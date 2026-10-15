@@ -172,7 +172,7 @@ def test_a_dada2_failure_is_explained_and_does_not_abort_the_run(tmp_path):
         rd.dada2_run(tmp_path, 500, 500, 2.0, 12)                      # longer than every read: the filter removes them all
     assert str(e.value).startswith("DADA2 failed:")
     flat = rd.explain_dada2_failure("Error in getErrors(err, enforce = TRUE) : Error matrix is NULL.\nCalls: learnErrors")
-    assert "could not learn an error model" in flat and "AmpliTrim's own result above is unaffected" in flat
+    assert "could not learn an error model" in flat and "SRA 'lite'" in flat and "no more informative than they are" in flat and "unaffected" not in flat
     assert rd.explain_dada2_failure("boom").startswith("DADA2 failed: boom")
 
 

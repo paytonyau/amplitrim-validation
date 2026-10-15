@@ -11,8 +11,30 @@ from types import SimpleNamespace
 
 import pytest
 
+ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).parent))
 from simulate import write_dataset  # noqa: E402
+
+# The tests of this archive test its development build (amplitrim/ next to tests/), not the released package of the software repository. Several scripts replace the
+# package for the whole process when they are given --package (night6.load_release, release_check.main, its_check): right for a script run on its own, wrong in
+# one test process, where every test after such a call would run against the wrong package. So the development build is imported first and kept, and it is put back
+# after every test (test_isolation.py checks this).
+sys.path.insert(0, str(ROOT))
+import amplitrim  # noqa: E402,F401
+
+
+def _our_modules():
+    return {k: v for k, v in sys.modules.items() if k == "amplitrim" or k.startswith("amplitrim.")}
+
+
+@pytest.fixture(autouse=True)
+def keep_the_development_build():
+    path, ours = list(sys.path), _our_modules()
+    yield
+    sys.path[:] = path
+    for name in list(_our_modules()):
+        del sys.modules[name]
+    sys.modules.update(ours)
 
 FIGARO = os.environ.get("AMPLITRIM_FIGARO_SCRIPT")
 if FIGARO and importlib.util.find_spec("scipy") is None:      # FIGARO itself needs scipy: skip its tests rather than fail them

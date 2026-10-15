@@ -2,7 +2,7 @@
 """ITS check: are the numbers of AmpliTrim's ITS report (where the pairs go, and what the forward reads alone would keep) what DADA2 itself gives?
 
   python validation\\its_check.py --package C:\\path\\to\\amplitrim     the folder of the clean repository: the package with the ITS report additions
-  python validation\\its_check.py --night3 C:\\data\\runs\\night3_2026-10-09    where the night 3 DADA2 track tables are (default: the newest night3_* in C:\\data\\runs)
+  python validation\\its_check.py --night3 C:\\data\\runs\\night3_2026-10-09    where the night 3 DADA2 track tables are (default: the newest night3_* or NN_night3_* in C:\\data\\runs)
   python validation\\its_check.py --out C:\\data\\runs\\its_check
 
 Part A (needs R and DADA2, about a minute): AmpliTrim's own ITS run (the code behind `amplitrim --its`, with vsearch) on the ITS reads, and DADA2's filterAndTrim with no
@@ -16,6 +16,7 @@ import argparse
 import csv
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -94,7 +95,9 @@ def find_night3_track(night3: Path, name: str = ARM_A):
 
 
 def newest_night3(runs: Path):
-    found = sorted(runs.glob("night3_*")) if runs.is_dir() else []
+    """The newest night 3 folder of the runs folder: night3_<date>, or 05_night3_<date> once organise_data.py has numbered it. The date decides, not the number."""
+    found = [d for d in runs.iterdir() if d.is_dir() and re.fullmatch(r"(\d\d_)?night3_.+", d.name)] if runs.is_dir() else []
+    found.sort(key=lambda d: re.sub(r"^\d\d_", "", d.name))
     return found[-1] if found else None
 
 
@@ -144,7 +147,7 @@ def main(argv=None, run=subprocess.run, find_rscript=None, pipeline_run=None) ->
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--config", type=Path, help="amplitrim_paths.json (default: the one next to the package)")
     ap.add_argument("--package", type=Path, help="the folder that contains the amplitrim package with the ITS report additions (the clean repository); default: this repository")
-    ap.add_argument("--night3", type=Path, help="the folder of night 3 (default: the newest night3_* in C:\\data\\runs)")
+    ap.add_argument("--night3", type=Path, help="the folder of night 3 (default: the newest night3_* or NN_night3_* in C:\\data\\runs)")
     ap.add_argument("--out", type=Path, default=Path("its_check_out"))
     a = ap.parse_args(argv)
     import rtools

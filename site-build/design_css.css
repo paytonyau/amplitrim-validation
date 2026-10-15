@@ -42,3 +42,5 @@ svg rect{rx:0;ry:0}
 .decisions td p{margin:.2rem 0}
 .mods th:first-child{white-space:nowrap}
 @media (max-width:48rem){.trio,.cases{grid-template-columns:1fr}.step{grid-template-columns:1fr}}
+.formula{margin:.6rem 0;padding:.5rem .8rem;background:var(--card);border-left:3px solid var(--accent)}
+.formula code{white-space:normal}

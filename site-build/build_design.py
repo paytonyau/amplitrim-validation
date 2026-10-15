@@ -60,6 +60,10 @@ steps = "\n".join([
       "<code>select_recommendation</code>", S.pick()),
  step(6, "Set maxEE",
       f"<p>At the chosen cut, for each read, AmpliTrim finds the limit that covers three quarters of the reads: the {F['q']}th percentile of their expected errors, plus 1. It is never below 2, DADA2's default. There is no upper limit: the report notes it when a limit goes above {F['warn']}.</p>"
+      f"<p class=\"formula\"><strong>In symbols.</strong> The expected errors of a read cut at length L are the sum, over its first L bases, of the chance that each base is wrong: "
+      "<code>EE = sum of 10^(-Q/10)</code>, where Q is the Phred quality of the base. For each read direction, over the reads that reach the cut: "
+      f"<code>maxEE = max(2, int(P{F['q']} of EE) + 1)</code>, where P{F['q']} is the {F['q']}th percentile and <code>int</code> drops the decimals. "
+      "For example, a 75th percentile of 3.4 gives int(3.4) + 1 = 4, and one of 0.6 gives int(0.6) + 1 = 1, which is below 2, so the limit is 2.</p>"
       "<p>If the limit is not the default for both reads, the search and the pick are repeated with it.</p>",
       "<code>_rule_max_ee</code>", S.ee()),
  step(7, "Write the report",
@@ -131,7 +135,7 @@ page = f'''<!DOCTYPE html>
 <h2>The idea</h2>
 <p class="intro">DADA2 does three things to your reads, in this order. AmpliTrim treats each one differently.</p>
 <ul class="trio">
-<li><span class="chip exact">Replicated exactly</span><h3>Filter and trim</h3><p>AmpliTrim applies the same rules as <code>filterAndTrim</code>: cut each read at the chosen length, drop reads that have a base of quality 2 or below, or any N, in the part you keep, and drop reads over the expected-error limit (<code>maxEE</code>). The share that passes is computed, not guessed.</p></li>
+<li><span class="chip exact">Replicated exactly</span><h3>Filter and trim</h3><p>AmpliTrim applies the same rules as <code>filterAndTrim</code>: cut each read at the chosen length, drop reads that have a base of quality 2 or below, or any N, in the part you keep, and drop reads over the expected-error limit (<code>maxEE</code>). A read's expected errors are the sum, over the bases you keep, of the chance that each base is wrong, <code>10^(-Q/10)</code> for a base of Phred quality Q (the formulas are in step 6). The share that passes is computed, not guessed.</p></li>
 <li><span class="chip none">Not modelled</span><h3>Denoise</h3><p>Denoising (<code>dada</code>) is DADA2's most expensive step, and a quick test cannot reproduce it. This is why AmpliTrim's yield is an estimate, and an optimistic one.</p></li>
 <li><span class="chip measured">Measured on raw reads</span><h3>Merge pairs</h3><p>DADA2's <code>mergePairs</code> works on denoised reads. AmpliTrim merges your trimmed reads with vsearch instead, at DADA2's minimum overlap of {F['overlap']}, so you see how many pairs really merge.</p></li>
 </ul>

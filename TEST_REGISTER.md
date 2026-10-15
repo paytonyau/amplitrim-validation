@@ -13,6 +13,37 @@ columns: AmpliTrim against DADA2 (filter and yield), against FIGARO (like for li
 
 ---
 
+**Contents.** Sections 1 to 8 describe the standard battery and the first outcomes; sections 9 to 26 follow the work in time order (round 4, then the nights, the checks and the release). Every section that decides something has its criteria written before the run. The **Run** column numbers the rounds and nights in the order they were run (01 to 14); the same numbers prefix the run folders on the data drive and are used in `validation/README.md`.
+
+| Section | Run | What |
+|---|---|---|
+| 1 | 01 | Datasets |
+| 2 | 01 | The standard battery |
+| 3 | 01 | Outcome matrix |
+| 4 | 01 | Outcomes so far |
+| 5 | 01 | Additional analyses |
+| 6 | 01 | Decision rule for the default of --allow-unmergeable |
+| 7 | 01 | Development stage |
+| 8 | 01 | Still to run, and further tests recommended |
+| 9 | 02 | Round 4: the open questions, tested in one place |
+| 10 | 02 | Round 4: outcomes |
+| 11 | 03 | Night 1 |
+| 12 | 04 | Night 2: the maxEE head-to-head |
+| 13 | 04 | Night 2: outcomes |
+| 14 | 05 | Night 3: arm G and arm F2 |
+| 15 | 05 | Night 3: outcomes |
+| 16 | 06 | Night 4 |
+| 17 | 06 | Night 4, second stage |
+| 18 | 07 | Night 4b: the percentile rule through DADA2 |
+| 19 | 08 | ITS check: are the numbers of the ITS report what DADA2 gives? |
+| 20 | 09 | ITS merge check: the exact split of DADA2's loss after the filter, and whether an overhang explains part of the ... |
+| 21 | 10 | Release check: does the released package recommend the settings that DADA2 was run at? |
+| 22 | 11 | Soil V4: over-merging on real reads, and the grid around the final recommendation |
+| 23 | 12 | The merge estimates against DADA2, and the cut-off for differences in the overlap |
+| 24 | 13 | Night 5: the rule without a cap, whether a simpler cut would do, and the reads wastewater loses to length |
+| 25 | 14 | Night 6: an independent real dataset, PRJNA933120 |
+| 26 | 14 | Night 6: outcomes |
+
 ## 1. Datasets
 
 | ID | Dataset | Marker, region | Reads | Samples | Stage | Config key | Expected sequences |
@@ -897,4 +928,70 @@ The report prints the commands for the DADA2 runs it cannot do itself: mock B (`
 - **Simplification, by the rule fixed in advance.** P43 was NOT MET on the nights' pairs (7 of 11), so the search over longer totals and the four-key tie-break are **not candidates for removal on this evidence**, and nothing changes in 0.1.0. P44, which asks the practical question (does the floor-only cut merge as many pairs?), was MET on all four datasets where the cuts differ, and on wastewater the floor-only cut merged 2.3 points more. P43, as a test of whether the cut is the same, was stricter than that question. **This is recorded as an observation, not as a changed criterion.** To pursue a simpler algorithm, a new test is needed with its own criteria fixed before it is run: all 12 datasets through DADA2 at the floor-only cut, and the stability over three sample sets.
 
 **Verdicts of night 5, as they stand.** P39 NOT MET (full reads). P39b NOT MET (one dataset, V4-V6, resolved by DADA2: the released package is better there). P40 MET. P41 MET. P42 descriptive. P43 MET on the package's own sample (8 of 11) and NOT MET on the nights' pairs (7 of 11). P44 MET (4 of 4). P45 descriptive.
+
+## 25. Night 6: an independent real dataset, PRJNA933120 (Buetas et al. 2024): the released package against DADA2 on its Illumina half, and a description of its PacBio half (drafted 13 October 2026; predictions written before any of it was run)
+
+**Why this dataset.** It is the first dataset that played no part in the design of AmpliTrim. Buetas et al. (BMC Genomics 25:310, 2024; CC BY) sequenced the same nine people as 16S V3-V4 on an Illumina MiSeq (2 x 300, primers 341F and 805R) and as full-length 16S on a PacBio Sequel II (27F and 1492R). The run table of the accession (read on 13 October 2026) lists 146 runs: 120 PacBio and 26 Illumina. The 26 Illumina runs are the paper's samples (their read counts equal the paper's Table 2) and each has a PacBio twin; `validation/PRJNA933120_pairs.csv` lists the 26 pairs (faeces are named H on PacBio and F on Illumina). The other 94 PacBio runs belong to other volunteers and are not used. **No mock community is among the runs, so nothing here has a known truth**: the Illumina half is judged as the other real datasets were, by what DADA2 does with the settings, and the PacBio half is only described.
+
+**What the status of the rule can and cannot become.** The `maxEE` rule is a sensible default that has not been tested on independent data. This is the first dataset on which it can be. One dataset cannot make it tested: the outcome is recorded as one independent observation. If P47 is met, the rule held on 1 of 1 independent real dataset; if it is not met, the status is reconsidered in a new decision recorded here, and the released rule is not changed in 0.1.0 because of one result without that decision.
+
+**Margins** (as in nights 2 to 5; the same table is in `validation/night6.py`, `MARGINS`, and printed in the summary): the estimate of the share of pairs passing the filter within 2 points of DADA2; the share merged by the rule at least 2 points above the default when the rule relaxes `maxEE`. Reads are thinned to 5,000 pairs per sample for AmpliTrim and DADA2, as in the nights.
+
+**Questions and predictions, written before any of this was run.**
+
+- **P46 (DADA2, the filter estimate).** At the released setting and at the default setting (the best cut at `maxEE` 2), AmpliTrim's estimate of the share of pairs passing DADA2's filter is within 2 points of what DADA2 measured (`est_pass` against `pass` in `compare_methods.tsv`). Expected to be met: the estimate was within 0.8 points on all 12 earlier datasets (mean 0.2).
+- **P47 (DADA2, the rule against the default).** If the released rule relaxes `maxEE` above 2 on either read, DADA2 at the released setting merges at least 2 points more of the pairs than at the default setting. If the rule keeps `maxEE` 2 on both reads, P47 does not apply. Expected: on the five earlier datasets where the rule relaxed `maxEE` it merged more than the default on all five (by 6.1 to 50.5 points: mock A 62.7% to 69.5%, mock B 19.9% to 70.4%, inter-laboratory V4-V6 41.6% to 63.4%, V4-V5 57.2% to 63.3%, wastewater 43.6% to 57.9%).
+- **P48 (descriptive, no criterion).** The shares merged at the default, at 2,5 and at the released setting. The rule was above 2,5 on three of five earlier datasets and below it on two.
+- **P49 (descriptive).** The development build (the archive's `amplitrim/`, used by `compare_methods.py` for its own AmpliTrim row) and the released package choose the same cut at `maxEE` 2. Expected: the same.
+- **P50 to P53 (descriptive expectations on the PacBio reads; no criterion changes anything).** P50: at least 90% of the reads have both primers. P51: the median length between the primers is 1,430 to 1,480 nt, and at least 95% of the reads are within 10% of it (the raw SRA length of 1,497 minus the two primers, 39 nt, is 1,458, and the paper reports 1,452 to 1,469 after processing). P52: the SRA copy keeps the original quality scores: every file has at least 40 distinct values and a highest value of at least Q60. P53: the mean quality of the first 50 bases and of the last 50 bases is within 3 Q of the middle half (HiFi reads are expected to be uniform).
+
+**Decisions, as set in advance.** If P46 is met and P47 is met or does not apply, the dataset is added to the results site as dataset 13, kept aside and not used in the design, with the real AmpliTrim report that the run writes (`amplitrim/report/`), and the counts on the overview change. If P46 is not met, the size of the error is reported as it is, nothing in the package changes, and the cause is investigated in a new section. If P52 is not as expected (simplified qualities), the PacBio expected errors are not used for anything, and a copy with the original qualities must be obtained before a long-read design relies on them. P48 to P51 and P53 attach no decision.
+
+**What is not tested.** The accuracy of variants (there is no truth). The PacBio reads are not denoised. The PacBio runs of the accession are not certain to be the paper's libraries: for four of the eight faecal twins, whose names carry `-R`, the read counts are 2 to 9 times those in the paper's Table 2 (see `FUTURE.md`), so P50 to P53 describe the deposited runs and not the paper's analysis. The ENA copies of the reads are assumed to equal the SRA's (the MD5 sums of ENA are checked).
+
+**How to run** (step by step in `PUSH_TO_GITHUB.md`, section 2d; all on the machine that has R, vsearch and cutadapt).
+
+```
+python validation\night6.py --check --package C:\Users\Admin\OneDrive\Documents\GitHub\amplitrim
+python validation\night6.py --out C:\data\runs\night6_pilot --package C:\Users\Admin\OneDrive\Documents\GitHub\amplitrim --limit 2
+python validation\night6.py --out C:\data\runs\night6_PRJNA933120 --package C:\Users\Admin\OneDrive\Documents\GitHub\amplitrim
+```
+
+The run writes `NIGHT6_SUMMARY.md`, which applies P46 to P53 with the margins above.
+
+## 26. Night 6: outcomes (14 October 2026)
+
+**The run.** `validation/night6.py` on the whole table of 26 pairs, folder `C:\data\runs\night6_PRJNA933120`, the released package 0.1.0 (the clone of the software repository, the version without a cap on `maxEE`), cutadapt 5.2, R with dada2 1.40.0. All 52 runs were downloaded and agreed with ENA's MD5 sums (3 minutes); the whole run took about 9 minutes. The Illumina reads start with the primers (341F at base 0 in 98.0% of R1, the reverse primer in 96.7% of R2), so the primer step was needed and the 26 samples were thinned to at most 5,000 pairs each, as in the nights.
+
+**Illumina half: not decided, because the deposited copy has no per-base quality.** `describe_reads.py` found **2 distinct quality values in each of the 26 samples**. The released package said so in its report ("Quality scores take only 2 distinct values ... consistent with a simplified-quality file such as the SRA 'lite' format; use the original FASTQ files instead"), and DADA2 stopped for both settings with `Error matrix is NULL` (it cannot learn an error model from two values). Outcomes of the criteria of section 25:
+
+- **P46** (the filter estimate within 2 points of DADA2): **not decided**. DADA2 gave no result at any setting, so there is nothing to compare the estimate with. This is not "not met".
+- **P47** (the rule against the default): the rule kept `maxEE` 2 at the cut 251/191, so P47 does not apply. **That carries no evidence about the rule**: the recommendation was computed from the same two-valued scores, which say almost nothing about errors.
+- **P48**: no share merged, because DADA2 did not run. **P49**: the development build and the released package chose the same cut, 251/191, at `maxEE` 2 (both used the same scores).
+
+**PacBio half** (26 runs, 606,658 reads; descriptive, no criterion changes anything):
+
+- **P50: not as expected.** 83.0% of the reads have both primers by a mismatch-only match (at most 3 of 20 bases wrong, within 60 bases of the end of the read); the expectation was at least 90%, which 3 of the 26 files reach (92, 91 and 93%; all saliva runs without `-R`). **What `longread/longread_describe.tsv` shows about the 17%:** 16.3% of the reads have exactly one primer (5' end only 8.2%, 3' end only 8.1%) and only 0.7% have none. That is what independent misses of each primer give: a chance of 8.9% per primer predicts 83.0% with both, 16.2% with one and 0.8% with none. The share with both primers follows quality across the files (Spearman correlation +0.89 with the mean quality of the middle, -0.90 with the median expected errors) and not the number of reads (-0.06). The six files whose library names end in `-R` are the lowest in quality and in the share: 77.0% with both primers against 85.8% in the other 20, middle quality Q28.7 against Q31.5, median expected errors 0.87 against 0.04, and 64.4% of the reads at or under `maxEE` 2 against 83.4%. **The reading that fits, not yet tested:** errors in the primer region, above all insertions and deletions, which a mismatch-only match cannot absorb, hide a primer that is there; the reads are not missing their primers. A search that allows indels on a low-quality file would show it (cutadapt, with the commands in the guide's section 2d). Reads whose primer is missed are left out of every other figure of this half, and are probably the noisier ones, so those figures are somewhat optimistic, most of all for the lowest-quality files.
+- **P51: as expected.** The median length between the primers is 1,454 nt (expected 1,430 to 1,480), and 99.6% of those reads are within 10% of it (expected at least 95%). With the raw length of 1,497 nt this confirms that the primers are still in the deposited reads.
+- **P52: as expected.** Every file has at least 92 distinct quality values and a highest value of Q93, so the ENA copy of the PacBio reads **keeps the original quality scores**. The Illumina reads of the same accession do not (above); that the two differ by platform within one accession is what the data show, and why it is so is not established.
+- **P53: as expected, within the margin.** The mean quality (as Phred of the mean error probability) is Q30.4 over the first 50 bases, Q30.3 over the middle half and Q27.8 over the last 50 bases: the 3' end is 2.5 Q below the middle (the margin was 3). The verdict is on the pooled figures and stands; per file, the last 50 bases are more than 3 Q below the middle in 5 of the 26 files (SRR23380883, SRR23380887, SRR23380901, SRR23380916, SRR23380952), all of them named `-R`.
+- **Added by the table, no prediction attached.** Retention among the reads that have both primers, pooled: 70.0% at `maxEE` 1, 77.9% at 2 (56% to 88% over the files), 82.9% at 3, 89.0% at 5, 94.3% at 8, 96.5% at 10 and 99.9% at 15. No read has more than about 15 expected errors, which is what the HiFi definition gives (predicted accuracy of at least 99%, so at most 1% of 1,454 nt, 14.5): consistent with these being HiFi reads (an inference). The six `-R` runs have 42,358 reads per file against 17,625 in the other 20 and a lower per-read quality; what `-R` stands for is still not stated.
+
+**A flaw found in the run's own scripts.** The first version of `night6.py` counted the DADA2 step as finished when `compare_methods.py` ended normally, although DADA2 had failed for every setting (the failure is written to a column of the table, not to the exit code). It was found because the summary showed dashes and "done in 1 min". It is fixed: the step now fails, quoting the error, and is skipped with the reason when the reads have two or fewer distinct quality values; `--redo STEP` repeats one step; the summary states the number of quality values at the top of the Illumina section. The sentence that `compare_methods.py`'s DADA2 error message used ("AmpliTrim's own result above is unaffected") was too reassuring and now says that the result is computed from the same scores. The build id changed with these edits.
+
+**Decisions proposed (for the researcher to confirm or change; none changes the package).**
+
+1. P46 to P49 are recorded as **not decided** for this copy, not as met or not met.
+2. The dataset is **not added to the results site**: it has no DADA2 result.
+3. The criteria of section 25 stand unchanged for a copy of these reads that has the original quality scores, or for another dataset: that would be recorded as a new section (night 6b), with its predictions written before it is run.
+4. P52 being as expected, the PacBio expected-error figures may be used; no decision is attached to P50, P51 and P53.
+5. **Before a dataset is chosen, one of its runs is described** (`describe_reads.py`, the `Qvals` column). It takes seconds, and would have found this before the run.
+
+**A diagnostic, written before it is run (P54, descriptive).** Question: are the primers that the mismatch-only match misses really absent, or hidden by errors? Method: cutadapt (linked adapters, both primers, either orientation, errors up to 15% of a primer, **insertions and deletions allowed**) on two raw files: SRR23380883 (the lowest in quality; 75% with both primers by the mismatch-only match) and SRR23380950 (one of the best; 93%). Measure: the share of reads written when only reads with both primers are kept. Criteria: if the share for SRR23380883 is at least 8 points above 75% (so at least 83%), the primers were hidden by errors that a mismatch-only match cannot absorb (supported); if it is under 3 points above (under 78%), the primers are really missing and the explanation is rejected; in between, partly. The rise for SRR23380950 is expected to be smaller than for SRR23380883. No decision is attached; if supported, the long-read describer's primer matching is to be changed to allow indels.
+
+**P54 outcome (14 October): supported.** cutadapt with indels allowed found both primers in **99.9%** of the reads of SRR23380883 (25,956 of 25,986; 75% by the mismatch-only match, a rise of 24.9 points against the criterion of 8) and in **99.7%** of SRR23380950 (18,588 of 18,642; 93% before, a rise of 6.7, smaller than for SRR23380883 as expected). The primers are in the reads; the mismatch-only search could not see them. cutadapt's own tables show the mechanism: in SRR23380883 26% of the matched 5' primers are 19 or 21 nt long instead of 20, and 22% of the matched 3' primers are not 19 nt long, that is, they carry an insertion or a deletion (in SRR23380950 8% and 12%); 54% of the reads were reverse-complemented in both files, as the describer had found. **Consequence, as written in advance:** the primer matching of `validation/longread_describe.py` now uses an edit distance (insertions and deletions count as errors, up to 3 of 20 bases, the same budget as cutadapt's) and reports how often each primer is found; the figures of the PacBio half above (P50 to P53, the retention at each `maxEE`, the quality at the ends) were computed with the mismatch-only match on 83.0% of the reads, so they are replaced by the figures of the rerun, which are recorded below when it has been run. **The P50 verdict recorded above stays as it was measured.**
+
+**The PacBio half rerun with the indel-tolerant describer (14 October, 1 minute).** Both primers are found in **99.7%** of the 606,658 reads: **P50 is as expected** (the first measurement, 83.0%, stays recorded). The median length between the primers is 1,454 nt and 99.6% of the reads are within 10% of it (P51, as expected, unchanged). Every file still has at least 92 distinct quality values and a highest value of Q93 (P52, unchanged). The mean quality is Q29.9 over the first 50 bases, Q29.9 over the middle half and Q27.5 over the last 50 (P53, as expected: the 3' end is 2.4 Q below the middle; the first run gave Q30.4, Q30.3 and Q27.8). The pooled quality is 0.3 to 0.5 Q lower than with the mismatch-only match, the direction expected if the reads that had been missed are the noisier ones. The first run's files are kept in `longread_mismatch_only`.
+
+**Not known yet.** The per-file table and the retention at each `maxEE` of the rerun below (not read yet). What `-R` stands for. **ENA has no original file for the Illumina runs:** its file report for SRR23380961, asked on 14 October, has empty `submitted_format` and `submitted_ftp` columns. Whether NCBI's SRA holds a full-quality version of these runs, or the authors the submitter's FASTQ files, is not known.
 

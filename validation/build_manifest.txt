@@ -1,4 +1,4 @@
-build 6ed09943f6: files that the build id covers (line endings ignored)
+build 772a747f31: files that the build id covers (line endings ignored)
 9144794401  amplitrim/__init__.py
 f24c706863  amplitrim/cli.py
 ec85be4d3d  amplitrim/config.py
@@ -21,12 +21,16 @@ f29138cc65  validation/describe_reads.py
 62c797ce3c  validation/download_ena.py
 6cfa937b18  validation/estimate_check.py
 4d95b66e29  validation/example_data.py
+bc359edb37  validation/filter_check.R
 7975c481b0  validation/filter_grid_check.py
+9f618898f6  validation/genome_amplicons.py
 5f8881c8a7  validation/install_vsearch_windows.py
-d9802628cb  validation/its_check.py
+adce93c25a  validation/its_check.py
 392ba2da83  validation/its_filter_check.R
 cd5b02fa94  validation/its_merge_check.R
-f96b0989cd  validation/its_merge_check.py
+880567c6fb  validation/its_merge_check.py
+d50fcc5554  validation/longread_describe.py
+f4422981f9  validation/longread_filter_check.py
 0524e51eef  validation/make_reference.py
 3ddbfdecbc  validation/max_ee_sweep.py
 541d3c5658  validation/maxee_arms.py
@@ -37,12 +41,15 @@ b49f960849  validation/mock_check.py
 b451e09930  validation/night2.py
 0b45004505  validation/night3.py
 6fb26c424f  validation/night4.py
+8f61f4bf76  validation/night6.py
+42575a65f8  validation/night7.py
 7ec149862a  validation/nocap_check.py
+8584c27e8d  validation/organise_data.py
 e5d9beeb29  validation/overmerge_real.py
 98f8ce7c60  validation/overnight.py
 76b56401f3  validation/peek_reads.py
 f02237dd39  validation/per_sample.py
-3997dc591c  validation/real_data.py
+b9d4031f71  validation/real_data.py
 2452bcbaef  validation/release_check.py
 15a7007fcd  validation/round4.py
 17f8610a8d  validation/round4_steps.py
