@@ -203,3 +203,16 @@ def test_merging_first_is_measured_against_the_input_pairs_not_the_merged_reads(
     f = res["flow"][("its2", "mfirst")]
     assert f["input"] == 2000 and math.isclose(f["yield"], 0.40) and math.isclose(f["pass"], 0.48)
     assert "+28.0 points" in dict((c, t) for c, _, t in R.verdicts(res))["P90"]                  # 40% against the default's 12%
+
+
+def test_an_arm_is_read_from_its_two_tables_without_the_drivers_done_marker(tmp_path):
+    """The archive keeps the tables of a run but not the driver's empty DONE files: the verdicts must be the same from the archive."""
+    out = build(tmp_path)
+    r = refs(tmp_path / "refs")
+    assert R.main(["--out", str(out), "--references", str(r)]) == 2
+    before = (out / "ITS_NIGHT_SUMMARY.md").read_text()
+    for done in out.rglob("DONE"):
+        done.unlink()
+    assert not list(out.rglob("DONE"))
+    assert R.main(["--out", str(out), "--references", str(r)]) == 2
+    assert (out / "ITS_NIGHT_SUMMARY.md").read_text() == before

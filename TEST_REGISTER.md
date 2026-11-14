@@ -50,6 +50,7 @@ columns: AmpliTrim against DADA2 (filter and yield), against FIGARO (like for li
 | 31 | 25 | ITS follow-up: why DADA2 refuses ITS pairs, and is a mismatch limit above 0 safe? |
 | 32 | 25 | ITS follow-up: outcomes |
 | 33 | 26 | ITS overnight run: what AmpliTrim can recommend for ITS |
+| 34 | 26 | ITS overnight run: outcomes |
 
 ## 1. Datasets
 
@@ -1484,3 +1485,49 @@ AmpliTrim 0.2.0 (`--its`) is also run on the thinned reads of every ITS group, f
 **What has already been seen (disclosed).** AmpliTrim's own predicted pass rates and yields at relaxed maxEE for the Arfken groups (run 25); the outcomes of run 25 at 2,2 without chimera removal, including the chimeras between isolates in the ITS2 mixes; the reference report of `ncbi_references.py`. A smoke run at 300 read pairs per sample (12 November 2026), after these criteria were agreed and before this section was committed, ran every step of every dataset to check the code; its verdicts mean nothing at that depth, are reported in section 34, and changed nothing here. It led to one fix of the procedure: AmpliTrim could not analyse the wastewater control's thinned reads (57 of 2,699 pairs overlapped at full read length), so a 16S control now falls back to the final run's cut. **Not seen at full depth:** the ATCC libraries (not downloaded before this section was written); any DADA2 result for a relaxed maxEE, a higher `truncQ`, a trim, forward reads alone, merging first or a longer minimum overlap; any count after chimera removal; any stricter estimate on ITS.
 
 **Procedure.** (1) The reference script is run and its report read; the members used in the truth are fixed here. (2) The code (R and Python) is written with tests on stand-ins. (3) A smoke run at 300 pairs per sample checks the paths (its look at the data is disclosed in section 34). (4) This section, the code and the reference sequences are committed. (5) The overnight run: one resumable command; every arm of every dataset is a step that is not repeated when the run is started again. (6) One summary of P83 to P93, the folders numbered and collected, and section 34 written from the summary.
+
+## 34. ITS overnight run: outcomes (14 November 2026)
+
+**The run.** Section 33 was agreed on 13 November 2026 and written into the register by the registration patch on 14 November (the date of its heading), before the run; it was committed in `46009ba` later on 14 November, after the night had run and before any of its output was read: the commit step had been missed (the commit message says 'written 13 November', the date of the agreed draft). The code that ran is the code committed there (the registration patch copied the same files into the archive). AmpliTrim 0.2.0 (the release code), R with DADA2. Folder `C:\data\runs\26_its_night` (named `its_night` when it ran): 96 of 96 steps in about 3.5 hours (the two real ITS studies took 50 and 83 minutes for their 13 arms). Results in `results/26_its_night` (`9f48c60`); the larger files in `C:\data\backup\runs_26`. The summary of the criteria: `results/26_its_night/ITS_NIGHT_SUMMARY.md`.
+
+**Fixes after the run (none changed a verdict).** (1) The archive's `.gitignore` excludes `*.fasta`, so the reference sequences of section 33 were not committed with it; they were committed unchanged in `a08868f`. (2) The analysis divided the yield of merging first by the reads that vsearch merged instead of the input pairs; corrected in `a08868f` (P90: +50.4 points instead of +55.5) and the analysis rerun (`46a0d51`). (3) The analysis read an arm only when the driver's empty `DONE` file was there, which the archive does not keep; corrected with this section, so that the verdicts can be regenerated from the archive alone. They were: the summary, the report and the metrics table regenerated from the archive equal the committed ones.
+
+**The smoke run** (300 read pairs per sample, disclosed in section 33; not part of the outcomes). Its verdicts differed in places: P83 not met (the estimate without differences +11.1 points), P84 met (11 controls; the wastewater control fell back to the final run's cut), P85 not met for `sw15` (ITS1 recall -5.6 points), P90 not met (+9.8 points, with the wrong denominator of fix 2), P91 not met (the second ITS study -0.65); the advice would have been `ee55`.
+
+**Outcomes** (the criteria of section 33; 5,000 read pairs per sample; the ATCC standard against the NCBI references is the primary truth of both markers).
+- **P83 met.** On the second ITS study the estimates differ from DADA2's merged share by +68.17 (10 differences, today's), +66.18 (5), +48.26 (2) and -2.75 points (0 differences, the closest).
+- **P84 not met.** On the 12 16S controls the estimate without differences is farther from DADA2 than today's: mean absolute difference 8.15 against 5.84 points.
+- **P85 to P87, per arm** (spurious share and recall against `std` on the ATCC standard; ITS2 yield gain; the median ASVs on the second and first ITS study):
+
+| Arm | P85 (safe) | P86 (useful) | P87 (a flag) |
+|---|---|---|---|
+| `ee23` | met: spurious +0.00 / +0.00, recall +5.6 / -0.0 | met: +9.6 | met: +4%, +0% |
+| `ee24` | met: +0.00 / +0.00, +11.1 / -0.0 | met: +13.6 | met: +4%, +0% |
+| `ee25` | met: +0.00 / +0.00, +11.1 / -0.0 | met: +18.0 | met: +4%, +0% |
+| `ee33` | met: +0.00 / +0.00, +5.6 / -0.0 | met: +10.2 | met: +9%, +0% |
+| `ee55` | met: +0.00 / +0.00, +11.1 / -0.0 | met: +20.7 | met: +9%, +1% |
+| `tq10` | not met: recall -11.1 on ITS2 | met: +50.5 | not met: +39%, +0% |
+| `tq20` | not met: ITS2 spurious +2.38, recall -11.1 / -5.6 | met: +20.8 | not met: +39%, -67% |
+| `sw15` | met: +0.00 / +0.00, recall +16.7 / +27.8 | met: +57.3 | met: +4%, -2% |
+
+- **P88 met.** Forward reads alone: spurious +0.15 (ITS1) and +0.57 points (ITS2), recall +11.1 and +0.0 points.
+- **P89 met.** Merging first: spurious +0.00 and +0.24 points, recall +16.7 and +33.3 points.
+- **P90 met.** Merging first raises the second ITS study's yield by 50.4 points (13.96% to 64.36% of the input pairs).
+- **P91 met.** Rank correlation 1.00 on all eight ITS groups (six maxEE arms each).
+- **P92 met.** AmpliTrim's predicted pass rate is within 0.22 points of DADA2's at all 48 comparisons.
+- **P93 met.** The spurious share at a minimum overlap of 12 nt equals the share at 20 and 30 nt on both markers (+0.00 points).
+
+**Described (no criterion).**
+- *The default on the ATCC standard:* ITS1 recall 83.3% (5.0 of the 6 strain-exact members per sample), spurious 0.00%, reads in exact sequences 37.0%, unjudged reads 50.3%; ITS2 recall 66.7% (4.0 of 6), spurious 0.00%, reads in exact sequences 100.0%, unjudged 41.7%. At maxEE 2,2 whole strains are lost, apparently at the filter (it keeps 26.9% of the ITS2 pairs, the trim 91.3%). On ITS1 the trim and the relaxed maxEE arms find them again (recall 88.9% to 100%); on ITS2 the relaxed maxEE arms do not (66.7%), the trim (94.4%) and merging first (100%) do. On ITS1 most judged reads are within 2 edits of their reference but not identical to it.
+- *The piglet mixes (the second view):* `sw15` keeps recall (ITS1 76.7%, ITS2 100.0%) and adds no spurious reads; `tq10` lowers ITS1 recall to 46.7%; `tq20` puts 3.04% of the ITS2 reads in spurious sequences. The isolate reference holds C 1, K 3, M 5, P 2 and T 1 sequences on ITS1 and C 1, K 2, M 1, P 4 and T 1 on ITS2; isolate M is flagged (section 33).
+- *The two real ITS studies* (shares of the input pairs after chimera removal; median ASVs per sample): the second study `std` 13.96% (23 ASVs), `ee55` 15.16% (25), `sw15` 14.35% (24), `tq10` 31.28% (32), forward reads 53.83% (94), merging first 64.36% (111); the first study `std` 46.85% (105), `ee55` 53.38% (106), `sw15` 59.51% (103), forward reads 61.84% (136), merging first 70.44% (141). On the full-length study the trim does not help, because the loss there is at the merge step, and forward reads alone and merging first give four to five times as many ASVs; whether they are real cannot be judged without truth.
+- *The merge test:* vsearch merged 92.7% of the second study's pairs, against DADA2's 13.96% after denoising and merging.
+
+**What follows (as section 33 said).**
+1. Q1: P83 holds and P84 does not. Section 33 adopted the closer estimate only if both held, so the report of 0.3.0 does not use it, and for ITS it says that the estimate is an upper bound and why (pairs refused at the merge step, mostly for indels, section 32). An estimate without differences used for ITS only (-2.75 points on the second study) is a candidate for a new registered test.
+2. Q2: `ee23` to `ee55` and `sw15` meet P85 and P86 on both markers; `sw15` has the largest ITS2 yield and becomes the advice of 0.3.0 for ITS data where fewer than half the pairs pass at maxEE 2,2: trim the read ends with a sliding window (4 bases, mean quality 15) before DADA2. The report says what it was tested on (short ITS1 and ITS2 amplicons of two fungal mock communities) and that on full-length ITS the yield is limited by the merge step instead. P87 holds for `sw15`.
+3. Q3: P88 holds: the report may name forward reads alone as an option when most long ITS pairs cannot merge; it does not recommend it, and it says that on the full-length study they gave four times as many ASVs.
+4. Q4: P89 and P90 hold: merging first may be named as an option for full-length ITS, with the caveat that DADA2's authors advise denoising first and that on the full-length study it gave nearly five times as many ASVs.
+5. P91 and P92 hold: the report presents the maxEE table for ITS as a reliable guide to the pass rate and to the order of the settings.
+6. P93 holds: 12 nt stays for ITS; whether the paper's Limits still name the missing overlap test is the authors' decision (FUTURE.md).
+7. Not claimed in any case: accuracy on full-length ITS, which has no truth here; taxonomy; abundances; anything about the four ATCC members left unjudged.

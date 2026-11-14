@@ -215,7 +215,7 @@ def analyse(out: Path, refs: dict) -> dict:
     seqs_cache = {}
     for lab in labels:
         for arm_dir in sorted((out / lab / "dada2").iterdir()):
-            if (arm_dir / "DONE").is_file():
+            if (arm_dir / "samples.tsv").is_file() and (arm_dir / "seqs.tsv").is_file():     # the two tables, not the driver's DONE (an empty file the archive does not keep)
                 R["flow"][(lab, arm_dir.name)] = flows(read_samples(arm_dir / "samples.tsv"))
                 seqs_cache[(lab, arm_dir.name)] = arm_dir / "seqs.tsv"
         if (lab, "mfirst") in R["flow"] and (lab, "std") in R["flow"]:

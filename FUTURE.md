@@ -1,5 +1,15 @@
 # AmpliTrim: future development
 
+## Added on 14 November 2026 (after the ITS overnight run: run 26, register sections 33 and 34)
+
+The overnight run tested what AmpliTrim can recommend for ITS (section 34). What follows for version 0.3.0:
+
+1. **ITS advice for poor read ends.** When fewer than half the pairs pass at maxEE 2,2, advise trimming the read ends with a sliding window (4 bases, mean quality 15) before DADA2: on the ATCC standard it raised the ITS2 yield by 57 points and recovered strains that maxEE 2,2 loses, with no spurious reads (P85, P86). Say what it was tested on (short ITS1 and ITS2 amplicons of two fungal mock communities) and that on full-length ITS the yield is limited by the merge step instead. AmpliTrim's filter prediction models `truncQ = 2` only: before the report predicts the trimmed reads, test that its prediction holds for them, as P92 did for maxEE.
+2. **Options for full-length ITS, not recommendations.** Forward reads alone (P88) and merging first (P89, P90) may be named where most long pairs cannot merge, each with its caveat: four to five times as many ASVs on the second ITS study, which has no truth; DADA2's authors advise denoising before merging.
+3. **The maxEE table for ITS is a reliable guide** to the pass rate and to the order of the settings (P91, P92): present it so.
+4. **An estimate without differences for ITS only** came within 2.75 points of DADA2 on the second ITS study (P83) but is worse on 16S (P84). Register an ITS-only test before using it.
+5. **The minimum overlap of 12 nt stays for ITS** (P93). For the manuscript (the authors' decision): the Limits no longer need to name the missing overlap test on repeat-rich ITS.
+
 ## Added on 12 November 2026 (after the ITS follow-up: run 25, register sections 31 and 32)
 
 The follow-up asked why DADA2 refuses so many ITS pairs at the merge step and whether a mismatch limit above 0 is a safe answer (8 of its 15 criteria met; section 32). What follows from it:
