@@ -59,6 +59,10 @@ Every file of this folder, by what it is for. The scripts import one another by 
 | `its_depth.py` | The same datasets at several depths (section 31; P76) |
 | `its_summary.py` | The criteria P68 to P82 in one table, from the reports of the steps, and the outcome rows of the register section |
 | `arfken_download.py` | Downloads the single-isolate and mixed-community libraries of Arfken et al. 2023 (PRJNA693350) under their library names, resumable, and checks the read counts against the run table (`download_ena.py` checks ENA's MD5 sums instead) |
+| `its_night.py` | The ITS overnight run (section 33): every arm of every ITS dataset and the 16S controls, thinned as before; the trim, merging first, AmpliTrim on the thinned reads and the stricter estimates; resumable step by step |
+| `its_night.R` | DADA2 arms on one dataset (paired, single, forward reads alone, another minimum overlap), with chimera removal in every arm (started by `its_night.py`) |
+| `its_night_report.py` | The analysis of the ITS overnight run (section 33; P83 to P93): the ATCC standard against NCBI references, the piglet mixes against the isolates, the verdicts and the advice |
+| `ncbi_references.py` | Reference ITS sequences of the Arfken mock communities from NCBI genomes by in-silico PCR with the paper's primers (section 33; the result is in `references_its/`) |
 | `msa1003_refined_variants.fasta` | The reference refined on Night 8 (69 sequences: the 60 genome variants, with the two *H. pylori* variants replaced by the sequence of the sample, and ten variants that passed the refinement rule of `FUTURE.md`; the added variants carry `0_copies`); to be used only on data that were not used to derive it |
 | `msa1003_refined_provenance.tsv` | For each of the 11 sequences that replace or extend the genome variants: its strain, how it was treated, the organisms of its 100% BLAST matches and its reads in the two libraries of Night 8 |
 | `msa1003_night8_asv_set.txt` | The names of the 49 sequences that were final ASVs in Night 8 (38 genome variants, the 10 added ones and the *H. pylori* sequence): the replication set of Night 9 |
@@ -106,6 +110,7 @@ The numbers are those of `python validation/organise_data.py --table`, and the s
 | 23 | Minimum overlap | `make_overlap_commands.py`, `collect_overlap_results.py`, `compare_methods.py` | 27 |
 | 24 | Closing run (night 10) | `night10.py`, `tail_classify.py` | 29-30 |
 | 25 | ITS follow-up | `its_followup.py`, `its_followup.R`, `its_truth.py`, `its_estimates.py`, `its_depth.py`, `its_summary.py`, `arfken_download.py` | 31-32 |
+| 26 | ITS overnight run | `its_night.py`, `its_night.R`, `its_night_report.py`, `ncbi_references.py` | 33 |
 | | The long unattended battery that runs many of the tests above in one command | `overnight.py`, `run_overnight.bat` (the batch file starts it on Windows) | |
 
 `night1_v2.py` ran night 1 and prepared its datasets (register section 11). It was missing from this archive until 7 November 2026; the only copy found, last modified on 9 October 2026, was added unchanged. Night 1 itself ran on 9 October 2026. The script has not been re-run here and has no test.

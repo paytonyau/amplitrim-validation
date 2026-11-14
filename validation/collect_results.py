@@ -28,7 +28,7 @@ def redact(text: str) -> str:
 def wanted(path: Path, root: Path):
     """(True, '') for a file to copy, else (False, the reason it is left out)."""
     rel = path.relative_to(root)
-    if any(part in SKIP_DIRS or part.endswith("_reads") for part in rel.parts[:-1]):
+    if any(part in SKIP_DIRS or part.endswith("_reads") or part.startswith("reads_") or part in ("filtered", "tmp_plain") for part in rel.parts[:-1]):
         return False, "work folder"
     if path.name.startswith(SKIP_PREFIXES):
         return False, "ASV FASTA"

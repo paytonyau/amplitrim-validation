@@ -49,6 +49,7 @@ columns: AmpliTrim against DADA2 (filter and yield), against FIGARO (like for li
 | 30 | 24 | Night 10: outcomes |
 | 31 | 25 | ITS follow-up: why DADA2 refuses ITS pairs, and is a mismatch limit above 0 safe? |
 | 32 | 25 | ITS follow-up: outcomes |
+| 33 | 26 | ITS overnight run: what AmpliTrim can recommend for ITS |
 
 ## 1. Datasets
 
@@ -1394,3 +1395,92 @@ This section tests the first three and the last two with one run, and asks wheth
 6. P78 fails (P79 holds): loss in denoising and in `mergePairs` does not predict *where* the overshoot is large, and, as section 31 said, the Limits paragraph says that its cause is only partly understood. Exploratory: on the ITS1 isolates the overshoot (+9.3 points) is close to the share of the input pairs refused for mismatches or indels (9.51%).
 7. Section 31 said that nothing from it enters the manuscript beyond one sentence of future work, and only if P68 and P72 hold. P72 does not hold, so no result of this section enters the manuscript. Items 4 and 6 bear on how the manuscript words the overshoot (that it is measured at 5,000 pairs per sample; that its cause is only partly understood); that wording is a decision of the authors and is recorded in `FUTURE.md`.
 8. Not claimed in any case: anything about full-length ITS from the Arfken libraries, which are short ITS1 and ITS2 amplicons; accuracy beyond the truth test; anything about maxEE on ITS, which was not tested.
+
+## 33. ITS overnight run: what AmpliTrim can recommend for ITS (written 14 November 2026, before the run)
+
+**Why.** AmpliTrim 0.2.0 gives no setting of its own for ITS: it uses DADA2's ITS defaults (no truncation, `truncQ = 2`, `minLen = 50`, maxEE 2,2), predicts the share of pairs that pass the filter (within 0.25 points on six ITS groups, sections 30 and 32) and estimates the yield, which on full-length ITS is far too high (82.1% against 14.0% on the second ITS study at 5,000 pairs per sample). Sections 31 and 32 left four questions that decide what version 0.3.0 can say about ITS:
+
+| | Question |
+|---|---|
+| Q1 | Can a stricter merge test make the yield estimate predict DADA2's merge on ITS, without making it worse on 16S? |
+| Q2 | When ITS reads have poor ends, is it better to keep maxEE 2,2, relax maxEE, or trim the poor ends? |
+| Q3 | When long ITS pairs cannot merge, are the forward reads alone as accurate? |
+| Q4 | Does merging first (vsearch on the raw pairs, then DADA2 on the merged reads) recover the refused pairs without false sequences? |
+
+**Parity with the 16S validation.** Every check that the 16S datasets went through, and where it stands for ITS:
+
+| 16S check in the paper | For ITS | Here |
+|---|---|---|
+| Filter prediction (Figure 2) | done at 2,2 | extended to every maxEE arm (P92) |
+| Merge estimate (Supplementary Figure S2) | done: an upper bound | Q1 (P83, P84) |
+| The estimate ranks settings in DADA2's order | not done | the order of the maxEE arms (P91) |
+| Truncation grid; coverage floor | do not apply: no cut | replaced by the arms of Q2 |
+| maxEE rule | not done: the rule needs a cut | Q2 (P85 to P87) |
+| Minimum overlap (10 to 25 nt) | not done; named as missing in the paper's Limits | 12 against 20 and 30 nt (P93) |
+| Accuracy on mocks against expected sequences (strains found, reads in exact sequences) | partly: without chimera removal, against the isolates' own sequences | against expected sequences from NCBI, after chimera removal (described for `std`; decides Q2 to Q4) |
+| FIGARO | cannot run on ITS | not run |
+| Reproducibility of the recommendation | does not apply: fixed settings | not run |
+| Depth | done (P76) | not repeated |
+| Independent test by another group | not available | not run |
+
+**Data.** All from Arfken AM, Frey JF, Carrillo NI, Dike NI, Onyeachonamm O, Rivera DN, Davies CP, Summers KL (2023), *Porcine fungal mock community analyses: Implications for mycobiome investigations*, Frontiers in Cellular and Infection Microbiology 13:928353 (BioProject PRJNA693350), except the two ITS studies and the 16S controls.
+
+| Label | Data | Truth |
+|---|---|---|
+| `atcc_its1`, `atcc_its2` | The ATCC mycobiome standard MSA-1010, ten strains with ATCC numbers (Table 3 of the paper), libraries ATCC-ITS1a to c and ATCC-ITS2a to c (folders 20 and 21). The ATCC2 libraries are not used: their ITS1 and ITS2 runs have identical read and base counts. | expected sequences from NCBI (below) |
+| `arfken_its1`, `arfken_its2` | The five piglet isolates (C, K, M, P, T), triplicate | their own sequences: the isolate reference |
+| `arfken_mix_its1`, `arfken_mix_its2` | MixA (KCTPM), MixB (KC), MixC (KT), triplicate | the isolate reference |
+| `its2`, `its` | The second (PRJEB108994, full-length ITS) and the first (PRJEB58189) ITS study | none: yields and flags |
+| 16S controls | The 12 16S datasets of the paper (amplitrim_paths.json, as the closing run read them), at the cut AmpliTrim 0.2.0 recommends for the same thinned reads, maxEE 2,2; when AmpliTrim cannot analyse a control's thinned reads, the cut the final run recommended for the whole dataset (run 24) is used, and the report says so | none needed: Q1 compares merged shares |
+
+Every dataset is thinned with the same function as before to 5,000 read pairs per sample (every pair where a sample has fewer, and every pair of mock A).
+
+**Expected sequences from NCBI.** `validation/ncbi_references.py` finds, for every member of the two mocks, a genome assembly at NCBI: one of the very strain if it exists ('strain'), else the species' reference genome ('species'). It cuts out the ITS1 and ITS2 amplicons with the paper's primers (Table 1: ITS1F `CTTGGTCATTTAGAGGAAGTAA` and ITS2 `GCTGCGTTCTTCATCGATGC`; ITS3 `GCATCGATGAAGAACGCAGC` and ITS4 `TCCTCCGCTTATTGATATGC`; at most 2 mismatches per primer), without the primers, like the reads. When a genome gives no product, NCBI's ITS records of the species are tried. Every copy found is kept, because fungal ITS can vary within one genome. The script's report (`REFERENCES_REPORT.md`) is read, and appended to this section, **before** the section is committed. *Result of that review (12 November 2026):* strain-exact references for 6 of the 10 ATCC members, for both markers: *A. fumigatus* (Af293 is ATCC MYA-4609), *C. neoformans* var. *grubii* (H99 is ATCC 208821), *C. glabrata* (ATCC 2001), *M. globosa* (CBS 7966 is ATCC MYA-4612) and *S. cerevisiae* from their genomes, and *C. albicans* ATCC 10231 from NCBI's ITS records of that strain (its genome assembly holds no rDNA). *S. cerevisiae* ATCC 201390 (BY4743) is counted through its parent S288C, a choice made before the count was known. So **the ATCC standard is the primary truth for both markers**; *T. interdigitale*, *P. chrysogenum*, *F. keratoplasticum* and *C. dermatis* have references of other strains only and are left unjudged. The piglet references agree with the isolates' own sequences within 0 to 3 edits for C, K, P and T (*K. slooffiae* ABBL is identical to isolate K on both markers); *L. corymbifera* gives no ITS1 product and its ITS2 record is 56 edits from isolate M's sequence, so isolate M's reference is flagged wherever the piglet mixes are reported. Disclosed: the first version of the script required the 3' end of each primer to match exactly and missed ITS1 in the yeasts and basidiomycetes; it was corrected (any 3 mismatches, every site found) before the references were fixed.
+
+**Which truth decides (fixed now).**
+- For each marker, the **ATCC standard is the primary truth** if strain-exact references were found for at least 6 of its 10 strains for that marker. A sequence of the standard is *true* when it is within 2 edits of an expected sequence of a strain-exact member, and *of an unjudged member* when it is within 3% of the length of a species-level reference of another member: such sequences are left out of the spurious share and of recall. Anything else is *spurious*.
+- Otherwise the **piglet mixes are the primary truth** for that marker, judged against the isolate reference, as in section 31: the merged sequences of the isolates in the `std` arm, after chimera removal, that hold at least 1% of an isolate's reads (the three replicates pooled); true within 2 edits.
+- The other truth is reported beside it for every arm. The NCBI references of the piglet species are used only to check the isolate reference (the edits between them are reported), never as truth, because the isolates were never sequenced as genomes in public.
+- *Recall*: the share of the expected members (the strain-exact members; the isolates of a mix) that are found in a sample, a member being found when a true sequence of it (any of its copies) holds 0.1% or more of the sample's reads; the mean over the samples. *Reads in exact sequences*: the share of reads in sequences that equal an expected sequence. *Strains found*: per sample. For `fwd`, a sequence is judged against the starts of the expected sequences of the same length.
+
+**One pipeline, several arms.** DADA2 (`learnErrors`, `dada`, pool = FALSE, `minLen = 50`, `maxN = 0`, `minOverlap = 12`, `maxMismatch = 0`), then **chimera removal** (`removeBimeraDenovo`, method "consensus") in every arm; counts are made after it.
+
+| Arm | What changes from the default | Question |
+|---|---|---|
+| `std` | nothing: no truncation, `truncQ = 2`, maxEE 2,2 | the baseline |
+| `ee23`, `ee24`, `ee25`, `ee33`, `ee55` | maxEE 2,3 / 2,4 / 2,5 / 3,3 / 5,5 | Q2 |
+| `tq10`, `tq20` | `truncQ = 10` / `20`, maxEE 2,2 | Q2 |
+| `sw15` | a sliding-window trim of the read ends before DADA2 (window 4, mean quality 15), then maxEE 2,2 | Q2 |
+| `fwd` | the forward reads of `std` alone, denoised, no merge | Q3 |
+| `mfirst` | vsearch merges the raw pairs (its default allowance of differences, a minimum overlap of 12 and staggered pairs allowed, as in AmpliTrim), then DADA2 denoises the merged reads (maxEE 2) | Q4 |
+| `mo20`, `mo30` | `mergePairs` with `minOverlap = 20` / `30` on the denoised reads of `std` | parity |
+
+AmpliTrim 0.2.0 (`--its`) is also run on the thinned reads of every ITS group, for its predicted pass rates and yields at each maxEE (P91, P92). For Q1 the merge test behind AmpliTrim's estimate is repeated on the reads of `std` with vsearch allowing 10 (today's tolerant default), 5, 2 and 0 differences; vsearch merges without gaps, so an indel in a long overlap shows as many differences.
+
+**Criteria** (written before the run).
+- **P83.** On the second ITS study, at least one of the stricter estimates (5, 2 or 0 differences) is within 10 points of DADA2's merged share (before chimera removal, as in Supplementary Figure S2).
+- **P84.** That estimate (the closest on the second ITS study) is not farther from DADA2 on the 16S controls than today's: the mean absolute difference over the 12 datasets grows by at most 2 points.
+- **P85 (safe).** Against `std`, on the primary truth of each marker: the share of reads in spurious sequences rises by at most 1 point, and recall falls by at most 2 points.
+- **P86 (useful).** On the primary truth of ITS2, the yield rises by at least 5 points against `std`.
+- **P87 (a flag).** On the two ITS studies, the median number of ASVs per sample rises by at most 25% against `std`.
+- **P88.** `fwd`: on the primary truth of each marker, the spurious share is at most 1 point above `std`'s and recall is at least `std`'s.
+- **P89 (safe).** `mfirst`: on the primary truth of each marker, the spurious share is at most 1 point above `std`'s, and recall does not fall.
+- **P90 (useful).** `mfirst`: on the second ITS study, the yield is at least 10 points above `std`'s.
+- **P91.** On each ITS group, AmpliTrim's predicted yields order the maxEE arms that its maxEE table holds (of `std`, `ee23`, `ee24`, `ee25`, `ee33`, `ee55`; at least three) as DADA2's merged shares do, with a rank correlation of at least 0.8.
+- **P92.** On each ITS group, AmpliTrim's predicted pass rate on the same thinned reads is within 1 point of DADA2's, at every maxEE arm.
+- **P93.** On the primary truth of each marker, the spurious share at a minimum overlap of 12 nt is at most 0.5 point above the share at 20 and at 30 nt.
+
+*Described, no criterion:* the accuracy of `std` on the primary truth (members found, recall, reads in exact sequences, spurious share) and of every arm on the piglet mixes (the second view); the yields of every arm on the two ITS studies; the share of the second ITS study's pairs that a minimum overlap of 20 and 30 nt costs.
+
+**What follows (decided now).**
+- P83 and P84 hold: the report of 0.3.0 gives the closer estimate for ITS (and for all markers, if P84 holds with room). P83 fails: the report says that the ITS estimate is an upper bound and why (indels at the merge step).
+- Among the arms of Q2 that meet P85 and P86 on both markers, the one with the largest ITS2 yield becomes the advice of 0.3.0 for ITS data where fewer than half the pairs pass at 2,2; the report says what it was tested on (short ITS1 and ITS2 amplicons of fungal mock communities). P87 failing is reported beside it. No arm meets both: 2,2 stays, and the report says that relaxing and trimming were tested and were not safe or not useful.
+- P88 holds: the report may name forward reads alone as an option when most long ITS pairs cannot merge; it does not recommend it.
+- P89 and P90 hold: merging first may be named as an option for full-length ITS, with the caveat that DADA2's authors advise denoising first. Otherwise it is not mentioned.
+- P91 and P92 hold: the report presents the maxEE table for ITS as a reliable guide to the pass rate and the order of the settings; P91 fails: it says that the table's yields do not give the order.
+- P93 holds: 12 nt stays for ITS, and the paper's Limits no longer need to name the missing test (the authors' decision, in FUTURE.md). P93 fails: a longer minimum overlap is advised for ITS, with its cost.
+- Not claimed in any case: accuracy on full-length ITS, which has no truth here; taxonomy; abundances; anything about the members left out of the truth.
+
+**What has already been seen (disclosed).** AmpliTrim's own predicted pass rates and yields at relaxed maxEE for the Arfken groups (run 25); the outcomes of run 25 at 2,2 without chimera removal, including the chimeras between isolates in the ITS2 mixes; the reference report of `ncbi_references.py`. A smoke run at 300 read pairs per sample (12 November 2026), after these criteria were agreed and before this section was committed, ran every step of every dataset to check the code; its verdicts mean nothing at that depth, are reported in section 34, and changed nothing here. It led to one fix of the procedure: AmpliTrim could not analyse the wastewater control's thinned reads (57 of 2,699 pairs overlapped at full read length), so a 16S control now falls back to the final run's cut. **Not seen at full depth:** the ATCC libraries (not downloaded before this section was written); any DADA2 result for a relaxed maxEE, a higher `truncQ`, a trim, forward reads alone, merging first or a longer minimum overlap; any count after chimera removal; any stricter estimate on ITS.
+
+**Procedure.** (1) The reference script is run and its report read; the members used in the truth are fixed here. (2) The code (R and Python) is written with tests on stand-ins. (3) A smoke run at 300 pairs per sample checks the paths (its look at the data is disclosed in section 34). (4) This section, the code and the reference sequences are committed. (5) The overnight run: one resumable command; every arm of every dataset is a step that is not repeated when the run is started again. (6) One summary of P83 to P93, the folders numbered and collected, and section 34 written from the summary.

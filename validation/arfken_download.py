@@ -12,10 +12,20 @@ The isolates are C (Candida albicans), K (Kazachstania slooffiae), M (the Mucor 
 triplicate (a, b, c). Two more folders hold the mixes MixA (KCTPM), MixB (KC) and MixC (KT) in triplicate, which are the mixes of known composition whose ITS1 and ITS2 files differ in the run table (for MixD
 to MixM and ATCC2 the two markers have identical read and base counts, which looks like duplicated deposits, so they are not used):
   18_mock_ITS1_arfken_mixes_PRJNA693350\\raw      and      19_mock_ITS2_arfken_mixes_PRJNA693350\\raw       (--only mixes)
-The other mixes, the ATCC standard, the negative controls and the separate K-Feb sample are not downloaded.
+The ATCC mycobiome standard MSA-1010 (ten strains, Table 3 of the paper) in triplicate, libraries ATCC-ITS1a to c and ATCC-ITS2a to c (not ATCC2, whose ITS1 and ITS2 runs
+have identical counts), goes to two more folders (--only atcc):
+  20_mock_ITS1_arfken_atcc_PRJNA693350\\raw      and      21_mock_ITS2_arfken_atcc_PRJNA693350\\raw
+Their accessions are not written here: first
+  python validation\\arfken_download.py --base C:\\data --find-atcc
+asks ENA for the run table of PRJNA693350, takes the libraries named exactly ATCC-ITS1a to c and ATCC-ITS2a to c, refuses unless there are three of each and the ITS1
+and ITS2 counts differ, and saves them to <base>\\arfken_atcc_runs.tsv (read it); --only atcc then downloads from that file, and --check counts against it.
+The other mixes, the negative controls and the separate K-Feb sample are not downloaded.
 """
 import argparse
+import csv
 import gzip
+import io
+import re
 import shutil
 import sys
 import time
@@ -23,8 +33,14 @@ import urllib.request
 from pathlib import Path
 
 DATASETS = {"its1": "16_mock_ITS1_arfken_isolates_PRJNA693350", "its2": "17_mock_ITS2_arfken_isolates_PRJNA693350",
-            "mix_its1": "18_mock_ITS1_arfken_mixes_PRJNA693350", "mix_its2": "19_mock_ITS2_arfken_mixes_PRJNA693350"}
-GROUPS = {"isolates": ["its1", "its2"], "mixes": ["mix_its1", "mix_its2"]}
+            "mix_its1": "18_mock_ITS1_arfken_mixes_PRJNA693350", "mix_its2": "19_mock_ITS2_arfken_mixes_PRJNA693350",
+            "atcc_its1": "20_mock_ITS1_arfken_atcc_PRJNA693350", "atcc_its2": "21_mock_ITS2_arfken_atcc_PRJNA693350"}
+GROUPS = {"isolates": ["its1", "its2"], "mixes": ["mix_its1", "mix_its2"], "atcc": ["atcc_its1", "atcc_its2"]}
+DEFAULT_KEYS = ["its1", "its2", "mix_its1", "mix_its2"]                  # without --only; the ATCC standard is asked for by name
+ENA_REPORT = ("https://www.ebi.ac.uk/ena/portal/api/filereport?accession=PRJNA693350&result=read_run"
+              "&fields=run_accession,library_name,sample_alias,sample_title,read_count,base_count&format=tsv&limit=0")
+ATCC_NAME = re.compile(r"^ATCC[-_ ]?ITS([12])([abc])$", re.I)             # ATCC-ITS1a ... ATCC-ITS2c; ATCC2-ITS1a does not match
+ATCC_TABLE = "arfken_atcc_runs.tsv"
 # (run accession, library, read pairs, total bases), copied from the ENA run table of PRJNA693350
 RUNS = {
     "its1": [("SRR13489861", "C-ITS1c", 366019, 159304823), ("SRR13489862", "C-ITS1b", 328661, 142933045), ("SRR13489866", "C-ITS1a", 351425, 152993050),
@@ -54,6 +70,48 @@ def ena_url(run: str, mate: int) -> str:
 
 def target(base: Path, key: str, library: str, mate: int) -> Path:
     return Path(base) / DATASETS[key] / "raw" / f"{library}_R{mate}.fastq.gz"
+
+
+def find_atcc(opener=None) -> dict:
+    """{'atcc_its1': [(run, library, pairs, bases), ...], 'atcc_its2': [...]} from ENA's run table of PRJNA693350. A library counts when its library name, sample alias or
+    sample title is exactly ATCC-ITS1a to c or ATCC-ITS2a to c. Refuses unless there are three runs per marker, one per replicate, and the two markers differ in counts."""
+    opener = opener or (lambda u: urllib.request.urlopen(u, timeout=60))
+    with opener(ENA_REPORT) as r:
+        text = r.read().decode("utf-8")
+    found = {"atcc_its1": {}, "atcc_its2": {}}
+    for row in csv.DictReader(io.StringIO(text), delimiter="\t"):
+        for field in ("library_name", "sample_alias", "sample_title"):
+            m = ATCC_NAME.match((row.get(field) or "").strip())
+            if m:
+                marker, rep_ = m.groups()
+                found[f"atcc_its{marker}"][rep_.lower()] = (row["run_accession"], f"ATCC-ITS{marker}{rep_.lower()}", int(row["read_count"]), int(row["base_count"]))
+                break
+    for key, reps in found.items():
+        if sorted(reps) != ["a", "b", "c"]:
+            raise RuntimeError(f"ENA's run table has {len(reps)} ATCC libraries for {key} ({', '.join(sorted(reps)) or 'none'}), not a, b and c")
+    one, two = ({v[2:] for v in found[k].values()} for k in ("atcc_its1", "atcc_its2"))
+    if one == two:
+        raise RuntimeError("the ATCC ITS1 and ITS2 runs have identical read and base counts, like the duplicated deposits: not used")
+    return {k: [v[r] for r in sorted(v)] for k, v in found.items()}
+
+
+def save_atcc(base: Path, runs: dict) -> Path:
+    p = Path(base) / ATCC_TABLE
+    p.parent.mkdir(parents=True, exist_ok=True)
+    lines = ["folder\trun\tlibrary\tread_pairs\tbases"] + [f"{k}\t{r}\t{lib}\t{n}\t{b}" for k in sorted(runs) for r, lib, n, b in runs[k]]
+    p.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return p
+
+
+def runs_for(key: str, base: Path) -> list:
+    """The runs of a folder: written in this file for the isolates and the mixes; for the ATCC standard, read from the table that --find-atcc saved."""
+    if key in RUNS:
+        return RUNS[key]
+    p = Path(base) / ATCC_TABLE
+    if not p.is_file():
+        raise SystemExit(f"{p} is missing: run  python validation\\arfken_download.py --base {base} --find-atcc  first, and read the table it saves")
+    rows = [line.split("\t") for line in p.read_text(encoding="utf-8").splitlines()[1:] if line.strip()]
+    return [(r[1], r[2], int(r[3]), int(r[4])) for r in rows if r[0] == key]
 
 
 def mean_read_length(pairs: int, bases: int) -> float:
@@ -115,7 +173,7 @@ def count_pairs(path: Path) -> int:
 def check(base: Path, key: str, runs=None) -> list:
     """Problems found: a missing file, or a read count that differs from the run table (for either mate)."""
     problems = []
-    for run, library, pairs, _ in (runs if runs is not None else RUNS[key]):
+    for run, library, pairs, _ in (runs if runs is not None else runs_for(key, base)):
         for mate in (1, 2):
             p = target(base, key, library, mate)
             if not p.is_file():
@@ -134,13 +192,26 @@ def check(base: Path, key: str, runs=None) -> list:
 def main(argv=None, opener=None, sleep=time.sleep, verify=verify_gzip) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--base", type=Path, default=Path(r"C:\data"))
-    ap.add_argument("--only", choices=sorted(DATASETS) + sorted(GROUPS), help="one folder (its1, its2, mix_its1, mix_its2) or a group (isolates, mixes); the default is all four")
+    ap.add_argument("--only", choices=sorted(DATASETS) + sorted(GROUPS), help="one folder (its1, its2, mix_its1, mix_its2, atcc_its1, atcc_its2) or a group (isolates, mixes, atcc); "
+                                                                             "the default is the isolates and the mixes")
+    ap.add_argument("--find-atcc", action="store_true", help="ask ENA for the ATCC standard's runs and save them to <base>\\arfken_atcc_runs.tsv; download nothing")
     ap.add_argument("--dry-run", action="store_true", help="show the plan and download nothing")
     ap.add_argument("--check", action="store_true", help="count the read pairs of the files already downloaded")
     a = ap.parse_args(argv)
-    keys = GROUPS[a.only] if a.only in GROUPS else [a.only] if a.only else sorted(DATASETS)
+    if a.find_atcc:
+        try:
+            found = find_atcc(opener)
+        except RuntimeError as e:
+            print(e)
+            return 2
+        for k in sorted(found):
+            for r, lib, n, b in found[k]:
+                print(f"{k:10s} {r:12s} {lib:12s} {n:>9,} read pairs  {b:>12,} bases  (mean read length {mean_read_length(n, b):.0f} nt)")
+        print(f"\nsaved: {save_atcc(a.base, found)}. Read it; then  python validation\\arfken_download.py --base {a.base} --only atcc")
+        return 0
+    keys = GROUPS[a.only] if a.only in GROUPS else [a.only] if a.only else DEFAULT_KEYS
     for key in keys:
-        runs = RUNS[key]
+        runs = runs_for(key, a.base)
         lengths = [mean_read_length(n, b) for _, _, n, b in runs]
         print(f"{key.upper()}: {len(runs)} runs, {sum(r[2] for r in runs):,} read pairs, mean read length {min(lengths):.0f} to {max(lengths):.0f} nt (run table: bases / pairs / 2) -> {a.base / DATASETS[key] / 'raw'}")
     if a.dry_run:
@@ -151,7 +222,7 @@ def main(argv=None, opener=None, sleep=time.sleep, verify=verify_gzip) -> int:
         return 2 if bad else 0
     done = kept = repaired = 0
     for key in keys:
-        for run, library, _, _ in RUNS[key]:
+        for run, library, _, _ in runs_for(key, a.base):
             for mate in (1, 2):
                 try:
                     status = download(ena_url(run, mate), target(a.base, key, library, mate), opener=opener, sleep=sleep, verify=verify)
