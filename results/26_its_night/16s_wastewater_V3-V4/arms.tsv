@@ -1,0 +1,2 @@
+arm	mode	reads	truncF	truncR	maxEEF	maxEER	truncQ	minOverlap
+std	paired	C:\data\runs\its_night\16s_wastewater_V3-V4\reads	261	183	2	2	2	12

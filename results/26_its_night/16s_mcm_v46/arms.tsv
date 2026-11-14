@@ -1,0 +1,2 @@
+arm	mode	reads	truncF	truncR	maxEEF	maxEER	truncQ	minOverlap
+std	paired	C:\data\runs\its_night\16s_mcm_v46\reads	273	265	2	2	2	12

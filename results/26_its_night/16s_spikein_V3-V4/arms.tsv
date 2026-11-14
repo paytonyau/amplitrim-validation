@@ -1,0 +1,2 @@
+arm	mode	reads	truncF	truncR	maxEEF	maxEER	truncQ	minOverlap
+std	paired	C:\data\runs\its_night\16s_spikein_V3-V4\reads	222	218	2	2	2	12

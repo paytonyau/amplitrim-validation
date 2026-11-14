@@ -1,0 +1,14 @@
+arm	mode	reads	truncF	truncR	maxEEF	maxEER	truncQ	minOverlap
+std	paired	C:\data\runs\its_night\arfken_its2\reads	0	0	2	2	2	12
+ee23	paired	C:\data\runs\its_night\arfken_its2\reads	0	0	2	3	2	12
+ee24	paired	C:\data\runs\its_night\arfken_its2\reads	0	0	2	4	2	12
+ee25	paired	C:\data\runs\its_night\arfken_its2\reads	0	0	2	5	2	12
+ee33	paired	C:\data\runs\its_night\arfken_its2\reads	0	0	3	3	2	12
+ee55	paired	C:\data\runs\its_night\arfken_its2\reads	0	0	5	5	2	12
+tq10	paired	C:\data\runs\its_night\arfken_its2\reads	0	0	2	2	10	12
+tq20	paired	C:\data\runs\its_night\arfken_its2\reads	0	0	2	2	20	12
+sw15	paired	C:\data\runs\its_night\arfken_its2\reads_sw15	0	0	2	2	2	12
+fwd	fwd	std	0	0	2	2	2	12
+mo20	overlap	std	0	0	2	2	2	20
+mo30	overlap	std	0	0	2	2	2	30
+mfirst	single	C:\data\runs\its_night\arfken_its2\reads_mfirst	0	0	2	2	2	12

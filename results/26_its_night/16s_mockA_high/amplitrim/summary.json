@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "maxEE_rule": {
+    "relaxed": true,
+    "pass_rate_at_maxEE_2": 0.6458421274799493,
+    "percentile": 0.75,
+    "cap": null,
+    "warn_above": 5,
+    "cut_measured_at": [
+      277,
+      243
+    ],
+    "percentile_expected_errors": [
+      1.6336898684859933,
+      2.4027052689771407
+    ]
+  },
+  "recommended": {
+    "truncLenF": 273,
+    "truncLenR": 247,
+    "maxEE": [
+      2.0,
+      3.0
+    ],
+    "maxEE_f": 2.0,
+    "maxEE_r": 3.0,
+    "minOverlap": 12,
+    "maxMismatch": 0,
+    "estimated_yield": 0.7162,
+    "longest_mergeable_insert": 508
+  },
+  "longest_amplicon": 508,
+  "pairs_analysed": 47380,
+  "data": {
+    "pairs_analysed": 47380,
+    "read_length_f": 297,
+    "read_length_r": 297,
+    "uniform_read_length": false,
+    "amplicon_min": 378,
+    "amplicon_median": 484,
+    "amplicon_max": 536,
+    "amplicon_99pct_min": 460,
+    "amplicon_99pct_max": 505,
+    "share_merged_at_full_length": 0.8876,
+    "share_amplicons_shorter_than_reads": 0.0,
+    "quality_values": 32
+  },
+  "warnings": [
+    "Only 89% of read pairs could be merged at full read length (amplicons longer than about 582 nt, or some reads shorter than the rest); the lengths above come from the pairs that merged.",
+    "Quality filtering removes 28% of read pairs at these settings."
+  ],
+  "maxEE_table": [
+    {
+      "maxEE": [
+        1.0,
+        1.0
+      ],
+      "pass_rate": 0.4341,
+      "estimated_yield": 0.4339,
+      "expected_errors_kept": [
+        0.2,
+        0.431
+      ],
+      "expected_errors_added": null
+    },
+    {
+      "maxEE": [
+        2.0,
+        2.0
+      ],
+      "pass_rate": 0.6384,
+      "estimated_yield": 0.6379,
+      "expected_errors_kept": [
+        0.355,
+        0.715
+      ],
+      "expected_errors_added": null
+    },
+    {
+      "maxEE": [
+        2.0,
+        3.0
+      ],
+      "pass_rate": 0.7172,
+      "estimated_yield": 0.7162,
+      "expected_errors_kept": [
+        0.405,
+        0.905
+      ],
+      "expected_errors_added": [
+        0.81,
+        2.443
+      ]
+    },
+    {
+      "maxEE": [
+        2.0,
+        4.0
+      ],
+      "pass_rate": 0.7553,
+      "estimated_yield": 0.7539,
+      "expected_errors_kept": [
+        0.433,
+        1.033
+      ],
+      "expected_errors_added": [
+        0.857,
+        2.77
+      ]
+    },
+    {
+      "maxEE": [
+        3.0,
+        3.0
+      ],
+      "pass_rate": 0.7536,
+      "estimated_yield": 0.7524,
+      "expected_errors_kept": [
+        0.503,
+        0.942
+      ],
+      "expected_errors_added": [
+        1.326,
+        2.194
+      ]
+    },
+    {
+      "maxEE": [
+        2.0,
+        5.0
+      ],
+      "pass_rate": 0.7764,
+      "estimated_yield": 0.7743,
+      "expected_errors_kept": [
+        0.448,
+        1.127
+      ],
+      "expected_errors_added": [
+        0.881,
+        3.028
+      ]
+    },
+    {
+      "maxEE": [
+        3.0,
+        5.0
+      ],
+      "pass_rate": 0.831,
+      "estimated_yield": 0.8279,
+      "expected_errors_kept": [
+        0.579,
+        1.21
+      ],
+      "expected_errors_added": [
+        1.324,
+        2.85
+      ]
+    },
+    {
+      "maxEE": [
+        5.0,
+        5.0
+      ],
+      "pass_rate": 0.8783,
+      "estimated_yield": 0.8722,
+      "expected_errors_kept": [
+        0.755,
+        1.292
+      ],
+      "expected_errors_added": [
+        1.821,
+        2.824
+      ]
+    }
+  ]
+}
