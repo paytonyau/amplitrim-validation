@@ -1,0 +1,130 @@
+{
+ "atcc_its1/thin": {
+  "state": "done",
+  "seconds": 10.3
+ },
+ "atcc_its1/trims": {
+  "state": "done",
+  "seconds": 16.0
+ },
+ "atcc_its1/eer": {
+  "state": "done",
+  "seconds": 1.9
+ },
+ "atcc_its1/arms": {
+  "state": "done",
+  "seconds": 65.0
+ },
+ "atcc_its2/thin": {
+  "state": "done",
+  "seconds": 8.8
+ },
+ "atcc_its2/trims": {
+  "state": "done",
+  "seconds": 19.7
+ },
+ "atcc_its2/eer": {
+  "state": "done",
+  "seconds": 2.3
+ },
+ "atcc_its2/arms": {
+  "state": "done",
+  "seconds": 84.2
+ },
+ "arfken_its1/thin": {
+  "state": "done",
+  "seconds": 43.8
+ },
+ "arfken_its1/trims": {
+  "state": "done",
+  "seconds": 77.0
+ },
+ "arfken_its1/eer": {
+  "state": "done",
+  "seconds": 8.1
+ },
+ "arfken_its1/arms": {
+  "state": "done",
+  "seconds": 217.6
+ },
+ "arfken_its2/thin": {
+  "state": "done",
+  "seconds": 41.5
+ },
+ "arfken_its2/trims": {
+  "state": "done",
+  "seconds": 96.3
+ },
+ "arfken_its2/eer": {
+  "state": "done",
+  "seconds": 9.9
+ },
+ "arfken_its2/arms": {
+  "state": "done",
+  "seconds": 240.7
+ },
+ "arfken_mix_its1/thin": {
+  "state": "done",
+  "seconds": 23.3
+ },
+ "arfken_mix_its1/trims": {
+  "state": "done",
+  "seconds": 47.3
+ },
+ "arfken_mix_its1/eer": {
+  "state": "done",
+  "seconds": 4.6
+ },
+ "arfken_mix_its1/arms": {
+  "state": "done",
+  "seconds": 158.1
+ },
+ "arfken_mix_its2/thin": {
+  "state": "done",
+  "seconds": 24.2
+ },
+ "arfken_mix_its2/trims": {
+  "state": "done",
+  "seconds": 57.7
+ },
+ "arfken_mix_its2/eer": {
+  "state": "done",
+  "seconds": 5.9
+ },
+ "arfken_mix_its2/arms": {
+  "state": "done",
+  "seconds": 241.8
+ },
+ "its2/thin": {
+  "state": "done",
+  "seconds": 30.2
+ },
+ "its2/trims": {
+  "state": "done",
+  "seconds": 110.0
+ },
+ "its2/eer": {
+  "state": "done",
+  "seconds": 9.4
+ },
+ "its2/arms": {
+  "state": "done",
+  "seconds": 2253.2
+ },
+ "its/thin": {
+  "state": "done",
+  "seconds": 83.1
+ },
+ "its/trims": {
+  "state": "done",
+  "seconds": 271.1
+ },
+ "its/eer": {
+  "state": "done",
+  "seconds": 18.5
+ },
+ "its/arms": {
+  "state": "done",
+  "seconds": 6068.2
+ }
+}

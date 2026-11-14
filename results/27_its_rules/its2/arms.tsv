@@ -1,0 +1,13 @@
+arm	mode	reads	truncF	truncR	maxEEF	maxEER	truncQ	minOverlap
+std	paired	C:\data\runs\its_rules\its2\reads	0	0	2	2	2	12
+tq3	paired	C:\data\runs\its_rules\its2\reads	0	0	2	2	3	12
+tq4	paired	C:\data\runs\its_rules\its2\reads	0	0	2	2	4	12
+tq5	paired	C:\data\runs\its_rules\its2\reads	0	0	2	2	5	12
+tq6	paired	C:\data\runs\its_rules\its2\reads	0	0	2	2	6	12
+tq8	paired	C:\data\runs\its_rules\its2\reads	0	0	2	2	8	12
+tq10	paired	C:\data\runs\its_rules\its2\reads	0	0	2	2	10	12
+sw10	paired	C:\data\runs\its_rules\its2\reads_sw10	0	0	2	2	2	12
+sw15	paired	C:\data\runs\its_rules\its2\reads_sw15	0	0	2	2	2	12
+sw20	paired	C:\data\runs\its_rules\its2\reads_sw20	0	0	2	2	2	12
+sw25	paired	C:\data\runs\its_rules\its2\reads_sw25	0	0	2	2	2	12
+eer	paired	C:\data\runs\its_rules\its2\reads	0	0	2	2	2	12
