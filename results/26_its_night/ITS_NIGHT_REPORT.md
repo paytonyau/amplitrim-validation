@@ -22,7 +22,7 @@
 | arfken_its1 | ee33 | 74,151 | 69.38% | 56.96% | 56.79% | 2 |
 | arfken_its1 | ee55 | 74,151 | 78.81% | 63.09% | 62.77% | 2 |
 | arfken_its1 | fwd | 74,151 | 62.20% | 62.14% | 62.05% | 2 |
-| arfken_its1 | mfirst | 61,982 | 99.79% | 99.69% | 98.62% | 2 |
+| arfken_its1 | mfirst | 74,151 | 83.41% | 83.33% | 82.44% | 2 |
 | arfken_its1 | mo20 | 74,151 | 62.20% | 52.60% | 52.52% | 2 |
 | arfken_its1 | mo30 | 74,151 | 62.20% | 52.60% | 52.52% | 2 |
 | arfken_its1 | std | 74,151 | 62.20% | 52.60% | 52.52% | 2 |
@@ -35,7 +35,7 @@
 | arfken_its2 | ee33 | 73,441 | 51.96% | 51.80% | 51.80% | 1 |
 | arfken_its2 | ee55 | 73,441 | 70.10% | 69.75% | 69.75% | 1 |
 | arfken_its2 | fwd | 73,441 | 37.70% | 37.68% | 37.68% | 1 |
-| arfken_its2 | mfirst | 57,549 | 99.28% | 99.19% | 98.97% | 2 |
+| arfken_its2 | mfirst | 73,441 | 77.79% | 77.72% | 77.55% | 2 |
 | arfken_its2 | mo20 | 73,441 | 37.70% | 37.57% | 37.57% | 1 |
 | arfken_its2 | mo30 | 73,441 | 37.70% | 37.57% | 37.57% | 1 |
 | arfken_its2 | std | 73,441 | 37.70% | 37.57% | 37.57% | 1 |
@@ -48,7 +48,7 @@
 | arfken_mix_its1 | ee33 | 44,547 | 79.55% | 77.54% | 77.19% | 5 |
 | arfken_mix_its1 | ee55 | 44,547 | 85.73% | 83.53% | 82.05% | 5 |
 | arfken_mix_its1 | fwd | 44,547 | 74.49% | 74.37% | 74.03% | 5 |
-| arfken_mix_its1 | mfirst | 39,223 | 99.92% | 99.89% | 98.21% | 5 |
+| arfken_mix_its1 | mfirst | 44,547 | 87.98% | 87.95% | 86.47% | 5 |
 | arfken_mix_its1 | mo20 | 44,547 | 74.49% | 72.42% | 72.08% | 4 |
 | arfken_mix_its1 | mo30 | 44,547 | 74.49% | 72.42% | 72.08% | 4 |
 | arfken_mix_its1 | std | 44,547 | 74.49% | 72.42% | 72.08% | 4 |
@@ -61,7 +61,7 @@
 | arfken_mix_its2 | ee33 | 44,269 | 53.15% | 51.82% | 47.20% | 3 |
 | arfken_mix_its2 | ee55 | 44,269 | 71.30% | 69.29% | 63.04% | 3 |
 | arfken_mix_its2 | fwd | 44,269 | 38.06% | 37.81% | 34.06% | 2 |
-| arfken_mix_its2 | mfirst | 34,933 | 99.69% | 99.19% | 87.98% | 4 |
+| arfken_mix_its2 | mfirst | 44,269 | 78.66% | 78.27% | 69.43% | 4 |
 | arfken_mix_its2 | mo20 | 44,269 | 38.06% | 37.28% | 33.97% | 3 |
 | arfken_mix_its2 | mo30 | 44,269 | 38.06% | 37.28% | 33.97% | 3 |
 | arfken_mix_its2 | std | 44,269 | 38.06% | 37.28% | 33.97% | 3 |
@@ -74,7 +74,7 @@
 | atcc_its1 | ee33 | 14,898 | 79.72% | 78.81% | 78.62% | 9 |
 | atcc_its1 | ee55 | 14,898 | 86.05% | 84.82% | 84.64% | 10 |
 | atcc_its1 | fwd | 14,898 | 74.34% | 74.20% | 73.47% | 9 |
-| atcc_its1 | mfirst | 12,854 | 99.67% | 99.39% | 98.27% | 10 |
+| atcc_its1 | mfirst | 14,898 | 86.00% | 85.76% | 84.79% | 10 |
 | atcc_its1 | mo20 | 14,898 | 74.34% | 73.53% | 73.35% | 8 |
 | atcc_its1 | mo30 | 14,898 | 74.34% | 73.53% | 73.35% | 8 |
 | atcc_its1 | std | 14,898 | 74.34% | 73.53% | 73.35% | 8 |
@@ -87,7 +87,7 @@
 | atcc_its2 | ee33 | 14,818 | 37.71% | 36.35% | 35.88% | 6 |
 | atcc_its2 | ee55 | 14,818 | 54.44% | 46.94% | 46.44% | 7 |
 | atcc_its2 | fwd | 14,818 | 26.93% | 26.69% | 25.89% | 6 |
-| atcc_its2 | mfirst | 9,728 | 99.75% | 98.67% | 93.94% | 10 |
+| atcc_its2 | mfirst | 14,818 | 65.49% | 64.78% | 61.67% | 10 |
 | atcc_its2 | mo20 | 14,818 | 26.93% | 26.14% | 25.70% | 5 |
 | atcc_its2 | mo30 | 14,818 | 26.93% | 26.14% | 25.70% | 5 |
 | atcc_its2 | std | 14,818 | 26.93% | 26.14% | 25.70% | 5 |
@@ -100,7 +100,7 @@
 | its | ee33 | 178,657 | 84.71% | 50.54% | 50.52% | 105 |
 | its | ee55 | 178,657 | 95.43% | 53.38% | 53.38% | 106 |
 | its | fwd | 178,657 | 74.24% | 61.88% | 61.84% | 136 |
-| its | mfirst | 149,677 | 99.07% | 84.09% | 84.07% | 141 |
+| its | mfirst | 178,657 | 83.00% | 70.45% | 70.44% | 141 |
 | its | mo20 | 178,657 | 74.24% | 46.81% | 46.80% | 105 |
 | its | mo30 | 178,657 | 74.24% | 46.76% | 46.75% | 105 |
 | its | std | 178,657 | 74.24% | 46.87% | 46.85% | 105 |
@@ -113,7 +113,7 @@
 | its2 | ee33 | 43,405 | 89.19% | 14.69% | 14.68% | 25 |
 | its2 | ee55 | 43,405 | 94.70% | 15.20% | 15.16% | 25 |
 | its2 | fwd | 43,405 | 82.86% | 57.59% | 53.83% | 94 |
-| its2 | mfirst | 40,222 | 97.56% | 69.62% | 69.46% | 111 |
+| its2 | mfirst | 43,405 | 90.41% | 64.51% | 64.36% | 111 |
 | its2 | mo20 | 43,405 | 82.86% | 13.96% | 13.96% | 23 |
 | its2 | mo30 | 43,405 | 82.86% | 13.96% | 13.96% | 23 |
 | its2 | std | 43,405 | 82.86% | 13.96% | 13.96% | 23 |
@@ -235,7 +235,7 @@ The isolate reference (sequences per isolate): arfken_mix_its1: C 1, K 3, M 5, P
 - **P87 sw15** MET: a flag: the median ASVs per sample rise by at most 25% on the two ITS studies: its2 +4%, its -2%
 - **P88** MET: forward reads alone: spurious at most 1 point above std and recall not below it, on the ATCC standard: ITS1 spurious +0.15 points, recall +11.1 points; ITS2 spurious +0.57 points, recall +0.0 points
 - **P89** MET: merging first: spurious at most 1 point above std and recall not below it, on the ATCC standard: ITS1 spurious +0.00 points, recall +16.7 points; ITS2 spurious +0.24 points, recall +33.3 points
-- **P90** MET: merging first raises the yield of the second ITS study by at least 10 points: +55.5 points
+- **P90** MET: merging first raises the yield of the second ITS study by at least 10 points: +50.4 points
 - **P91** MET: AmpliTrim's predicted yields order the maxEE arms as DADA2's merged shares do, rank correlation at least 0.8 on each ITS group: atcc_its1 1.00 (6 arms), atcc_its2 1.00 (6 arms), arfken_its1 1.00 (6 arms), arfken_its2 1.00 (6 arms), arfken_mix_its1 1.00 (6 arms), arfken_mix_its2 1.00 (6 arms), its2 1.00 (6 arms), its 1.00 (6 arms)
 - **P92** MET: AmpliTrim's predicted pass rate is within 1 point of DADA2's at every maxEE arm on every ITS group: 48 comparisons, the largest +0.22 points (its, ee25)
 - **P93** MET: the spurious share at 12 nt is at most 0.5 point above 20 and 30 nt on the ATCC standard: ITS1 12 nt against 20 nt +0.00, against 30 nt +0.00 points; ITS2 12 nt against 20 nt +0.00, against 30 nt +0.00 points

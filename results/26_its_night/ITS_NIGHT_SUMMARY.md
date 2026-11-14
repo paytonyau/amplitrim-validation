@@ -30,7 +30,7 @@ The criteria (P83 to P93) are in TEST_REGISTER.md and were fixed before this ran
 - **P87 sw15** MET: a flag: the median ASVs per sample rise by at most 25% on the two ITS studies: its2 +4%, its -2%
 - **P88** MET: forward reads alone: spurious at most 1 point above std and recall not below it, on the ATCC standard: ITS1 spurious +0.15 points, recall +11.1 points; ITS2 spurious +0.57 points, recall +0.0 points
 - **P89** MET: merging first: spurious at most 1 point above std and recall not below it, on the ATCC standard: ITS1 spurious +0.00 points, recall +16.7 points; ITS2 spurious +0.24 points, recall +33.3 points
-- **P90** MET: merging first raises the yield of the second ITS study by at least 10 points: +55.5 points
+- **P90** MET: merging first raises the yield of the second ITS study by at least 10 points: +50.4 points
 - **P91** MET: AmpliTrim's predicted yields order the maxEE arms as DADA2's merged shares do, rank correlation at least 0.8 on each ITS group: atcc_its1 1.00 (6 arms), atcc_its2 1.00 (6 arms), arfken_its1 1.00 (6 arms), arfken_its2 1.00 (6 arms), arfken_mix_its1 1.00 (6 arms), arfken_mix_its2 1.00 (6 arms), its2 1.00 (6 arms), its 1.00 (6 arms)
 - **P92** MET: AmpliTrim's predicted pass rate is within 1 point of DADA2's at every maxEE arm on every ITS group: 48 comparisons, the largest +0.22 points (its, ee25)
 - **P93** MET: the spurious share at 12 nt is at most 0.5 point above 20 and 30 nt on the ATCC standard: ITS1 12 nt against 20 nt +0.00, against 30 nt +0.00 points; ITS2 12 nt against 20 nt +0.00, against 30 nt +0.00 points
