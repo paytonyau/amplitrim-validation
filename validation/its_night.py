@@ -51,6 +51,11 @@ ITS_ARMS = [  # arm, mode, reads (a folder name under the dataset, or the arm re
 ]
 DIFFS = (10, 5, 2, 0)
 WINDOW, WINDOW_Q = 4, 15
+# --plan rules (the ITS rules night, register section 35): truncQ 3 to 10, the trim at four strengths, and maxEE computed from the reads (the arm eer, added at run time)
+RULES_ARMS = [("std", "paired", "reads", 0, 0, 2, 2, 2, 12)] + [(f"tq{q}", "paired", "reads", 0, 0, 2, 2, q, 12) for q in (3, 4, 5, 6, 8, 10)] \
+    + [(f"sw{q}", "paired", f"reads_sw{q}", 0, 0, 2, 2, 2, 12) for q in (10, 15, 20, 25)]
+SW_STRENGTHS = (10, 15, 20, 25)
+RULE_Q, TRUNC_Q, MIN_LEN = 0.75, 2, 50
 
 
 # ----------------------------------------------------------------------------------------------------------- pure helpers (unit-tested)
@@ -74,20 +79,46 @@ def fastq_records(path: Path):
             yield h.rstrip("\n"), s, p, qq
 
 
-def trim_folder(src: Path, dst: Path) -> int:
-    """sw15: every read of every FASTQ in src cut by sliding_cut, written to dst under the same name (both mates, so the pairs stay in order). Returns the files written."""
+def trim_folder(src: Path, dst: Path, q: float = WINDOW_Q) -> int:
+    """The sliding-window trim (sw15 by default; sw10, sw20, sw25 with q): every read of every FASTQ in src cut by sliding_cut, written to dst under the same name
+    (both mates, so the pairs stay in order). Returns the files written."""
     dst.mkdir(parents=True, exist_ok=True)
     n = 0
     for f in sorted(src.glob("*.fastq*")):
         out = dst / f.name
         part = out.with_name(out.name + ".part")
         with gzip.open(part, "wt", newline="\n") if f.name.endswith(".gz") else open(part, "w", newline="\n") as o:
-            for h, s, p, q in fastq_records(f):
-                k = sliding_cut(q)
-                o.write(f"{h}\n{s[:k]}\n{p}\n{q[:k]}\n")
+            for h, s, p, qq in fastq_records(f):
+                k = sliding_cut(qq, q=q)
+                o.write(f"{h}\n{s[:k]}\n{p}\n{qq[:k]}\n")
         part.replace(out)
         n += 1
     return n
+
+
+def read_ee(qual: str, trunc_q: int = TRUNC_Q, offset: int = 33) -> tuple:
+    """(length kept, expected errors) of a read after DADA2's truncQ cut: the read stops before its first base of quality truncQ or below; EE = sum of 10^(-Q/10)."""
+    s = [ord(c) - offset for c in qual]
+    k = next((i for i, v in enumerate(s) if v <= trunc_q), len(s))
+    return k, sum(10 ** (-v / 10) for v in s[:k])
+
+
+def ee_rule(folder: Path, min_len: int = MIN_LEN) -> dict:
+    """AmpliTrim's maxEE rule (pipeline._rule_max_ee: numpy's 75th percentile of the expected errors per direction, int + 1, at least 2), applied to ITS reads
+    without truncation: the expected errors of each read after the truncQ = 2 cut, over the reads that keep at least min_len bases."""
+    import numpy as np
+    ef, er = [], []
+    for _, r1, r2 in pairs_in(folder):
+        for f, acc in ((r1, ef), (r2, er)):
+            for _, _, _, q in fastq_records(f):
+                k, e = read_ee(q)
+                if k >= min_len:
+                    acc.append(e)
+    if not ef or not er:
+        raise RuntimeError(f"no read keeps {min_len} bases in {folder}")
+    pct = (float(np.percentile(ef, 100 * RULE_Q)), float(np.percentile(er, 100 * RULE_Q)))
+    raw = (int(pct[0]) + 1, int(pct[1]) + 1)
+    return {"percentile": list(pct), "raw": list(raw), "max_ee": [max(2, v) for v in raw], "reads": [len(ef), len(er)]}
 
 
 def pairs_in(folder: Path) -> list:
@@ -191,6 +222,13 @@ class Night:
     def step_sw15(self, d: Path):
         trim_folder(d / "reads", d / "reads_sw15")
 
+    def step_trims(self, d: Path):
+        for q in SW_STRENGTHS:
+            trim_folder(d / "reads", d / f"reads_sw{q}", q)
+
+    def step_eer(self, d: Path):
+        (d / "eer.json").write_text(json.dumps(ee_rule(d / "reads"), indent=1), encoding="utf-8")
+
     def step_mfirst(self, d: Path):
         out = d / "reads_mfirst"
         out.mkdir(parents=True, exist_ok=True)
@@ -245,6 +283,13 @@ def cut_of(d: Path) -> tuple:
     return int(r["truncLenF"]), int(r["truncLenR"])
 
 
+def rules_rows(d: Path) -> list:
+    """The arms of the rules night for one dataset: RULES_ARMS and the arm eer at the maxEE that ee_rule computed (eer.json)."""
+    ef, er = json.loads((d / "eer.json").read_text(encoding="utf-8"))["max_ee"]
+    rows = [[arm, mode, str(d / reads), tf, tr, a, b, tq, mo] for arm, mode, reads, tf, tr, a, b, tq, mo in RULES_ARMS]
+    return rows + [["eer", "paired", str(d / "reads"), 0, 0, ef, er, 2, 12]]
+
+
 def plan(a, sixteen) -> list:
     """(label, source folder, ITS or not, pairs per sample)."""
     its = {k: Path(a.base) / v for k, v in ITS_FOLDERS.items()}
@@ -253,7 +298,12 @@ def plan(a, sixteen) -> list:
         if not sep or k not in its:
             raise SystemExit(f"--dataset wants LABEL=FOLDER with LABEL one of {sorted(its)}")
         its[k] = Path(v)
-    out = [(k, its[k], True, a.pairs) for k in ITS_FOLDERS]
+    for item in getattr(a, "extra", []):
+        k, sep, v = item.partition("=")
+        if not sep or not k or k in its:
+            raise SystemExit(f"--extra wants a new LABEL=FOLDER, not {item!r}")
+        its[k] = Path(v)
+    out = [(k, its[k], True, a.pairs) for k in its]
     if not a.no_16s:
         for ds in sixteen:
             out.append((f"16s_{ds['name']}", Path(ds["reads"]), False, 0 if ds["pairs"] == 0 else a.pairs))
@@ -267,6 +317,8 @@ def main(argv=None, run=subprocess.run, thin=None, rscript=None, sixteen=None, a
     ap.add_argument("--base", type=Path, default=Path(r"C:\data"))
     ap.add_argument("--config", type=Path, help="amplitrim_paths.json, for the 16S controls")
     ap.add_argument("--dataset", action="append", default=[], metavar="LABEL=FOLDER")
+    ap.add_argument("--extra", action="append", default=[], metavar="LABEL=FOLDER", help="one more ITS dataset (for example a third mock community)")
+    ap.add_argument("--plan", choices=["night", "rules"], default="night", help="night: the ITS overnight run (section 33); rules: the ITS rules night (section 35)")
     ap.add_argument("--pairs", type=int, default=5000)
     ap.add_argument("--only", default="", help="labels to run, e.g. atcc_its1,its2 (default: all)")
     ap.add_argument("--no-16s", action="store_true")
@@ -276,6 +328,8 @@ def main(argv=None, run=subprocess.run, thin=None, rscript=None, sixteen=None, a
     ap.add_argument("--final-run", type=Path, help="the final run's command-line reports (results/24_night10_closing_2026-11-06/cli of the archive; found by itself when the archive's "
                                                      "helpers are used): the fallback cut of a 16S control that AmpliTrim cannot analyse")
     a = ap.parse_args(argv)
+    if a.plan == "rules":
+        a.no_16s = True                                                 # no question of the rules night concerns 16S
     if sixteen is None:
         sixteen = []
         if not a.no_16s:
@@ -300,12 +354,12 @@ def main(argv=None, run=subprocess.run, thin=None, rscript=None, sixteen=None, a
         log("Not found: " + ", ".join(missing))
         return 2
     a.out.mkdir(parents=True, exist_ok=True)
-    if installed is None or amplitrim_call is None:
+    if a.plan == "night" and (installed is None or amplitrim_call is None):
         import its_estimates                                            # the archive's: AmpliTrim started from --out, so the archive's early copy cannot shadow it
         installed = installed or its_estimates.installed
         amplitrim_call = amplitrim_call or its_estimates.CALL
-    version = installed(run, a.out)
-    if a.expect_version != "any" and version[0] != a.expect_version:
+    version = installed(run, a.out) if a.plan == "night" else ("not used", "the rules night does not run AmpliTrim")
+    if a.plan == "night" and a.expect_version != "any" and version[0] != a.expect_version:
         log(f"The AmpliTrim in this Python is version {version[0]} ({version[1]}), not {a.expect_version}. Nothing was run.")
         return 2
     if thin is None:
@@ -325,7 +379,10 @@ def main(argv=None, run=subprocess.run, thin=None, rscript=None, sixteen=None, a
     for label, src, its, pairs in todo:
         d = a.out / label
         log(label)
-        if its:
+        if its and a.plan == "rules":
+            steps = [("thin", lambda d=d, s=src, p=pairs: night.step_thin(s, d, p)), ("trims", lambda d=d: night.step_trims(d)), ("eer", lambda d=d: night.step_eer(d)),
+                     ("arms", lambda d=d: night.step_arms(d, rules_rows(d)))]
+        elif its:
             steps = [("thin", lambda d=d, s=src, p=pairs: night.step_thin(s, d, p)), ("sw15", lambda d=d: night.step_sw15(d)),
                      ("mfirst", lambda d=d: night.step_mfirst(d)), ("arms", lambda d=d: night.step_arms(d, arms_rows(d, True))),
                      ("amplitrim", lambda d=d: night.step_amplitrim(d, True, amplitrim_call)), ("estimates", lambda d=d: night.step_estimates(d))]
@@ -339,7 +396,7 @@ def main(argv=None, run=subprocess.run, thin=None, rscript=None, sixteen=None, a
     lines += [f"| {k} | {v.get('state')} | {v.get('seconds', '')} | {v.get('error', '')[:200]} |" for k, v in sorted(night.status.items())]
     (a.out / "NIGHT_STATUS.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     log(f"\n{len(night.status) - len(bad)} steps done, {len(bad)} not. written: {a.out / 'NIGHT_STATUS.md'}")
-    log(f"Next: python validation\\its_night_report.py --out {a.out}" if not bad else "Start the same command again to retry what failed; finished steps are kept.")
+    log((f"Next: python validation\\its_rules_report.py --out {a.out}" if a.plan == "rules" else f"Next: python validation\\its_night_report.py --out {a.out}") if not bad else "Start the same command again to retry what failed; finished steps are kept.")
     return 0 if not bad else 2
 
 

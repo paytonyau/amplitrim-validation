@@ -218,3 +218,62 @@ def test_a_16s_control_that_amplitrim_cannot_analyse_takes_the_final_runs_cut(tm
     rc, _ = go(tmp_path / "b", world2, extra=["--final-run", str(tmp_path / "nowhere")])
     status = json.loads((tmp_path / "b" / "night" / "night_status.json").read_text())
     assert rc == 2 and status["16s_mockA_high/amplitrim"]["state"] == "failed"
+
+
+# ------------------------------------------------------------------ the rules night (--plan rules, register section 35)
+def test_the_trim_strength_cuts_more_the_higher_it_is(tmp_path):
+    q = "I" * 20 + "5" * 8 + "+" * 8 + "I" * 4                                     # 40, then 20, then 10, then 40
+    fq(tmp_path / "in" / "s_R1.fastq.gz", [("A" * 40, q)])
+    fq(tmp_path / "in" / "s_R2.fastq.gz", [("A" * 40, q)])
+    kept = {}
+    for strength in N.SW_STRENGTHS:
+        N.trim_folder(tmp_path / "in", tmp_path / f"sw{strength}", strength)
+        kept[strength] = len(list(N.fastq_records(tmp_path / f"sw{strength}" / "s_R1.fastq.gz"))[0][1])
+    assert kept[10] >= kept[15] >= kept[20] >= kept[25] and kept[10] > kept[25]
+    assert (kept[10], kept[15], kept[20], kept[25]) == (40, 27, 25, 20)                 # 25: the window at base 20 averages 20; 20: at 25, 17.5; 15: at 27, 12.5; 10: none falls below 10
+
+
+def test_the_computed_maxee_is_amplitrims_rule_on_reads_cut_at_their_first_q2():
+    import numpy as np
+    assert N.read_ee("I" * 10 + "#" + "I" * 10) == (10, 10 * 10 ** -4)              # cut before the first Q2 ('#'); EE of the 10 bases kept
+    assert N.read_ee("+" * 3)[0] == 3 and abs(N.read_ee("+" * 3)[1] - 0.3) < 1e-9     # Q10: 0.1 each
+
+
+def test_ee_rule_on_a_folder(tmp_path):
+    import numpy as np
+    quals_f = ["I" * 60, "5" * 60, "+" * 60, "+" * 30 + "I" * 30]                     # EE 0.006, 0.6, 6, 3.003
+    quals_r = ["+" * 60, "+" * 60, "+" * 60, "+" * 40]                               # the last keeps only 40 bases: left out (minLen 50)
+    fq(tmp_path / "r" / "a_R1.fastq.gz", [("A" * len(q), q) for q in quals_f])
+    fq(tmp_path / "r" / "a_R2.fastq.gz", [("A" * len(q), q) for q in quals_r])
+    res = N.ee_rule(tmp_path / "r")
+    ef = [N.read_ee(q)[1] for q in quals_f]
+    expected_f = max(2, int(float(np.percentile(ef, 75))) + 1)
+    assert res["reads"] == [4, 3] and res["max_ee"][0] == expected_f and res["max_ee"][1] == 7     # reverse: 6, 6, 6 -> P75 6.0 -> 7
+
+
+class RulesWorld(World):
+    pass
+
+
+def test_the_rules_night_runs_its_steps_and_writes_the_arms_with_the_computed_maxee(tmp_path):
+    world = RulesWorld()
+    base = tmp_path / "data"
+    for lab in ("a1", "a2"):                                                          # reads of 60 bases: the computed maxEE needs reads of at least 50
+        for smp in ("A", "B"):
+            for m in (1, 2):
+                fq(base / lab / f"{smp}_R{m}.fastq.gz", [("ACGT" * 15, "I" * 50 + "+" * 10)] * 6)
+    logged = []
+    rc = N.main(["--out", str(tmp_path / "night"), "--base", str(base), "--plan", "rules", "--only", "atcc_its1,mock3", "--pairs", "4",
+                 "--dataset", f"atcc_its1={base / 'a1'}", "--extra", f"mock3={base / 'a2'}"],
+                run=world, thin=fake_thin, rscript="Rscript-fake", sixteen=[], log=logged.append)
+    assert rc == 0, "\n".join(logged)
+    d = tmp_path / "night" / "atcc_its1"
+    rows = [l.split("\t") for l in (d / "arms.tsv").read_text().splitlines()[1:]]
+    assert [r[0] for r in rows] == ["std", "tq3", "tq4", "tq5", "tq6", "tq8", "tq10", "sw10", "sw15", "sw20", "sw25", "eer"]
+    eer = json.loads((d / "eer.json").read_text())
+    assert rows[-1][5:7] == [str(eer["max_ee"][0]), str(eer["max_ee"][1])] and rows[3][7] == "5"
+    assert all((d / f"reads_sw{q}").is_dir() for q in N.SW_STRENGTHS)
+    status = json.loads((tmp_path / "night" / "night_status.json").read_text())
+    assert sorted(k.split("/")[1] for k in status if k.startswith("atcc_its1/")) == ["arms", "eer", "thin", "trims"] and "mock3/arms" in status
+    assert not any("-c" in c for c, _ in world.calls)                                # no AmpliTrim in the rules night
+    assert "its_rules_report.py" in logged[-1]

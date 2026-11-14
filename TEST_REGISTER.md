@@ -51,6 +51,7 @@ columns: AmpliTrim against DADA2 (filter and yield), against FIGARO (like for li
 | 32 | 25 | ITS follow-up: outcomes |
 | 33 | 26 | ITS overnight run: what AmpliTrim can recommend for ITS |
 | 34 | 26 | ITS overnight run: outcomes |
+| 35 | 27 | ITS rules night: can AmpliTrim compute truncQ, the trim strength and maxEE for ITS? |
 
 ## 1. Datasets
 
@@ -1531,3 +1532,54 @@ AmpliTrim 0.2.0 (`--its`) is also run on the thinned reads of every ITS group, f
 5. P91 and P92 hold: the report presents the maxEE table for ITS as a reliable guide to the pass rate and to the order of the settings.
 6. P93 holds: 12 nt stays for ITS; whether the paper's Limits still name the missing overlap test is the authors' decision (FUTURE.md).
 7. Not claimed in any case: accuracy on full-length ITS, which has no truth here; taxonomy; abundances; anything about the four ATCC members left unjudged.
+
+## 35. ITS rules night: can AmpliTrim compute truncQ, the trim strength and maxEE for ITS? (written 14 November 2026, before the run)
+
+**Why.** Run 26 (sections 33 and 34) found one safe and useful answer to poor ITS read ends, a sliding-window trim (window 4, mean quality 15), and found that `truncQ = 10` and `20` raise the yield but lose true strains. It left three questions that decide whether AmpliTrim 0.3 can compute ITS settings from the reads instead of giving fixed defaults:
+
+| | Question |
+|---|---|
+| A | Does a milder `truncQ` (3 to 8) remove poor read ends and improve merging **without** losing strains? |
+| B | How strong should the sliding-window trim be: is mean quality 15 the best of 10, 15, 20 and 25? |
+| C | Can a maxEE computed from the ITS reads themselves (the 16S rule applied to untruncated reads) replace the default 2,2? |
+
+**Data, truth and pipeline: as section 33, unchanged.** The eight ITS groups (the ATCC standard, the piglet isolates and mixes of Arfken et al. 2023 for ITS1 and ITS2, and the two ITS studies), thinned with the same function to 5,000 read pairs per sample, so that the reads are the same as in run 26. DADA2 as there, with chimera removal in every arm. The ATCC standard against the NCBI references (`validation/references_its`) is the primary truth of both markers; the piglet mixes against the isolates' own sequences are the second view. The same definitions of true, unjudged and spurious sequences, recall, reads in exact sequences and yield. No 16S control (no question here concerns 16S). The mock libraries carry 32 distinct quality values, the first ITS study 27 and the second ITS study 3, so on the second study most `truncQ` values cut where 2 does; that is described, not judged.
+
+**Arms.**
+
+| Arm | Change from `std` (no truncation, `truncQ = 2`, maxEE 2,2, `minLen = 50`) | Question |
+|---|---|---|
+| `std` | none | the baseline, and the consistency check |
+| `tq3`, `tq4`, `tq5`, `tq6`, `tq8` | `truncQ = 3` / 4 / 5 / 6 / 8 | A |
+| `tq10` | `truncQ = 10`, repeated from run 26 as the known-unsafe reference | A |
+| `sw10`, `sw15`, `sw20`, `sw25` | the sliding-window trim of section 33 (window 4, cut before the first window whose mean quality is below the value) at mean quality 10 / 15 / 20 / 25, then the `std` filter | B |
+| `eer` | maxEE computed per read direction from the dataset's own reads, by AmpliTrim's 16S rule (`pipeline._rule_max_ee`): each read cut at its first base of quality 2 or below (as DADA2 does with `truncQ = 2`), its expected errors EE = Σ 10^(−Q/10) over the bases kept, P75 the 75th percentile (numpy's default) over the reads that keep at least 50 bases, and maxEE = max(2, int(P75) + 1); no truncation; written to `eer.json` | C |
+
+**The consistency check.** The `std` arm is run again on the same reads; for every sample of every group its input, filtered, denoised, merged and after-chimera-removal counts must equal those of run 26 (`results/26_its_night`). If they do not, the night's results are reported but no criterion is decided until the difference is explained. The analysis is `validation/its_rules_report.py`.
+
+**Criteria** (written before the run; "safe" and "useful" as in section 33).
+- **P94 (A, safe), per arm `tq3` to `tq8`.** Against `std`, for each marker, on the ATCC standard **and** on the piglet mixes (both truths): the share of reads in spurious sequences rises by at most 1 point, and recall falls by at most 2 points.
+- **P95 (A, useful), per arm.** On the ATCC standard's ITS2 the yield rises by at least 5 points against `std`.
+- **P96 (A, your mechanism), per arm.** On the ATCC standard's ITS2 the share of denoised pairs that merge rises by at least 2 points against `std`.
+- **P97 (A, a flag), per arm.** On the first ITS study the median number of ASVs per sample rises by at most 25%.
+- **P98 (B, safe), per arm `sw10`, `sw20`, `sw25`.** As P94.
+- **P99 (B, useful), per arm.** As P95.
+- **P100 (B, a flag), per arm.** As P97, on both ITS studies.
+- **P101 (B, repetition).** `sw15` reproduces run 26's `sw15`: the same counts on all eight groups.
+- **P102 (C, safe).** `eer` as P94.
+- **P103 (C, useful).** On the ATCC standard's ITS2 the yield of `eer` rises by at least 5 points against `std`.
+- **P104 (C, a flag).** As P97, on both ITS studies.
+
+*Safety on both truths* is a choice made for this section: section 33 decided on the ATCC standard alone. *A third mock community* was considered and none was found in time; the code accepts one (`its_night.py --extra`, `its_rules_report.py --truth`), and if one is added before this section is committed, it is named here and must be safe as well.
+
+*Described, no criterion:* the maxEE that `eer` computes for each group; the share of denoised pairs that merge, for every arm and group (the mechanism of A in full); every arm on the piglet mixes (the second view) and on the two real ITS studies; the cut lengths of every trim.
+
+**What follows (decided now).**
+- A: if one or more of `tq3` to `tq8` meet P94 and P95 on both markers, the highest such value may become an option in the report of 0.3 for unbinned data, beside the sliding-window trim; which of the two is advised follows the larger ITS2 yield among the arms that are safe and useful. If none does, `truncQ` stays 2, and the report says that values 3 to 10 were tested. P96 says whether removing poor ends improves merging, whatever P94 says.
+- B: among the strengths that meet P98 and P99 (with `sw15` from section 34), the one with the largest ITS2 yield becomes the advised strength. If more than one is safe and useful, a per-dataset choice of strength is possible, and needs its own rule, registered and tested.
+- C: if P102 and P103 hold, AmpliTrim 0.3 may compute maxEE for ITS by this rule; the report then says it was tested on short ITS1 and ITS2 mock communities. If not, ITS stays at 2,2 with the maxEE table as the guide.
+- Not claimed in any case: accuracy on full-length ITS; taxonomy; abundances; the ATCC members left unjudged in section 33.
+
+**What has already been seen (disclosed).** All of run 26's results, including `tq10`, `tq20` and `sw15` on these datasets, and the number of distinct quality values of each group. Not seen: any arm of this section other than `tq10` and `sw15`.
+
+**Procedure.** As section 33: the code is written with tests, a smoke run at 300 read pairs per sample checks the paths (disclosed in section 36), this section and the code are committed, then the night, then the outcomes.
