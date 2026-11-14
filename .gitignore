@@ -22,6 +22,7 @@ report/
 # the archive does keep these although the rules above would drop them (a fresh clone must pass its own tests and hold what results/MANIFEST.tsv lists):
 !results/**/report/
 !validation/msa1003_refined_variants.fasta
+!validation/references_its/*.fasta
 
 # development material stays on the C: data drive (C:\amplitrim_v2, C:\data): the local dataset paths and the run outputs are not committed
 # (the text outputs of the runs reach the archive only through validation/collect_results.py, into results/)

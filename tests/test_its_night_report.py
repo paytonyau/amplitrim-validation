@@ -192,3 +192,14 @@ def test_a_safe_arm_that_is_not_useful_is_not_the_advice(tmp_path):
     assert R.main(["--out", str(out), "--references", str(refs(tmp_path / "refs"))]) == 2
     assert verdict(out, "P85 ee23").startswith("- **P85 ee23** MET") and verdict(out, "P86 ee23").startswith("- **P86 ee23** NOT MET")
     assert "keep maxEE 2,2" in (out / "ITS_NIGHT_SUMMARY.md").read_text()
+
+
+def test_merging_first_is_measured_against_the_input_pairs_not_the_merged_reads(tmp_path):
+    """mfirst's samples.tsv counts the reads that vsearch merged as its input; its yield is a share of the pairs, like every arm's."""
+    out = build(tmp_path)
+    p = out / "its2" / "dada2" / "mfirst" / "samples.tsv"
+    p.write_text(p.read_text().replace("\t1000\t800\t400\t400\t400\t12", "\t500\t480\t400\t400\t400\t12"))          # 500 merged reads of 1000 pairs
+    res = R.analyse(out, {m: R.read_references(refs(tmp_path / "r") / f"references_{m}.fasta") for m in ("ITS1", "ITS2")})
+    f = res["flow"][("its2", "mfirst")]
+    assert f["input"] == 2000 and math.isclose(f["yield"], 0.40) and math.isclose(f["pass"], 0.48)
+    assert "+28.0 points" in dict((c, t) for c, _, t in R.verdicts(res))["P90"]                  # 40% against the default's 12%

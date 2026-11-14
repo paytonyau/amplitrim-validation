@@ -170,9 +170,11 @@ def accuracy(seqs: dict, truth: Truth, mix: bool, prefix: bool = False) -> dict:
     return {"spurious": mean("spurious"), "recall": mean("recall"), "exact": mean("exact"), "found": mean("found"), "unjudged": mean("unjudged"), "samples": len(rows)}
 
 
-def flows(samples: list) -> dict:
+def flows(samples: list, denominator: float = None) -> dict:
+    """Shares of the input pairs. For merging first (mfirst) the reads that DADA2 receives are the pairs vsearch merged, so its shares are taken of the input pairs
+    of the default arm (`denominator`), like every other arm's."""
     s = lambda k: sum(r[k] for r in samples)
-    inp = s("input")
+    inp = denominator if denominator is not None else s("input")
     f = lambda k: s(k) / inp if inp else float("nan")
     return {"input": inp, "pass": f("filtered"), "merged": f("merged"), "yield": f("nonchim"), "asv_median": statistics.median([r["asvs"] for r in samples]) if samples else float("nan")}
 
@@ -216,6 +218,8 @@ def analyse(out: Path, refs: dict) -> dict:
             if (arm_dir / "DONE").is_file():
                 R["flow"][(lab, arm_dir.name)] = flows(read_samples(arm_dir / "samples.tsv"))
                 seqs_cache[(lab, arm_dir.name)] = arm_dir / "seqs.tsv"
+        if (lab, "mfirst") in R["flow"] and (lab, "std") in R["flow"]:
+            R["flow"][(lab, "mfirst")] = flows(read_samples(out / lab / "dada2" / "mfirst" / "samples.tsv"), denominator=R["flow"][(lab, "std")]["input"])
         e = out / lab / "estimates.tsv"
         if e.is_file() and (lab, "std") in R["flow"]:
             rows = read_samples(e)
