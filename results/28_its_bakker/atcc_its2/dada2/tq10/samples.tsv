@@ -1,0 +1,4 @@
+sample	input	filtered	denoised	merged	nonchim	asvs
+ATCC-ITS2a	4985	4605	4586	4287	4226	8
+ATCC-ITS2b	4962	4582	4548	3576	3512	6
+ATCC-ITS2c	4871	4469	4446	3638	3557	7
