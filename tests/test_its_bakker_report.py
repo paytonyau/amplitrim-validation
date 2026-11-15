@@ -163,3 +163,18 @@ def test_bakkers_samples_are_grouped_by_condition(tmp_path):
     rep = (out / "ITS_BAKKER_REPORT.md").read_text()
     assert "| bakker_pcr_its1 | tq10 | high cycles | 30.00% | 66.67% | 2.0 | 1 |" in rep and "| bakker_pol_its2 | sw15 | PreAmp | 0.00% | 100.00% | 3.0 | 1 |" in rep
     assert "| bakker_pcr_its1 | sw15 | 2,000 | 90.00% | 80.00% | 79.00% | 98.77% | 11 |" in rep                # two samples; merged 800 of 810 denoised
+
+
+def test_the_overhang_gate_passes_clean_reads_and_stops_every_verdict_when_bakkers_reads_carry_overhangs(tmp_path):
+    import bakker_prep as BP
+    import bakker_primers as bpr
+    out, rc_, s = run(tmp_path / "a")
+    assert "**The overhang check:**" not in s                                           # off unless asked: run 28's analysis is unchanged
+    out, r, br, p26, p27 = build(tmp_path / "b")
+    args = ["--out", str(out), "--references", str(r), "--bakker-references", str(br), "--previous", str(p26), "--previous-rules", str(p27), "--overhang-max", "0.01"]
+    assert B.main(args) == 0 and "(at most 1%: passed)" in (out / "ITS_BAKKER_SUMMARY.md").read_text()
+    tail = "".join(bpr.IUPAC[c][0] for c in BP.rc(bpr.PRIMERS["B58S3"]))[:8]
+    arm(out, "bakker_pcr_its1", "std", {smp: {M1 + tail: 50, M2: 30, M3: 20} for smp in SAMPLES["bakker_pcr_its1"]})
+    assert B.main(args) == 2
+    summ = (out / "ITS_BAKKER_SUMMARY.md").read_text()
+    assert "bakker_pcr_its1 50.00%" in summ and "FAILED (more than 1%" in summ and "- **P105** not decided" in summ

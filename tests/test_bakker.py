@@ -152,9 +152,9 @@ def test_a_pair_is_assigned_trimmed_and_swapped_when_its_forward_primer_is_on_r2
     body1, body2 = rnd(60), rnd(60)
     r1 = ("@a", "AC" + F1 + body1, "+", "I" * (2 + len(F1) + 60))
     r2 = ("@a", R1_ + body2, "+", "J" * (len(R1_) + 60))
-    x, y, swapped = PREP.assign(r1, r2, F1, R1_, 2, 10)
+    x, y, swapped, _ = PREP.assign(r1, r2, F1, R1_, 2, 10)
     assert (x[1], y[1], swapped) == (body1, body2, False) and len(x[3]) == 60
-    x, y, swapped = PREP.assign(r2, r1, F1, R1_, 2, 10)                                  # the mates the other way round
+    x, y, swapped, _ = PREP.assign(r2, r1, F1, R1_, 2, 10)                               # the mates the other way round
     assert (x[1], y[1], swapped) == (body1, body2, True)
     assert PREP.assign(("@b", rnd(80), "+", "I" * 80), r2, F1, R1_, 2, 10) is None
 
@@ -168,7 +168,7 @@ def test_prepare_splits_a_mixed_run_by_primer_pair(tmp_path):
     fq(raw / "MockE_GoTaq_1_R2.fastq.gz", [b for _, b in its1 + its2 + junk])
     rows1 = PREP.prepare(raw, tmp_path / "its1", F1, R1_)
     rows2 = PREP.prepare(raw, tmp_path / "its2", P.PRIMERS["ITS3_KYO2"], P.PRIMERS["ITS4"])
-    assert rows1 == [("MockE_GoTaq_1", 8, 4, 0)] and rows2 == [("MockE_GoTaq_1", 8, 3, 0)]
+    assert [r[:4] for r in rows1] == [("MockE_GoTaq_1", 8, 4, 0)] and [r[:4] for r in rows2] == [("MockE_GoTaq_1", 8, 3, 0)]
     assert len(list(PREP.fastq(tmp_path / "its2" / "MockE_GoTaq_1_R2.fastq.gz"))) == 3
 
 
@@ -176,3 +176,28 @@ def test_ambiguity_codes_are_expanded_into_the_variants_they_allow():
     assert sorted(PREP.expand("ARY")) == ["AAC", "AAT", "AGC", "AGT"] and PREP.expand("ACGT") == ["ACGT"]
     with pytest.raises(ValueError, match="more than 64"):
         PREP.expand("N" * 4)
+
+
+def resolve(p):
+    return "".join(P.IUPAC[c][0] for c in p)
+
+
+def test_a_read_that_runs_through_a_short_amplicon_is_cut_at_the_far_primer():
+    amp = rnd(150)
+    fwd, rev = P.PRIMERS["BITS"], P.PRIMERS["B58S3"]
+    r1 = resolve(fwd) + amp + resolve(PREP.rc(rev)) + "CTGTCTCTTATACACATCT"            # forward primer, amplicon, far primer, Nextera adapter
+    r2 = PREP.rc(resolve(fwd) + amp + resolve(PREP.rc(rev))) + "CTGTCTCTTATACACATCT"
+    x, y, swapped, through = PREP.assign(("@a", r1, "+", "I" * len(r1)), ("@a", r2, "+", "I" * len(r2)), fwd, rev, 2, 10)
+    assert (x[1], y[1], swapped, through) == (amp, PREP.rc(amp), False, True) and len(x[3]) == 150
+    far = resolve(PREP.rc(rev))
+    assert PREP.trim3(amp + far[:6], PREP.rc(rev)) == 150                                  # only the far primer's first bases at the very end
+    assert PREP.trim3(amp, PREP.rc(rev)) == 150 or PREP.trim3(amp, PREP.rc(rev)) >= 147     # no overhang (a chance 3-base match may cut 3)
+
+
+def test_the_overhang_check_classifies_exact_overhanging_and_other_sequences():
+    BO = load("bakker_overhang")
+    ref = rnd(200)
+    fwd, rev = P.PRIMERS["ITS1F"], P.PRIMERS["ITS2"]
+    seqs = {ref: 50, resolve(fwd)[-7:] + ref + resolve(PREP.rc(rev))[:6]: 30, ref + resolve(PREP.rc(rev)): 10, rnd(200): 10}
+    got = BO.classify(seqs, [ref], fwd, rev)
+    assert (round(got["exact"], 2), round(got["overhang"], 2), round(got["other"], 2), got["reads"]) == (0.5, 0.4, 0.1, 100)

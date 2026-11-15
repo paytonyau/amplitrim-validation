@@ -55,6 +55,7 @@ columns: AmpliTrim against DADA2 (filter and yield), against FIGARO (like for li
 | 36 | 27 | ITS rules night: outcomes |
 | 37 | 28 | The Bakker night: do the ITS rules hold on a third mock community? |
 | 38 | 28 | The Bakker night: outcomes |
+| 39 | 29 | The Bakker re-run: Bakker's reads with the far primer cut |
 
 ## 1. Datasets
 
@@ -1678,3 +1679,19 @@ The primers are those of the paper's methods (sections 2.3 and 2.4), and the pri
 **Described.** The maxEE computed on the trimmed reads is 2,2 on every dataset (the 75th percentiles of the expected errors fall to 0.35 to 1.02 after the trim), so `sweer` is `sw15` by construction. On Bakker's reads the maxEE computed without the trim is also 2,2 (75th percentiles 0.16 to 1.27), so on Bakker `eer` is `std` and Bakker's datasets cannot test the computed maxEE either way; this does not depend on the defect.
 
 **What follows.** The preparation now cuts the far primer where a read runs into it (`bakker_prep.trim3`, as cutadapt's `-a`/`-A`); the re-run of all eleven datasets, with the overhang check as a gate, is registered as section 39 before it runs. Not claimed from this run: anything about the trim, the computed maxEE or their combination on Bakker's data.
+
+## 39. The Bakker re-run: Bakker's reads with the far primer cut (written 15 November 2026, before the run)
+
+**Why.** Section 38 found that the preparation of Bakker's reads removed the primers at the start of each read only, so that the reads of short amplicons ran into the far primer, DADA2 kept those overhangs, and about 72% of the reads on Bakker's two ITS1 datasets were judged spurious although they were true members' sequences. Every judgement of Bakker's datasets in run 28 was set aside. This section decides them again.
+
+**What changes: the preparation of Bakker's reads only.** `bakker_prep.py` now also cuts the far primer: after the primer at the start of a read is removed, the read is cut where the opposite primer appears reverse-complemented, in full (up to 10% mismatches) or, at the very end of the read, its first bases only (at least 3 bases, up to 10% mismatches), as cutadapt's `-a`/`-A` do in DADA2's ITS workflow (`bakker_prep.trim3`). The primers, the assignment of pairs to datasets and the references (`validation/references_bakker`) are those of section 37. The preparation's report is kept as `references_bakker/PREP_REPORT_rerun.md`.
+
+**What does not change.** The eleven datasets, the thinning to 5,000 read pairs per sample, the six arms (`std`, `sw10`, `sw15`, `eer`, `sweer`, `tq10`), DADA2, the truths and the criteria **P105 to P114 of section 37, with their thresholds and their consequences**, decided by `its_bakker_report.py` as in section 37. The eight earlier datasets' reads are the same as in runs 26 to 28.
+
+**Two gates; if either fails, no criterion is decided until the failure is explained.**
+- *Consistency:* `std` reproduces run 26 on the eight earlier datasets, sample by sample, as in section 37; P113 as in section 37.
+- *Overhangs:* on each of Bakker's three datasets at most 1% of the reads of `std` are in sequences carrying primer overhangs (`bakker_overhang.py`, as in section 38; `its_bakker_report.py --overhang-max 0.01`).
+
+**Known before the run (disclosed).** Everything in sections 33 to 38, including the Bakker verdicts of run 28 under the defective preparation and the share of the reads that carried overhangs. On Bakker's reads the computed maxEE is 2,2 before the trim and after it, so on Bakker `eer` equals `std` and `sweer` equals `sw15`; P108 and P109 can only be met on Bakker's datasets, and P110 follows P105. Bakker's datasets therefore add evidence on the trim (P105, P107) and on `tq10` (P114), not on the computed maxEE or on the combination. P106 rests on the ATCC standard and the piglet mixes only (section 38). The preparation was changed after run 28's results were read; this section is written before any arm is run on the newly prepared reads.
+
+**Procedure.** The reads are prepared again; a smoke run at 300 read pairs per sample checks the paths and the overhang gate (disclosed in section 40); this section and the changed code are committed; the night runs into `C:\data\runs\bakker_rerun`; the outcomes follow in section 40.

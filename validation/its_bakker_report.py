@@ -156,6 +156,8 @@ def main(argv=None) -> int:
     ap.add_argument("--bakker-references", type=Path, required=True)
     ap.add_argument("--previous", type=Path, required=True, help="run 26 (std and sw15)")
     ap.add_argument("--previous-rules", type=Path, required=True, help="run 27 (eer)")
+    ap.add_argument("--overhang-max", type=float, default=None, help="the re-run's gate (section 39): no criterion is decided if more than this share of the reads of "
+                    "std on a Bakker dataset carries primer overhangs (bakker_overhang.py)")
     a = ap.parse_args(argv)
     refs = {m: N.read_references(a.references / f"references_{m}.fasta") for m in ("ITS1", "ITS2") if (a.references / f"references_{m}.fasta").is_file()}
     brefs = {lab: N.read_references(a.bakker_references / f"references_{lab}.fasta") for lab in BAKKER if (a.bakker_references / f"references_{lab}.fasta").is_file()}
@@ -167,11 +169,21 @@ def main(argv=None) -> int:
     n_sw, d_sw = RR.consistency(a.out, a.previous, "sw15")
     n_ee, d_ee = RR.consistency(a.out, a.previous_rules, "eer")
     gate_ok = n_std > 0 and not d_std
+    over_line = ""
+    if a.overhang_max is not None:
+        import bakker_overhang as BO
+        oh = BO.run_check(a.out, a.bakker_references)
+        bad = {k: v["overhang"] for k, v in oh.items() if v["overhang"] > a.overhang_max}
+        over_line = (f"**The overhang check:** reads of std carrying primer overhangs: " + ", ".join(f"{k} {v['overhang']:.2%}" for k, v in oh.items())
+                     + (f" (at most {a.overhang_max:.0%}: passed)." if not bad and len(oh) == len(BAKKER) else f": FAILED (more than {a.overhang_max:.0%}, or a dataset missing), so no criterion is decided."))
+        gate_ok = gate_ok and not bad and len(oh) == len(BAKKER)
     reproduce = ((not d_sw and not d_ee) if (n_sw and n_ee) else None,
                  f"sw15 reproduces run 26 on {n_sw} datasets and eer reproduces run 27 on {n_ee}" + ("" if not (d_sw or d_ee) else ": " + "; ".join(d_sw + d_ee)))
     V = verdicts(R, gate_ok, reproduce)
     S = ["# The Bakker night: summary", "", "The criteria (P105 to P114) are in TEST_REGISTER.md and were fixed before this ran.", "",
-         f"**The consistency check:** std reproduces run 26 on {n_std} datasets" + (" exactly." if gate_ok else ": FAILED, so no criterion is decided: " + "; ".join(d_std or ["nothing to compare"])), ""]
+         f"**The consistency check:** std reproduces run 26 on {n_std} datasets" + (" exactly." if (n_std > 0 and not d_std) else ": FAILED, so no criterion is decided: " + "; ".join(d_std or ["nothing to compare"])), ""]
+    if over_line:
+        S += [over_line, ""]
     S += [N.line(c, ok, t) for c, ok, t in V]
     S += ["", "**What follows (section 37):** " + " ".join(follows(R)), "", "Next: send this file."]
     F, A = R["flow"], R["acc"]

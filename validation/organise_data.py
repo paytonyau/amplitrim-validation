@@ -63,6 +63,7 @@ RUNS = [
     (26, "ITS overnight run", "33-34", "its_night.py, its_night.R, its_night_report.py, ncbi_references.py", [r"^its_night"]),
     (27, "ITS rules night", "35-36", "its_rules_report.py", [r"^its_rules"]),
     (28, "Bakker night", "37-38", "its_bakker_report.py, bakker_prep.py", [r"^its_bakker"]),
+    (29, "Bakker re-run", "39", "bakker_overhang.py, bakker_prep.py", [r"^bakker_rerun"]),
 ]
 # number, id of the results site, every pattern must match the folder name (lower case): the accession, and the region or the name where one accession holds two datasets
 DATASETS = [

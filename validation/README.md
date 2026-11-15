@@ -68,6 +68,7 @@ Every file of this folder, by what it is for. The scripts import one another by 
 | `bakker_download.py` | Bakker (2018), PRJNA377530: the mock runs from ENA by the SRA run table (`tests/data/SraRunInfo_PRJNA377530.csv`) (section 37) |
 | `bakker_primers.py` | The primer census of Bakker's reads: which primers start the reads, after which spacer (section 37; the census is in `references_bakker/`) |
 | `bakker_prep.py` | Bakker's reads assigned to ITS1 or ITS2 by their primers and trimmed, and the reference amplicons cut from Appendix S2 (section 37; the result is in `references_bakker/`) |
+| `bakker_overhang.py` | Bakker's ASVs as exact references, references with primer overhangs, or other: the check of section 38 and the gate of section 39 |
 | `msa1003_refined_variants.fasta` | The reference refined on Night 8 (69 sequences: the 60 genome variants, with the two *H. pylori* variants replaced by the sequence of the sample, and ten variants that passed the refinement rule of `FUTURE.md`; the added variants carry `0_copies`); to be used only on data that were not used to derive it |
 | `msa1003_refined_provenance.tsv` | For each of the 11 sequences that replace or extend the genome variants: its strain, how it was treated, the organisms of its 100% BLAST matches and its reads in the two libraries of Night 8 |
 | `msa1003_night8_asv_set.txt` | The names of the 49 sequences that were final ASVs in Night 8 (38 genome variants, the 10 added ones and the *H. pylori* sequence): the replication set of Night 9 |
@@ -118,6 +119,7 @@ The numbers are those of `python validation/organise_data.py --table`, and the s
 | 26 | ITS overnight run | `its_night.py`, `its_night.R`, `its_night_report.py`, `ncbi_references.py` | 33-34 |
 | 27 | ITS rules night | `its_rules_report.py` | 35-36 |
 | 28 | Bakker night | `its_bakker_report.py`, `bakker_prep.py` | 37-38 |
+| 29 | Bakker re-run | `bakker_overhang.py`, `bakker_prep.py` | 39 |
 | | The long unattended battery that runs many of the tests above in one command | `overnight.py`, `run_overnight.bat` (the batch file starts it on Windows) | |
 
 `night1_v2.py` ran night 1 and prepared its datasets (register section 11). It was missing from this archive until 7 November 2026; the only copy found, last modified on 9 October 2026, was added unchanged. Night 1 itself ran on 9 October 2026. The script has not been re-run here and has no test.

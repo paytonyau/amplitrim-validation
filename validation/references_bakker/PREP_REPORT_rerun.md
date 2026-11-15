@@ -1,0 +1,89 @@
+# Bakker (2018): the reads assigned by primers
+
+The far primer is cut where a read runs into it (short amplicons).
+
+| Dataset | Primers | Sample | Read pairs | Kept | Of them swapped | Of them cut at the far primer |
+|---|---|---|---|---|---|---|
+| bakker_pcr_its1 | BITS / B58S3 | FMockA1 | 38,951 | 38,107 (98%) | 0 | 24,344 (64%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockA2 | 41,924 | 41,107 (98%) | 0 | 23,695 (58%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockA3 | 88,537 | 87,021 (98%) | 1 | 50,849 (58%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockA_HC1 | 33,555 | 33,006 (98%) | 0 | 20,189 (61%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockA_HC2 | 47,813 | 47,000 (98%) | 0 | 29,146 (62%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockA_HC3 | 18,129 | 17,813 (98%) | 0 | 11,173 (63%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockA_LE1 | 24,324 | 23,903 (98%) | 0 | 14,577 (61%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockA_LE2 | 40,631 | 39,903 (98%) | 0 | 24,070 (60%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockA_LE3 | 34,112 | 33,487 (98%) | 0 | 19,831 (59%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockB1 | 23,859 | 23,361 (98%) | 0 | 18,810 (81%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockB2 | 60,624 | 59,486 (98%) | 0 | 50,185 (84%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockB3 | 60,906 | 59,658 (98%) | 0 | 47,204 (79%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockB_HC1 | 22,292 | 21,895 (98%) | 1 | 19,547 (89%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockB_HC2 | 20,226 | 19,916 (98%) | 0 | 17,724 (89%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockB_HC3 | 24,729 | 24,313 (98%) | 2 | 21,687 (89%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockB_LE1 | 50,370 | 49,359 (98%) | 0 | 38,720 (78%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockB_LE2 | 43,020 | 42,271 (98%) | 0 | 29,958 (71%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockB_LE3 | 44,181 | 43,404 (98%) | 0 | 33,637 (77%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockE1 | 29,490 | 28,876 (98%) | 0 | 21,876 (76%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockE2 | 42,604 | 41,810 (98%) | 0 | 31,199 (75%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockE3 | 17,399 | 17,097 (98%) | 0 | 13,088 (77%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockE_HC1 | 25,946 | 25,438 (98%) | 0 | 21,609 (85%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockE_HC3 | 31,965 | 31,380 (98%) | 0 | 24,309 (77%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockE_HC | 34,891 | 34,273 (98%) | 0 | 26,897 (78%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockE_LE1 | 44,545 | 43,741 (98%) | 0 | 36,465 (83%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockE_LE2 | 35,834 | 35,118 (98%) | 0 | 29,575 (84%) |
+| bakker_pcr_its1 | BITS / B58S3 | FMockE_LE3 | 31,448 | 30,835 (98%) | 0 | 25,753 (84%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockA_GoTaq_1 | 75,180 | 60,070 (80%) | 0 | 15,249 (25%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockA_GoTaq_2 | 53,065 | 40,077 (76%) | 0 | 10,326 (26%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockA_GoTaq_3 | 71,611 | 57,538 (80%) | 0 | 14,994 (26%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockA_Phusion_1 | 24,348 | 18,514 (76%) | 0 | 4,857 (26%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockA_Phusion_2 | 44,884 | 28,326 (63%) | 0 | 7,332 (26%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockA_Phusion_3 | 31,605 | 22,446 (71%) | 1 | 5,825 (26%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockA_PreAmp_1 | 43,933 | 19,865 (45%) | 0 | 5,518 (28%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockA_PreAmp_2 | 63,804 | 45,252 (71%) | 0 | 13,345 (29%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockA_PreAmp_3 | 55,104 | 40,118 (73%) | 0 | 10,844 (27%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockB_GoTaq_1 | 63,398 | 46,431 (73%) | 0 | 27,142 (58%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockB_GoTaq_2 | 71,197 | 61,571 (86%) | 0 | 35,176 (57%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockB_GoTaq_3 | 50,873 | 39,171 (77%) | 0 | 22,027 (56%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockB_Phusion_1 | 30,784 | 22,866 (74%) | 0 | 13,840 (61%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockB_Phusion_2 | 33,865 | 23,603 (70%) | 0 | 14,290 (61%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockB_Phusion_3 | 18,041 | 12,225 (68%) | 0 | 7,657 (63%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockB_PreAmp_1 | 44,854 | 27,582 (61%) | 0 | 16,820 (61%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockB_PreAmp_2 | 41,677 | 28,339 (68%) | 0 | 17,234 (61%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockB_PreAmp_3 | 54,107 | 35,461 (66%) | 0 | 22,105 (62%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockE_GoTaq_1 | 60,582 | 46,407 (77%) | 0 | 16,975 (37%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockE_GoTaq_2 | 66,638 | 55,589 (83%) | 0 | 19,497 (35%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockE_GoTaq_3 | 62,582 | 39,686 (63%) | 0 | 13,390 (34%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockE_Phusion_1 | 40,910 | 24,289 (59%) | 0 | 10,927 (45%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockE_Phusion_2 | 44,533 | 32,808 (74%) | 0 | 14,163 (43%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockE_Phusion_3 | 24,582 | 16,648 (68%) | 1 | 7,589 (46%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockE_PreAmp_1 | 70,999 | 48,209 (68%) | 1 | 16,150 (33%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockE_PreAmp_2 | 79,361 | 56,196 (71%) | 0 | 18,879 (34%) |
+| bakker_pol_its1 | ITS1F / ITS2 | MockE_PreAmp_3 | 72,767 | 46,758 (64%) | 0 | 14,975 (32%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockA_GoTaq_1 | 75,180 | 12,339 (16%) | 0 | 5,032 (41%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockA_GoTaq_2 | 53,065 | 10,960 (21%) | 0 | 4,313 (39%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockA_GoTaq_3 | 71,611 | 11,389 (16%) | 0 | 4,684 (41%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockA_Phusion_1 | 24,348 | 3,352 (14%) | 0 | 1,169 (35%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockA_Phusion_2 | 44,884 | 13,672 (30%) | 0 | 4,548 (33%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockA_Phusion_3 | 31,605 | 6,414 (20%) | 0 | 2,219 (35%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockA_PreAmp_1 | 43,933 | 22,181 (50%) | 0 | 5,425 (24%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockA_PreAmp_2 | 63,804 | 15,850 (25%) | 0 | 3,707 (23%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockA_PreAmp_3 | 55,104 | 12,682 (23%) | 0 | 3,049 (24%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockB_GoTaq_1 | 63,398 | 14,505 (23%) | 0 | 2,212 (15%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockB_GoTaq_2 | 71,197 | 7,180 (10%) | 0 | 1,129 (16%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockB_GoTaq_3 | 50,873 | 9,860 (19%) | 0 | 1,528 (15%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockB_Phusion_1 | 30,784 | 5,912 (19%) | 0 | 761 (13%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockB_Phusion_2 | 33,865 | 8,039 (24%) | 0 | 1,106 (14%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockB_Phusion_3 | 18,041 | 3,575 (20%) | 0 | 411 (11%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockB_PreAmp_1 | 44,854 | 15,398 (34%) | 0 | 2,187 (14%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockB_PreAmp_2 | 41,677 | 11,666 (28%) | 0 | 1,667 (14%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockB_PreAmp_3 | 54,107 | 16,427 (30%) | 0 | 2,331 (14%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockE_GoTaq_1 | 60,582 | 11,915 (20%) | 0 | 456 (4%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockE_GoTaq_2 | 66,638 | 8,540 (13%) | 0 | 298 (3%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockE_GoTaq_3 | 62,582 | 20,525 (33%) | 0 | 872 (4%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockE_Phusion_1 | 40,910 | 14,703 (36%) | 0 | 455 (3%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockE_Phusion_2 | 44,533 | 10,026 (23%) | 0 | 354 (4%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockE_Phusion_3 | 24,582 | 4,935 (20%) | 0 | 165 (3%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockE_PreAmp_1 | 70,999 | 19,945 (28%) | 0 | 1,025 (5%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockE_PreAmp_2 | 79,361 | 19,972 (25%) | 0 | 1,042 (5%) |
+| bakker_pol_its2 | ITS3_KYO2 / ITS4_KYO3 | MockE_PreAmp_3 | 72,767 | 22,927 (32%) | 0 | 1,220 (5%) |
+
+Next: send this file and REFERENCES_REPORT.md.
