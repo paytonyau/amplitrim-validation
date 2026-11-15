@@ -36,11 +36,11 @@ def test_every_run_is_numbered_by_its_name_and_the_dated_night_4_folder_is_night
     expected = {"night3_2026-10-09": 5, "night4_2026-10-10": 7, "night4_offline": 6, "night4b_offline": 6, "night4c_offline": 6, "night7_longread": 17, "night8_truth": 18, "night9b_revio": 20, "timing_0.2.0": 22,
                 "overlap_test_2026-11-04": 23, "night5_mockB": 13, "nocap_check_mockB": 13, "nocap_check": 13, "night6_pilot": 14,
                 "night6_PRJNA933120": 14, "its_check": 8, "its_merge_check": 9, "release_check": 10, "round4": 2, "round4_phase1": 2, "night1": 3, "night2_2026-10-09": 4,
-                "soil_v4_overmerge": 11, "estimate_check": 12, "night1_x": 3, "night10_closing_2026-11-07": 24, "night10_pilot": 24, "its_followup": 25, "its_followup_arfken": 25, "its_depth_1000": 25, "its_depth": 25, "its_night": 26, "its_rules": 27, "its_bakker": 28, "bakker_rerun": 29}
+                "soil_v4_overmerge": 11, "estimate_check": 12, "night1_x": 3, "night10_closing_2026-11-07": 24, "night10_pilot": 24, "its_followup": 25, "its_followup_arfken": 25, "its_depth_1000": 25, "its_depth": 25, "its_night": 26, "its_rules": 27, "its_bakker": 28, "bakker_rerun": 29, "trim_check": 30}
     for name, number in expected.items():
         assert od.run_number(name) == number, name
     assert all(od.run_number(n) is None for n in ("mystery_run", "night100", "round40", "night40", "night50", "night60"))
-    assert [r[0] for r in od.RUNS] == list(range(1, 30)) and len({r[1] for r in od.RUNS}) == 29
+    assert [r[0] for r in od.RUNS] == list(range(1, 31)) and len({r[1] for r in od.RUNS}) == 30
 
 
 def test_datasets_are_recognised_by_accession_and_by_region_where_one_accession_holds_two():
@@ -154,11 +154,11 @@ def test_an_existing_target_stops_everything_before_any_rename(tree):
 
 
 def test_the_next_run_number_follows_the_highest_one_known_or_found(tmp_path):
-    assert od.next_run_number(tmp_path / "none") == 30
+    assert od.next_run_number(tmp_path / "none") == 31
     runs = tmp_path / "runs"
-    (runs / "30_new").mkdir(parents=True)
+    (runs / "31_new").mkdir(parents=True)
     (runs / "night6_old").mkdir()
-    assert od.next_run_number(runs) == 31
+    assert od.next_run_number(runs) == 32
     assert od.parse_numbers(["mystery run=7"]) == {"mystery run": 7}
     with pytest.raises(SystemExit):
         od.parse_numbers(["nonumber"])
@@ -224,7 +224,7 @@ def test_extra_copies_are_set_aside_never_deleted_and_can_be_restored_and_protec
 def test_the_table_prints_every_run_and_dataset(capsys):
     assert od.main(["--table"]) == 0
     text = capsys.readouterr().out
-    assert all(f"{n:02d}" in text for n in range(1, 30)) and "night 6" in text and "buetas-2024" in text and "night1_v2.py, describe_reads.py" in text
+    assert all(f"{n:02d}" in text for n in range(1, 31)) and "night 6" in text and "buetas-2024" in text and "night1_v2.py, describe_reads.py" in text
 
 
 def test_a_missing_base_folder_is_reported(tmp_path, capsys):

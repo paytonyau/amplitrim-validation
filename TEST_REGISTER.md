@@ -57,6 +57,7 @@ columns: AmpliTrim against DADA2 (filter and yield), against FIGARO (like for li
 | 38 | 28 | The Bakker night: outcomes |
 | 39 | 29 | The Bakker re-run: Bakker's reads with the far primer cut |
 | 40 | 29 | The Bakker re-run: outcomes |
+| 41 | 30 | The trim check: does AmpliTrim 0.3 predict the share of pairs that pass DADA2's filter after the trim? |
 
 ## 1. Datasets
 
@@ -1722,3 +1723,26 @@ The primers are those of the paper's methods (sections 2.3 and 2.4), and the pri
 3. The computed maxEE for ITS holds; its evidence is the ATCC standard and the piglet communities, Bakker's reads being neutral.
 4. The trim and the computed maxEE stay separate: after the trim the computed maxEE is 2,2.
 5. Not claimed: accuracy on full-length ITS; taxonomy; abundances; Bakker's own conclusions about PCR conditions.
+
+## 41. The trim check: does AmpliTrim 0.3 predict the share of pairs that pass DADA2's filter after the trim? (written 15 November 2026, before the run)
+
+**Why.** AmpliTrim 0.3 (software commit `42d795e`) advises trimming the poor ends of ITS reads when fewer than half the pairs pass DADA2's filter at maxEE 2,2, and predicts the share of pairs that pass after the trim. Its report says that this prediction is not yet checked against DADA2. This section checks it.
+
+**Data.** The eleven ITS datasets of run 29 (section 39): the thinned reads that DADA2 was given there (on the analysis computer, `C:\data\runs\29_bakker_rerun\<dataset>\reads`) and DADA2's counts (`results/29_bakker_rerun/<dataset>/dada2/std` and `sw15`, `samples.tsv`: the filtered and the merged pairs over the input pairs, summed over the samples). The trim of run 29 (`validation/its_night.py`, `sliding_cut`) and AmpliTrim's (`amplitrim/trim.py`, `sliding_cut`) are the same code.
+
+**Method** (`validation/trim_check.py`). AmpliTrim 0.3 is imported from its repository folder (the script refuses any other version) and analyses each dataset's thinned reads as `amplitrim --its` does (a subsample of at most 50,000 read pairs): the share of pairs that pass at maxEE 2,2 as they are, and, with the trim, the share that pass after it (`pipeline._its_after_trim`), for every dataset whatever the share that passes untrimmed.
+
+**Criteria** (written before the run).
+- **P115.** On every one of the eleven datasets, the predicted pass rate after the trim is within 1 point of DADA2's (`sw15`).
+- **P116.** On every one of the eleven datasets, the predicted pass rate at maxEE 2,2 is within 1 point of DADA2's (`std`), as P92 required of 0.2.0.
+
+*Described, no criterion:* the predicted yield after the trim against DADA2's merged share (`sw15`); the yield is known to be an upper bound (sections 28 to 32).
+
+**What follows (decided now).**
+1. P115 met: AmpliTrim 0.3's report says that the prediction was checked against DADA2 on these eleven datasets (with the largest difference found), `summary.json` gives `trim_advice.checked: true`, and 0.3.0 may be released.
+2. P115 not met: the report keeps "not yet checked", the user guide gives the differences found, and the prediction is corrected and checked again before it is called checked.
+3. P116 not met: 0.3's filter prediction differs from 0.2.0's validated one (P92 met within 0.22 points on eight of these datasets); it is explained before release.
+
+**What has been seen (disclosed).** All results of runs 24 to 29, including DADA2's counts that this check uses. AmpliTrim's predictions after the trim have not been computed on these datasets. On the code's own tests, the prediction equals an independent computation of DADA2's filter on synthetic reads.
+
+**Procedure.** The check runs in minutes, so there is no smoke run: this section and the code are committed, the check runs into `C:\data\runs\trim_check`, and the outcomes follow in section 42.
