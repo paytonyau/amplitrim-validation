@@ -59,9 +59,10 @@ qs = section("Quick start"); qs_blocks = code_blocks(qs); qs_paras = paragraphs(
 need = bullets(section("What you need"))
 opts = paragraphs(section("Options"))[0]
 how = section("How the settings are chosen"); how_rows = table_rows(how); how_para = paragraphs(how)[0]
+its_sec = section("ITS reads with poor ends"); its_paras = paragraphs(its_sec); its_blocks = code_blocks(its_sec)       # 0.3
 limits = bullets(section("Limits"))
 cite = paragraphs(section("Citation, licence and contributing"))[0]
-assert len(why) == 4 and len(qs_blocks) == 3 and len(need) == 3 and len(limits) == 4
+assert len(why) == 4 and len(qs_blocks) == 3 and len(need) == 3 and len(limits) == 5 and len(its_paras) == 2 and len(its_blocks) == 1
 
 def card(b):
     m = re.match(r"\*\*(.+?)\*\*\s*(.*)", b, flags=re.S); return f'<li class="card"><h3>{inline(m.group(1))}</h3><p>{inline(m.group(2))}</p></li>'
@@ -88,7 +89,8 @@ subs = {"VERSION": VERSION,
  "BASH1": pre(qs_blocks[0], True), "EXAMPLEINTRO": inline(example_intro), "EXAMPLE": pre(qs_blocks[1]), "AFTEREXAMPLE": inline(after_example),
  "BASH2": pre(qs_blocks[2], True), "SIMNOTE": inline(sim_note),
  "NEED": "\n".join(f"<li>{inline(b)}</li>" for b in need), "OPTS": inline(opts),
- "HOWTABLE": table_html(how_rows), "HOWPARA": inline(how_para), "LIMITS": "\n".join(f"<li>{inline(b)}</li>" for b in limits),
+ "HOWTABLE": table_html(how_rows), "HOWPARA": inline(how_para),
+ "ITSINTRO": inline(its_paras[0]), "ITSBLOCK": pre(its_blocks[0], True), "ITSAFTER": inline(its_paras[1]), "LIMITS": "\n".join(f"<li>{inline(b)}</li>" for b in limits),
  "CITE": inline(cite).replace("<code>LICENSE</code>", f'<a href="{REPO}/blob/main/LICENSE"><code>LICENSE</code></a>').replace("<code>CITATION.cff</code>", f'<a href="{REPO}/blob/main/CITATION.cff"><code>CITATION.cff</code></a>'),
 }
 out = TEMPLATE

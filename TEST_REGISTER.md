@@ -56,6 +56,7 @@ columns: AmpliTrim against DADA2 (filter and yield), against FIGARO (like for li
 | 37 | 28 | The Bakker night: do the ITS rules hold on a third mock community? |
 | 38 | 28 | The Bakker night: outcomes |
 | 39 | 29 | The Bakker re-run: Bakker's reads with the far primer cut |
+| 40 | 29 | The Bakker re-run: outcomes |
 
 ## 1. Datasets
 
@@ -1695,3 +1696,29 @@ The primers are those of the paper's methods (sections 2.3 and 2.4), and the pri
 **Known before the run (disclosed).** Everything in sections 33 to 38, including the Bakker verdicts of run 28 under the defective preparation and the share of the reads that carried overhangs. On Bakker's reads the computed maxEE is 2,2 before the trim and after it, so on Bakker `eer` equals `std` and `sweer` equals `sw15`; P108 and P109 can only be met on Bakker's datasets, and P110 follows P105. Bakker's datasets therefore add evidence on the trim (P105, P107) and on `tq10` (P114), not on the computed maxEE or on the combination. P106 rests on the ATCC standard and the piglet mixes only (section 38). The preparation was changed after run 28's results were read; this section is written before any arm is run on the newly prepared reads.
 
 **Procedure.** The reads are prepared again; a smoke run at 300 read pairs per sample checks the paths and the overhang gate (disclosed in section 40); this section and the changed code are committed; the night runs into `C:\data\runs\bakker_rerun`; the outcomes follow in section 40.
+
+## 40. The Bakker re-run: outcomes (15 November 2026)
+
+**The run.** Bakker's reads were prepared again with the far primer cut, and section 39 and its code were committed in `274cc88` before the night ran. The smoke run (300 read pairs per sample) came first and its overhang gate failed (reads of `std` carrying primer overhangs: `bakker_pcr_its1` 1.81%, `bakker_pol_its1` 33.21%, `bakker_pol_its2` 0.00%); the planned stop after the smoke run was not made, and the registration and the night went ahead. The output of the tests run while registering was cut off in the console; the archive's tests passed afterwards (827 passed). The night: folder `C:\data\runs\29_bakker_rerun` (named `bakker_rerun` when it ran), 55 of 55 steps; results in `results/29_bakker_rerun` (`72fe68d`).
+
+**The gates.** The consistency check passed: `std` reproduced run 26 on all eight earlier datasets, sample by sample. **The overhang gate failed as registered**: reads of `std` carrying primer overhangs, `bakker_pcr_its1` 1.69%, `bakker_pol_its1` 31.40%, `bakker_pol_its2` 0.00% (at most 1% allowed). The analysis labelled every criterion "not decided (the consistency check failed)"; the label was wrong (the consistency check had passed) and is corrected, which changes no number.
+
+**The failure explained.** Section 39 leaves the criteria undecided until a failed gate is explained. Every remaining overhang read carries exactly **one extra base, an A, at the start** of the sequence: on `bakker_pol_its1` 35,758 reads, the *Naganishia albida* sequence that run 28 had with the same count; on `bakker_pcr_its1` 1,858 reads. Overhangs of 3 or more bases: **0.00% on all three datasets** (`OVERHANG_CHECK_min3.md`). The far-primer cut, like cutadapt's, needs at least 3 bases to recognise a primer, so 1- or 2-base remnants are expected; whether the A is the primer's last base or a variant of the isolate, a sequence one base longer than its reference is within the 2-edit rule and was judged true. No judgement depended on the overhangs that the gate counted; the gate's measure counted overhangs of any length, which was a flaw of its definition, not of the preparation. The criteria are therefore decided, on the analysis with the overhang check counting overhangs of at least 3 bases (`its_bakker_report.py --overhang-min-bases 3`, `ITS_BAKKER_SUMMARY_min3.md`); the analysis with the gate as registered is kept beside it (`ITS_BAKKER_SUMMARY.md`), and apart from the corrected label the two give the same numbers.
+
+**Outcomes** (criteria of section 37; safe on all seven truth datasets).
+- **P105 met.** `sw15` is safe on every truth; on Bakker's datasets spurious −0.04, +0.00 and +0.00 points, recall −0.6, +2.3 and −1.2 points.
+- **P106 met** (ATCC ITS2 +57.3 points, ITS2 piglet mixes +46.7); it rests on the earlier datasets only, no Bakker dataset passing below 50% at maxEE 2,2 (section 38).
+- **P107 met.** Where at least 50% pass at 2,2, `sw15` is safe and gains yield: ATCC ITS1 +17.0, ITS1 piglet mixes +15.4, `bakker_pcr_its1` +5.2, `bakker_pol_its1` +5.1, `bakker_pol_its2` +6.2 points.
+- **P108 and P109 met.** On Bakker's datasets `eer` equals `std` (maxEE 2,2; disclosed in section 39).
+- **P110 met; P111 not met** (+0.0 points against `sw15` everywhere: the maxEE computed after the trim is 2,2).
+- **P112 met** for `sw15` (its2 +4%, its −2%), `eer` (+0%, +0%) and `sweer` (as `sw15`).
+- **P113 met** (`sw15` reproduces run 26 and `eer` run 27 on the eight earlier datasets). **P114 met** (`tq10` not safe: recall −11.1 on ATCC ITS2, −30.0 in the ITS1 piglet mixes, −4.1 on `bakker_pcr_its1`).
+
+**Described.** With the far primer cut, Bakker's truth works: in `std`, `bakker_pcr_its1` 1.00% of reads spurious and recall 58.9% (10.6 of 18 members), `bakker_pol_its1` 0.00% and 52.1% (9.4 of 18), `bakker_pol_its2` 0.00% and 61.4% (11.7 of 19); recall is below 100% because the staggered communities hold members at up to 2,000-fold lower abundance and because some members are lost by these primers and reads (the paper's own findings), alike in every arm. Yields after chimera removal, `std` to `sw15`: 86.8% to 92.0%, 91.0% to 96.1% and 88.9% to 95.1%.
+
+**What follows (as section 37 said).**
+1. The trim advice (window 4, mean quality 15) holds on a third mock community, with reads of about 2×195 and 2×250 nt and error-prone PCR conditions; on Bakker's well-passing reads it gains 5 to 6 points, safely.
+2. The trim did not harm data that pass well at maxEE 2,2: the 50% trigger is not needed for safety, and stays in AmpliTrim 0.3 as a guide to when the trim helps most.
+3. The computed maxEE for ITS holds; its evidence is the ATCC standard and the piglet communities, Bakker's reads being neutral.
+4. The trim and the computed maxEE stay separate: after the trim the computed maxEE is 2,2.
+5. Not claimed: accuracy on full-length ITS; taxonomy; abundances; Bakker's own conclusions about PCR conditions.

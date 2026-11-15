@@ -26,29 +26,30 @@ def read_refs(path: Path) -> list:
     return out
 
 
-def overhanging(seq: str, refs: list, fwd: str, rev_rc: str, max_mm: int = 2) -> bool:
-    """A reference inside seq, with at most the forward primer's last bases before it and the reverse primer's first bases (reverse-complemented) after it."""
+def overhanging(seq: str, refs: list, fwd: str, rev_rc: str, max_mm: int = 2, min_bases: int = 1) -> bool:
+    """A reference inside seq, with at most the forward primer's last bases before it and the reverse primer's first bases (reverse-complemented) after it,
+    and at least `min_bases` such bases in all. (An overhang of 1 or 2 bases is within the 2-edit rule, so it cannot turn a true read spurious; section 40.)"""
     for r in refs:
         i = seq.find(r)
         if i < 0:
             continue
         head, tail = seq[:i], seq[i + len(r):]
-        if (head or tail) and len(head) <= len(fwd) and len(tail) <= len(rev_rc) \
+        if len(head) + len(tail) >= max(1, min_bases) and len(head) <= len(fwd) and len(tail) <= len(rev_rc) \
                 and (not head or bp.mismatches(head, fwd[-len(head):]) <= max_mm) and (not tail or bp.mismatches(tail, rev_rc[:len(tail)]) <= max_mm):
             return True
     return False
 
 
-def classify(seqs: dict, refs: list, fwd: str, rev: str) -> dict:
+def classify(seqs: dict, refs: list, fwd: str, rev: str, min_bases: int = 1) -> dict:
     """seqs: {sequence: reads}. Returns the shares of the reads that are exact, overhang and other."""
     exact, rr, c = set(refs), rc(rev), {"exact": 0, "overhang": 0, "other": 0}
     for s, n in seqs.items():
-        c["exact" if s in exact else "overhang" if overhanging(s, refs, fwd, rr) else "other"] += n
+        c["exact" if s in exact else "overhang" if overhanging(s, refs, fwd, rr, min_bases=min_bases) else "other"] += n
     tot = sum(c.values()) or 1
     return {k: v / tot for k, v in c.items()} | {"reads": sum(c.values())}
 
 
-def run_check(run: Path, references: Path, arm: str = "std") -> dict:
+def run_check(run: Path, references: Path, arm: str = "std", min_bases: int = 1) -> dict:
     out = {}
     for label, (_, f, r) in AMPLICONS.items():
         p = Path(run) / label / "dada2" / arm / "seqs.tsv"
@@ -58,7 +59,7 @@ def run_check(run: Path, references: Path, arm: str = "std") -> dict:
         with open(p, newline="", encoding="utf-8") as fh:
             for row in csv.DictReader(fh, delimiter="\t"):
                 seqs[row["sequence"]] = seqs.get(row["sequence"], 0) + int(float(row["abundance"]))
-        out[label] = classify(seqs, read_refs(Path(references) / f"references_{label}.fasta"), bp.PRIMERS[f], bp.PRIMERS[r])
+        out[label] = classify(seqs, read_refs(Path(references) / f"references_{label}.fasta"), bp.PRIMERS[f], bp.PRIMERS[r], min_bases)
     return out
 
 
@@ -67,12 +68,14 @@ def main(argv=None) -> int:
     ap.add_argument("--run", type=Path, required=True)
     ap.add_argument("--references", type=Path, required=True)
     ap.add_argument("--arm", default="std")
+    ap.add_argument("--min-bases", type=int, default=1, help="count only overhangs of at least this many bases (1: every overhang, as section 39's gate)")
     a = ap.parse_args(argv)
-    res = run_check(a.run, a.references, a.arm)
-    L = ["# Bakker's ASVs: exact, with primer overhangs, other", "", f"Arm `{a.arm}`; shares of the reads.", "",
+    res = run_check(a.run, a.references, a.arm, a.min_bases)
+    L = ["# Bakker's ASVs: exact, with primer overhangs, other", "", f"Arm `{a.arm}`; shares of the reads; overhangs of at least {a.min_bases} base(s)"
+         + ("; a shorter overhang counts as other." if a.min_bases > 1 else "."), "",
          "| Dataset | Reads | Exact reference | Reference with primer overhangs | Other |", "|---|---|---|---|---|"]
     L += [f"| {lab} | {x['reads']:,} | {x['exact']:.1%} | {x['overhang']:.1%} | {x['other']:.1%} |" for lab, x in res.items()]
-    (a.run / "OVERHANG_CHECK.md").write_text("\n".join(L) + "\n", encoding="utf-8")
+    (a.run / ("OVERHANG_CHECK.md" if a.min_bases <= 1 else f"OVERHANG_CHECK_min{a.min_bases}.md")).write_text("\n".join(L) + "\n", encoding="utf-8")
     print("\n".join(L))
     return 0 if res else 2
 

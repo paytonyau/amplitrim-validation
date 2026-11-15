@@ -201,3 +201,12 @@ def test_the_overhang_check_classifies_exact_overhanging_and_other_sequences():
     seqs = {ref: 50, resolve(fwd)[-7:] + ref + resolve(PREP.rc(rev))[:6]: 30, ref + resolve(PREP.rc(rev)): 10, rnd(200): 10}
     got = BO.classify(seqs, [ref], fwd, rev)
     assert (round(got["exact"], 2), round(got["overhang"], 2), round(got["other"], 2), got["reads"]) == (0.5, 0.4, 0.1, 100)
+
+
+def test_a_one_base_overhang_counts_at_the_minimum_of_one_and_not_at_three():
+    BO = load("bakker_overhang")
+    ref = rnd(200)
+    fwd, rev = P.PRIMERS["ITS1F"], P.PRIMERS["ITS2"]
+    seqs = {ref: 60, "A" + ref: 30, resolve(fwd)[-4:] + ref: 10}                    # exact, one extra A (as Naganishia), four primer bases
+    one, three = BO.classify(seqs, [ref], fwd, rev), BO.classify(seqs, [ref], fwd, rev, min_bases=3)
+    assert (round(one["overhang"], 2), round(three["overhang"], 2), round(three["other"], 2)) == (0.4, 0.1, 0.3)

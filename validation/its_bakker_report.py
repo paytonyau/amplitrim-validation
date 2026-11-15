@@ -63,7 +63,7 @@ def analyse(out: Path, refs: dict, bakker_refs: dict) -> dict:
     return R
 
 
-def verdicts(R: dict, gate_ok: bool, reproduce: tuple, previous_ok=True) -> list:
+def verdicts(R: dict, gate_ok: bool, reproduce: tuple, previous_ok=True, why: str = "the consistency check failed") -> list:
     F, A = R["flow"], R["acc"]
     labels = R["truth_labels"]
 
@@ -120,7 +120,7 @@ def verdicts(R: dict, gate_ok: bool, reproduce: tuple, previous_ok=True) -> list
     unsafe = safe("tq10")
     V.append(("P114", (unsafe[0] is False) if unsafe[0] is not None else None, "the known-unsafe reference (truncQ 10) is still unsafe somewhere: " + unsafe[1]))
     if not gate_ok:
-        V = [(c, None, "not decided (the consistency check failed): " + t) for c, _, t in V]
+        V = [(c, None, f"not decided ({why}): " + t) for c, _, t in V]
     R["verdict"] = {c: ok for c, ok, _ in V}
     return V
 
@@ -156,6 +156,8 @@ def main(argv=None) -> int:
     ap.add_argument("--bakker-references", type=Path, required=True)
     ap.add_argument("--previous", type=Path, required=True, help="run 26 (std and sw15)")
     ap.add_argument("--previous-rules", type=Path, required=True, help="run 27 (eer)")
+    ap.add_argument("--overhang-min-bases", type=int, default=1, help="with --overhang-max: count only overhangs of at least this many bases (section 40: 3)")
+    ap.add_argument("--suffix", default="", help="written as ITS_BAKKER_SUMMARY<suffix>.md and so on, beside the files of an earlier analysis")
     ap.add_argument("--overhang-max", type=float, default=None, help="the re-run's gate (section 39): no criterion is decided if more than this share of the reads of "
                     "std on a Bakker dataset carries primer overhangs (bakker_overhang.py)")
     a = ap.parse_args(argv)
@@ -172,14 +174,15 @@ def main(argv=None) -> int:
     over_line = ""
     if a.overhang_max is not None:
         import bakker_overhang as BO
-        oh = BO.run_check(a.out, a.bakker_references)
+        oh = BO.run_check(a.out, a.bakker_references, min_bases=a.overhang_min_bases)
         bad = {k: v["overhang"] for k, v in oh.items() if v["overhang"] > a.overhang_max}
-        over_line = (f"**The overhang check:** reads of std carrying primer overhangs: " + ", ".join(f"{k} {v['overhang']:.2%}" for k, v in oh.items())
+        over_line = (f"**The overhang check:** reads of std carrying primer overhangs" + (f" of at least {a.overhang_min_bases} bases" if a.overhang_min_bases > 1 else "") + ": " + ", ".join(f"{k} {v['overhang']:.2%}" for k, v in oh.items())
                      + (f" (at most {a.overhang_max:.0%}: passed)." if not bad and len(oh) == len(BAKKER) else f": FAILED (more than {a.overhang_max:.0%}, or a dataset missing), so no criterion is decided."))
         gate_ok = gate_ok and not bad and len(oh) == len(BAKKER)
     reproduce = ((not d_sw and not d_ee) if (n_sw and n_ee) else None,
                  f"sw15 reproduces run 26 on {n_sw} datasets and eer reproduces run 27 on {n_ee}" + ("" if not (d_sw or d_ee) else ": " + "; ".join(d_sw + d_ee)))
-    V = verdicts(R, gate_ok, reproduce)
+    why = "the consistency check failed" if not (n_std > 0 and not d_std) else "the overhang check failed"
+    V = verdicts(R, gate_ok, reproduce, why=why)
     S = ["# The Bakker night: summary", "", "The criteria (P105 to P114) are in TEST_REGISTER.md and were fixed before this ran.", "",
          f"**The consistency check:** std reproduces run 26 on {n_std} datasets" + (" exactly." if (n_std > 0 and not d_std) else ": FAILED, so no criterion is decided: " + "; ".join(d_std or ["nothing to compare"])), ""]
     if over_line:
@@ -201,11 +204,11 @@ def main(argv=None) -> int:
     for (lab, arm), f in sorted(F.items()):
         x = A.get((lab, arm), {})
         M.append("\t".join([lab, arm] + [f"{f[k]:.6g}" for k in ("input", "pass", "merged", "yield", "asv_median")] + [f"{x[k]:.6g}" if k in x else "" for k in ("spurious", "recall", "exact", "found", "unjudged")]))
-    (a.out / "ITS_BAKKER_SUMMARY.md").write_text("\n".join(S) + "\n", encoding="utf-8")
-    (a.out / "ITS_BAKKER_REPORT.md").write_text("\n".join(L) + "\n", encoding="utf-8")
-    (a.out / "its_bakker_metrics.tsv").write_text("\n".join(M) + "\n", encoding="utf-8")
+    (a.out / f"ITS_BAKKER_SUMMARY{a.suffix}.md").write_text("\n".join(S) + "\n", encoding="utf-8")
+    (a.out / f"ITS_BAKKER_REPORT{a.suffix}.md").write_text("\n".join(L) + "\n", encoding="utf-8")
+    (a.out / f"its_bakker_metrics{a.suffix}.tsv").write_text("\n".join(M) + "\n", encoding="utf-8")
     print("\n".join(S))
-    print(f"written: {a.out / 'ITS_BAKKER_SUMMARY.md'}, ITS_BAKKER_REPORT.md, its_bakker_metrics.tsv")
+    print(f"written: {a.out / ('ITS_BAKKER_SUMMARY' + a.suffix + '.md')}, ITS_BAKKER_REPORT{a.suffix}.md, its_bakker_metrics{a.suffix}.tsv")
     return 0 if gate_ok and all(ok is not None for _, ok, _ in V) else 2
 
 

@@ -178,3 +178,16 @@ def test_the_overhang_gate_passes_clean_reads_and_stops_every_verdict_when_bakke
     assert B.main(args) == 2
     summ = (out / "ITS_BAKKER_SUMMARY.md").read_text()
     assert "bakker_pcr_its1 50.00%" in summ and "FAILED (more than 1%" in summ and "- **P105** not decided" in summ
+
+
+def test_a_failed_overhang_gate_names_itself_and_three_bases_pass_a_one_base_overhang(tmp_path):
+    out, r, br, p26, p27 = build(tmp_path)
+    arm(out, "bakker_pcr_its1", "std", {smp: {"A" + M1: 50, M2: 30, M3: 20} for smp in SAMPLES["bakker_pcr_its1"]})   # one extra base, within the 2-edit rule
+    base = ["--out", str(out), "--references", str(r), "--bakker-references", str(br), "--previous", str(p26), "--previous-rules", str(p27), "--overhang-max", "0.01"]
+    assert B.main(base) == 2
+    s = (out / "ITS_BAKKER_SUMMARY.md").read_text()
+    assert "- **P105** not decided (the overhang check failed)" in s and "consistency check failed" not in s and "exactly." in s
+    assert B.main(base + ["--overhang-min-bases", "3", "--suffix", "_min3"]) == 0
+    s3 = (out / "ITS_BAKKER_SUMMARY_min3.md").read_text()
+    assert "of at least 3 bases: bakker_pcr_its1 0.00%" in s3 and "- **P105** MET" in s3
+    assert (out / "ITS_BAKKER_SUMMARY.md").read_text() == s and (out / "its_bakker_metrics_min3.tsv").is_file()     # the first analysis is kept

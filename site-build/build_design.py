@@ -9,7 +9,8 @@ sys.path.insert(0, str(ROOT)); sys.path.insert(0, str(HERE))
 import design_svgs as S
 import amplitrim
 from amplitrim.subsample import DEFAULT_MAX_PAIRS
-from amplitrim.pipeline import Settings, RULE_Q, WARN_ABOVE, MIN_PAIRS_FOR_ESTIMATE
+from amplitrim.pipeline import Settings, RULE_Q, WARN_ABOVE, MIN_PAIRS_FOR_ESTIMATE, TRIM_ADVICE_BELOW
+from amplitrim.trim import WINDOW as TRIM_WINDOW, QUALITY as TRIM_QUALITY
 from amplitrim.config import Config
 
 REPO, BLOB = "https://github.com/paytonyau/amplitrim", "https://github.com/paytonyau/amplitrim/blob/main/"
@@ -19,15 +20,16 @@ cfg = Config(); step = {f.name: f.default for f in Settings.__dataclass_fields__
 F = dict(pairs=f"{DEFAULT_MAX_PAIRS:,}", overlap=cfg.dada2_min_overlap, unmerge=f"{cfg.max_unmergeable_frac * 100:g}%", step=step,
          tol=f"{cfg.yield_tolerance * 100:g} point", q=int(RULE_Q * 100), warn=WARN_ABOVE, minpairs=MIN_PAIRS_FOR_ESTIMATE, version=amplitrim.__version__)
 
-modules = ["cli", "api", "config", "subsample", "trimmer", "merge_wrapper", "ranking", "pipeline", "report"]
+modules = ["cli", "api", "config", "subsample", "trimmer", "trim", "merge_wrapper", "ranking", "pipeline", "report"]
 roles = {"cli": "The command line: reads the arguments, runs the pipeline, prints the summary and writes the report.",
          "api": "The programmatic entry point, <code>recommend()</code>: runs the pipeline, writes the report and returns the summary. The command line calls it.",
          "config": "Defaults that mirror the DADA2 call you will run (minimum overlap, mismatches, <code>maxEE</code>), and how a <code>maxEE</code> value is read.",
          "subsample": "Finds the read pairs and takes the shared, repeatable sample.",
          "trimmer": "Holds the sample in memory and replicates DADA2's filter: the quality table, filtering at a cut, and the error counts.",
+         "trim": f"<code>amplitrim trim</code>: cuts the poor ends of ITS reads before the first window of {TRIM_WINDOW} bases whose mean quality is below {TRIM_QUALITY:g}, the cut tested in the validation.",
          "merge_wrapper": "Runs vsearch to merge reads, and reads its log.",
          "ranking": "Defines a candidate cut, the floor, and the rule that picks the recommendation.",
-         "pipeline": "The whole run: the steps in order, the <code>maxEE</code> rule, the ITS mode and the warnings.",
+         "pipeline": "The whole run: the steps in order, the <code>maxEE</code> rule, the ITS mode with its trim advice, and the warnings.",
          "report": "Writes <code>REPORT.md</code>, <code>summary.json</code> and <code>summary.png</code>, and the summary for the terminal."}
 def uses(mod):
     t = ast.parse((ROOT / "amplitrim" / f"{mod}.py").read_text(encoding="utf-8")); s = set()
@@ -73,8 +75,11 @@ steps = "\n".join([
 ])
 its = (f'<li class="step"><div><h3><span class="num" aria-hidden="true">+</span><span>With <code>--its</code></span></h3>'
        "<p>ITS amplicons vary a lot in length, so DADA2's ITS workflow does not truncate. AmpliTrim evaluates exactly that: each read is cut at its first base of quality 2 or below, then kept if it is long enough, free of N and within <code>maxEE</code>.</p>"
-       "<p>The floor, the search and the <code>maxEE</code> rule are skipped. The report shows where the pairs go instead.</p>"
-       f'<p class="where">In the code: <code>_run_its</code></p></div>{fig(S.its())}</li>')
+       "<p>The floor and the search are skipped. The <code>maxEE</code> rule is measured on each read after this cut, with the same percentile and rounding. "
+       f"When fewer than {TRIM_ADVICE_BELOW:.0%} of the pairs pass at <code>maxEE</code> 2,2, the report advises trimming the poor read ends first "
+       f"(<code>amplitrim trim</code>: window {TRIM_WINDOW}, mean quality {TRIM_QUALITY:g}) and predicts the effect, and <code>maxEE</code> stays 2 for the trimmed reads. "
+       "The report also shows where the pairs go.</p>"
+       f'<p class="where">In the code: <code>_run_its</code>, <code>_run_its_rules</code></p></div>{fig(S.its())}</li>')
 
 def row(choice, why, chip, klass, how):
     return f'<tr><th scope="row">{choice}</th><td>{why}</td><td><span class="chip {klass}">{chip}</span><p>{how}</p></td></tr>'

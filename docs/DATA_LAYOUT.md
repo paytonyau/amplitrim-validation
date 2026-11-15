@@ -77,7 +77,7 @@ The number of a run is its number in `validation/README.md` and in `python valid
 | 26 | `26_its_night` (the ITS overnight run: every arm of every dataset, the stricter estimates; `ITS_NIGHT_SUMMARY.md`) | 33-34 |
 | 27 | `27_its_rules` (the ITS rules night: truncQ, the trim strengths and the computed maxEE on every ITS dataset; `ITS_RULES_SUMMARY.md`) | 35-36 |
 | 28 | `28_its_bakker` (the Bakker night: the trim, the computed maxEE and their combination on three mock communities; `ITS_BAKKER_SUMMARY.md`) | 37-38 |
-| 29 | `29_bakker_rerun` (the Bakker re-run: the eleven datasets again, Bakker's reads with the far primer cut; `ITS_BAKKER_SUMMARY.md`, `OVERHANG_CHECK.md`) | 39 |
+| 29 | `29_bakker_rerun` (the Bakker re-run: the eleven datasets again, Bakker's reads with the far primer cut; `ITS_BAKKER_SUMMARY.md`, `OVERHANG_CHECK.md`) | 39-40 |
 
 Runs 15 to 20 were planned in `FUTURE.md` (the long-read test plan), not in numbered sections of the register.
 

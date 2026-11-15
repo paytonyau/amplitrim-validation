@@ -119,7 +119,7 @@ The numbers are those of `python validation/organise_data.py --table`, and the s
 | 26 | ITS overnight run | `its_night.py`, `its_night.R`, `its_night_report.py`, `ncbi_references.py` | 33-34 |
 | 27 | ITS rules night | `its_rules_report.py` | 35-36 |
 | 28 | Bakker night | `its_bakker_report.py`, `bakker_prep.py` | 37-38 |
-| 29 | Bakker re-run | `bakker_overhang.py`, `bakker_prep.py` | 39 |
+| 29 | Bakker re-run | `bakker_overhang.py`, `bakker_prep.py` | 39-40 |
 | | The long unattended battery that runs many of the tests above in one command | `overnight.py`, `run_overnight.bat` (the batch file starts it on Windows) | |
 
 `night1_v2.py` ran night 1 and prepared its datasets (register section 11). It was missing from this archive until 7 November 2026; the only copy found, last modified on 9 October 2026, was added unchanged. Night 1 itself ran on 9 October 2026. The script has not been re-run here and has no test.

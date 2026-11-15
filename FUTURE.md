@@ -1,5 +1,11 @@
 # AmpliTrim: future development
 
+## Added on 15 November 2026 (after the Bakker re-run: run 29, register sections 39 and 40)
+
+1. **The ITS rules of AmpliTrim 0.3 are settled** (sections 33 to 40): maxEE computed from the reads by the 16S rule; the sliding-window trim (window 4, mean quality 15) advised for poor read ends, safe on all three mock communities, with "fewer than half the pairs pass at maxEE 2,2" as the guide to when it helps most; the two never combined (after the trim the computed maxEE is 2,2); `truncQ` 2, `minOverlap` 12, `maxMismatch` 0; forward reads alone and merging first named as options for full-length ITS only.
+2. **Overhang checks count overhangs of at least 3 bases**: shorter ones are within the 2-edit rule and cannot turn a true read spurious (run 29).
+3. **Next:** build 0.3, then register the check of AmpliTrim's filter prediction on trimmed reads against DADA2's `sw15` results already in runs 26 to 29, as P92 did for maxEE.
+
 ## Added on 15 November 2026 (after the Bakker night: run 28, register sections 37 and 38)
 
 1. **Prepare reads by cutting the far primer as well**, wherever an amplicon can be shorter than the reads: run 28 showed that DADA2 keeps the overhangs of reads that run past a short amplicon, and a mock's truth then counts true reads as spurious. Any future mock community or ITS dataset gets both primers cut at both ends (`bakker_prep.trim3`, as cutadapt's `-a`/`-A`), and the overhang check (`bakker_overhang.py`) before its results are read.
