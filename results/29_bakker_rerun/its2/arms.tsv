@@ -1,0 +1,7 @@
+arm	mode	reads	truncF	truncR	maxEEF	maxEER	truncQ	minOverlap
+std	paired	C:\data\runs\bakker_rerun\its2\reads	0	0	2	2	2	12
+sw10	paired	C:\data\runs\bakker_rerun\its2\reads_sw10	0	0	2	2	2	12
+sw15	paired	C:\data\runs\bakker_rerun\its2\reads_sw15	0	0	2	2	2	12
+tq10	paired	C:\data\runs\bakker_rerun\its2\reads	0	0	2	2	10	12
+eer	paired	C:\data\runs\bakker_rerun\its2\reads	0	0	2	2	2	12
+sweer	paired	C:\data\runs\bakker_rerun\its2\reads_sw15	0	0	2	2	2	12
