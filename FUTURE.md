@@ -1,5 +1,16 @@
 # AmpliTrim: future development
 
+## Added on 15 November 2026 (after the trim check: run 30, register sections 41 and 42)
+
+1. **Release AmpliTrim 0.3.0** with the trim advice marked as checked (P115). After Zenodo issues the version's DOI, `CITATION.cff` gives it (until then the all-versions DOI).
+2. **Future studies, each to be registered before it runs** (none has criteria yet):
+   - *Window size of the trim:* windows of 3, 4, 8 and 12 bases at mean quality 15, on the three mock communities; why 4, and whether a larger window keeps longer reads safely.
+   - *minLen:* 20, 50, 100 and 150, and a rule "just below the shortest amplicon of the data", on the three mock communities; Bakker's first run has amplicons of 105 nt.
+   - *A fourth mock community:* Pauvert et al. 2019, *Fungal Ecology* 41:23-33 (doi:10.1016/j.funeco.2019.03.005): 189 strains (175 distinct ITS1 sequences), ITS1F/ITS2, MiSeq 2×250, Sanger references of every strain (their Table S1), reads on Dataverse (doi:10.15454/8CVWRR). Tests the trim, the computed maxEE and forward reads alone (their recommended approach) on a far richer community.
+   - *Full-length ITS with a known answer,* the largest gap: no mock community so far covers it, and the yield estimate is far too high there.
+   - *Other sequencers:* NovaSeq (binned qualities) and 2×150 reads, where `truncQ` 3 to 7 can also be tested.
+   - *A per-dataset trim strength,* only if a study shows more than one strength safe and useful on the same data.
+
 ## Added on 15 November 2026 (after the Bakker re-run: run 29, register sections 39 and 40)
 
 1. **The ITS rules of AmpliTrim 0.3 are settled** (sections 33 to 40): maxEE computed from the reads by the 16S rule; the sliding-window trim (window 4, mean quality 15) advised for poor read ends, safe on all three mock communities, with "fewer than half the pairs pass at maxEE 2,2" as the guide to when it helps most; the two never combined (after the trim the computed maxEE is 2,2); `truncQ` 2, `minOverlap` 12, `maxMismatch` 0; forward reads alone and merging first named as options for full-length ITS only.

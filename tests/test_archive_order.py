@@ -38,7 +38,7 @@ def test_the_run_numbers_agree_between_the_code_the_validation_readme_and_the_re
     register = read("TEST_REGISTER.md")
     contents = re.findall(r"^\| (\d+) \| (\d\d) \| (.+) \|$", register, re.M)
     headings = re.findall(r"^## (\d+)\. ", register, re.M)
-    assert [c[0] for c in contents] == headings and len(headings) == 41                    # the table lists every section once, in order
+    assert [c[0] for c in contents] == headings and len(headings) == 42                    # the table lists every section once, in order
     for section, run, _ in contents:
         owner = [r[0] for r in od.RUNS if int(section) in sections_of(r[2])]
         assert owner == [int(run)], (section, run, owner)

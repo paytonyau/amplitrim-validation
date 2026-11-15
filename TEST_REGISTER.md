@@ -58,6 +58,7 @@ columns: AmpliTrim against DADA2 (filter and yield), against FIGARO (like for li
 | 39 | 29 | The Bakker re-run: Bakker's reads with the far primer cut |
 | 40 | 29 | The Bakker re-run: outcomes |
 | 41 | 30 | The trim check: does AmpliTrim 0.3 predict the share of pairs that pass DADA2's filter after the trim? |
+| 42 | 30 | The trim check: outcomes |
 
 ## 1. Datasets
 
@@ -1746,3 +1747,15 @@ The primers are those of the paper's methods (sections 2.3 and 2.4), and the pri
 **What has been seen (disclosed).** All results of runs 24 to 29, including DADA2's counts that this check uses. AmpliTrim's predictions after the trim have not been computed on these datasets. On the code's own tests, the prediction equals an independent computation of DADA2's filter on synthetic reads.
 
 **Procedure.** The check runs in minutes, so there is no smoke run: this section and the code are committed, the check runs into `C:\data\runs\trim_check`, and the outcomes follow in section 42.
+
+## 42. The trim check: outcomes (15 November 2026)
+
+**The run.** Section 41 and its code were committed in `3b402f9` before the check ran. AmpliTrim 0.3.0 was imported from the software repository at `269f628` (the code of `42d795e` with the home page regenerated); the check refused any other copy, and none other was used. Folder `C:\data\runs\30_trim_check` (named `trim_check` when it ran); eleven datasets; results in `results/30_trim_check`.
+
+**Outcomes.**
+- **P115 met.** The predicted pass rate after the trim is within 1 point of DADA2's on all eleven datasets; the largest difference is +0.11 points (`its`).
+- **P116 met.** The predicted pass rate at maxEE 2,2 is within 1 point of DADA2's on all eleven; the largest difference is −0.21 points (`arfken_its1`).
+
+**Described.** The predictions equal DADA2's exactly, untrimmed and trimmed, on the five datasets that AmpliTrim analysed in full (the ATCC standard's ITS1 and ITS2, the ITS1 and ITS2 piglet mixes, and the second ITS study, each under its subsample of 50,000 read pairs); the small differences elsewhere come from the subsample. The predicted yield after the trim, against DADA2's merged share: on the mock communities within 4.2 points except the ITS1 piglet isolates (+12.9 points: 83.95% predicted, 71.06% merged); on the two real ITS studies far too high (+27.5 and +70.2 points), as every ITS yield estimate is (sections 28 to 32).
+
+**What follows (as section 41 said).** P115 is met: AmpliTrim 0.3's report says that the predicted pass rate after the trim was checked against DADA2 on these eleven datasets, with the largest difference, and `summary.json` gives `trim_advice.checked: true`; 0.3.0 may be released. The yield after the trim stays described as an upper bound. P116 is met: 0.3's filter prediction agrees with 0.2.0's validated one.
