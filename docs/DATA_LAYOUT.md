@@ -76,7 +76,7 @@ The number of a run is its number in `validation/README.md` and in `python valid
 | 25 | `25_its_followup`, `25_its_followup_arfken`, `25_its_depth_1000`, `25_its_depth_20000`, `25_its_depth`, `25_its_followup_summary` (the ITS follow-up: the pairs that DADA2 refuses, the truth test on the Arfken mixes, AmpliTrim's estimates against DADA2, the depth series; `ITS_FOLLOWUP_SUMMARY.md`) | 31-32 |
 | 26 | `26_its_night` (the ITS overnight run: every arm of every dataset, the stricter estimates; `ITS_NIGHT_SUMMARY.md`) | 33-34 |
 | 27 | `27_its_rules` (the ITS rules night: truncQ, the trim strengths and the computed maxEE on every ITS dataset; `ITS_RULES_SUMMARY.md`) | 35-36 |
-| 28 | `28_its_bakker` (the Bakker night: the trim, the computed maxEE and their combination on three mock communities; `ITS_BAKKER_SUMMARY.md`) | 37 |
+| 28 | `28_its_bakker` (the Bakker night: the trim, the computed maxEE and their combination on three mock communities; `ITS_BAKKER_SUMMARY.md`) | 37-38 |
 
 Runs 15 to 20 were planned in `FUTURE.md` (the long-read test plan), not in numbered sections of the register.
 

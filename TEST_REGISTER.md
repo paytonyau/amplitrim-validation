@@ -54,6 +54,7 @@ columns: AmpliTrim against DADA2 (filter and yield), against FIGARO (like for li
 | 35 | 27 | ITS rules night: can AmpliTrim compute truncQ, the trim strength and maxEE for ITS? |
 | 36 | 27 | ITS rules night: outcomes |
 | 37 | 28 | The Bakker night: do the ITS rules hold on a third mock community? |
+| 38 | 28 | The Bakker night: outcomes |
 
 ## 1. Datasets
 
@@ -1661,3 +1662,19 @@ The primers are those of the paper's methods (sections 2.3 and 2.4), and the pri
 **What has been seen (disclosed).** All results of runs 24 to 27, which include `std`, `sw10`, `sw15`, `eer` and `tq10` on the eight earlier datasets: on those datasets these arms are known (`sw15`, `eer` safe; `tq10` not), so P105, P107, P108 and P109 are decided there by results already seen, and what is new is Bakker's three datasets and the arm `sweer`. If no Bakker dataset passes below 50% at maxEE 2,2, P106 rests on datasets already seen only, and section 38 says so. Also seen: the paper itself (which members it found and lost on each run with its own pipeline), the primer census and the preparation report of Bakker's reads (which pairs carry which primers; no arm was run) and the reference report. Not seen: any arm on Bakker's reads, and `sweer` anywhere.
 
 **Procedure.** As sections 33 and 35: the code is written with tests, a smoke run at 300 read pairs per sample checks the paths (disclosed in section 38), this section, the code, the references and the reports of the census and the preparation are committed, then the night, then the outcomes.
+
+## 38. The Bakker night: outcomes (15 November 2026)
+
+**The run.** Section 37 and its code were committed in `cf3665d` before the night ran. The smoke run (300 read pairs per sample) came first: `std` reproduced run 26's smoke run and `sw15` and `eer` reproduced runs 26 and 27 on the eight earlier datasets; at that depth P105, P107, P110 and P111 were not met, and `sweer` equalled `sw15` everywhere; those verdicts are not outcomes. The night: folder `C:\data\runs\28_its_bakker` (named `its_bakker` when it ran), 55 of 55 steps; results in `results/28_its_bakker`.
+
+**The verdicts as measured.** The consistency check passed (`std` reproduced run 26 on all eight earlier datasets, sample by sample). P105 to P110 and P112 to P114 were met, P111 not met, as `ITS_BAKKER_SUMMARY.md` gives them.
+
+**A defect in the preparation of Bakker's reads, found after the verdicts were read.** On Bakker's two ITS1 datasets 74% and 41% of the reads of `std` were judged spurious, and only 3.3 of 18 and 6.7 of 18 members were found, against 0% and 11.7 of 19 on ITS2 and 17 to 18 members in the paper. The references are not the cause: every ITS1F to ITS2 amplicon has the length of the paper's Table 3 to the base. The ASVs show the cause (`bakker_overhang.py`, `OVERHANG_CHECK.md`): where an amplicon is shorter than the reads (many of the first run's BITS to B58S3 amplicons of 105 to 366 nt under reads of about 195 nt; the short ITS1 amplicons under 2×250 nt reads), each read runs past the far end of the amplicon, and in the merged sequence the overhangs put the forward primer, or its last bases, back at the start and the reverse primer's reverse complement at the end. `bakker_prep.py` removed the primers at the start of each read only; DADA2's `mergePairs` keeps overhangs by default; DADA2's own ITS workflow cuts the reverse-complemented primers from the read ends (cutadapt) for this reason, and this preparation did not. Of the reads of `std`: `bakker_pcr_its1` 26.8% exact references, 72.5% references with primer overhangs, 0.7% other; `bakker_pol_its1` 27.7%, 72.2% and 0.1%; `bakker_pol_its2` 100.0% exact (its amplicons are longer than the reads). The eight earlier datasets carry no primer overhangs (0.0% of reads with five or more bases of a primer at either end), so runs 26 and 27 and the earlier datasets of this run are not affected.
+
+**What stands and what does not.**
+- *Valid* (decided on the earlier datasets only, or not concerning Bakker's truth): the consistency check and P113 (`sw15` reproduces run 26 and `eer` run 27 on all eight earlier datasets); P106 (it rests on the ATCC standard's ITS2, +57.3 points, and the ITS2 piglet mixes, +46.7 points, only: no Bakker dataset passes below 50% at maxEE 2,2); P112 (the two real ITS studies). On the earlier datasets alone `sw15`, `eer` and `sweer` were safe and `tq10` was not, as in runs 26 and 27.
+- *Not used:* every judgement of Bakker's datasets, so P105, P107, P108, P109, P110, P111 and P114 as decided here. They are decided again on Bakker's reads prepared with the far primer cut (the re-run, section 39), with the criteria of section 37 unchanged.
+
+**Described.** The maxEE computed on the trimmed reads is 2,2 on every dataset (the 75th percentiles of the expected errors fall to 0.35 to 1.02 after the trim), so `sweer` is `sw15` by construction. On Bakker's reads the maxEE computed without the trim is also 2,2 (75th percentiles 0.16 to 1.27), so on Bakker `eer` is `std` and Bakker's datasets cannot test the computed maxEE either way; this does not depend on the defect.
+
+**What follows.** The preparation now cuts the far primer where a read runs into it (`bakker_prep.trim3`, as cutadapt's `-a`/`-A`); the re-run of all eleven datasets, with the overhang check as a gate, is registered as section 39 before it runs. Not claimed from this run: anything about the trim, the computed maxEE or their combination on Bakker's data.

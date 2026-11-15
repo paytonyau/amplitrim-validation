@@ -1,5 +1,11 @@
 # AmpliTrim: future development
 
+## Added on 15 November 2026 (after the Bakker night: run 28, register sections 37 and 38)
+
+1. **Prepare reads by cutting the far primer as well**, wherever an amplicon can be shorter than the reads: run 28 showed that DADA2 keeps the overhangs of reads that run past a short amplicon, and a mock's truth then counts true reads as spurious. Any future mock community or ITS dataset gets both primers cut at both ends (`bakker_prep.trim3`, as cutadapt's `-a`/`-A`), and the overhang check (`bakker_overhang.py`) before its results are read.
+2. **The computed maxEE is 2,2 after the trim** on every dataset tested, so the trim and the computed maxEE need no combined rule: AmpliTrim 0.3 advises one or the other.
+3. **Bakker's data cannot test the computed maxEE** (it is 2,2 on them untrimmed). The evidence for it remains the ATCC standard and the piglet communities (sections 36 and 38).
+
 ## Added on 15 November 2026 (after the ITS rules night: run 27, register sections 35 and 36)
 
 1. **Compute maxEE for ITS** in 0.3 by the 16S rule (the 75th percentile of each direction's expected errors after the `truncQ = 2` cut, over reads of at least 50 bases; int + 1, at least 2): safe on both truths and useful (P102, P103). It gives 2,2 on good data.
