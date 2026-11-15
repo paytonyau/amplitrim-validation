@@ -73,7 +73,7 @@ The number of a run is its number in `validation/README.md` and in `python valid
 | 24 | `24_night10_closing_<date>` (the closing run: the command line on every dataset, the coverage setting, the new datasets, the hold-out overlap test, the grid; `NIGHT10_SUMMARY.md`) | 29-30 |
 | 25 | `25_its_followup`, `25_its_followup_arfken`, `25_its_depth_1000`, `25_its_depth_20000`, `25_its_depth`, `25_its_followup_summary` (the ITS follow-up: the pairs that DADA2 refuses, the truth test on the Arfken mixes, AmpliTrim's estimates against DADA2, the depth series; `ITS_FOLLOWUP_SUMMARY.md`) | 31-32 |
 | 26 | `26_its_night` (the ITS overnight run: every arm of every dataset, the stricter estimates; `ITS_NIGHT_SUMMARY.md`) | 33-34 |
-| 27 | `27_its_rules` (the ITS rules night: truncQ, the trim strengths and the computed maxEE on every ITS dataset; `ITS_RULES_SUMMARY.md`) | 35 |
+| 27 | `27_its_rules` (the ITS rules night: truncQ, the trim strengths and the computed maxEE on every ITS dataset; `ITS_RULES_SUMMARY.md`) | 35-36 |
 
 Runs 15 to 20 were planned in `FUTURE.md` (the long-read test plan), not in numbered sections of the register.
 

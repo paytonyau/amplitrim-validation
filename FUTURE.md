@@ -1,5 +1,12 @@
 # AmpliTrim: future development
 
+## Added on 15 November 2026 (after the ITS rules night: run 27, register sections 35 and 36)
+
+1. **Compute maxEE for ITS** in 0.3 by the 16S rule (the 75th percentile of each direction's expected errors after the `truncQ = 2` cut, over reads of at least 50 bases; int + 1, at least 2): safe on both truths and useful (P102, P103). It gives 2,2 on good data.
+2. **`truncQ` stays 2.** Say in the report that 3 to 10 were tested: 3 to 6 do nothing on these data (no such quality values), 8 and 10 are not safe. Removing poor ends lets more pairs pass the filter; it does not make them merge better (P96).
+3. **The trim strength stays 15** (window 4): of the strengths tested only 10 and 15 are safe, and 15 keeps more.
+4. **Next (section 37, the Bakker night):** whether the trim and the computed maxEE may be combined, whether the 50% trigger is needed, and whether the rules hold on a third mock community with other read lengths and error-prone PCR.
+
 ## Added on 14 November 2026 (after the ITS overnight run: run 26, register sections 33 and 34)
 
 The overnight run tested what AmpliTrim can recommend for ITS (section 34). What follows for version 0.3.0:

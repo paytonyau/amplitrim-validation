@@ -112,7 +112,7 @@ The numbers are those of `python validation/organise_data.py --table`, and the s
 | 24 | Closing run (night 10) | `night10.py`, `tail_classify.py` | 29-30 |
 | 25 | ITS follow-up | `its_followup.py`, `its_followup.R`, `its_truth.py`, `its_estimates.py`, `its_depth.py`, `its_summary.py`, `arfken_download.py` | 31-32 |
 | 26 | ITS overnight run | `its_night.py`, `its_night.R`, `its_night_report.py`, `ncbi_references.py` | 33-34 |
-| 27 | ITS rules night | `its_rules_report.py` | 35 |
+| 27 | ITS rules night | `its_rules_report.py` | 35-36 |
 | | The long unattended battery that runs many of the tests above in one command | `overnight.py`, `run_overnight.bat` (the batch file starts it on Windows) | |
 
 `night1_v2.py` ran night 1 and prepared its datasets (register section 11). It was missing from this archive until 7 November 2026; the only copy found, last modified on 9 October 2026, was added unchanged. Night 1 itself ran on 9 October 2026. The script has not been re-run here and has no test.

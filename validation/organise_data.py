@@ -61,7 +61,7 @@ RUNS = [
     (24, "closing run (night 10)", "29-30", "night10.py, tail_classify.py", [r"^night_?10(?!\d)"]),
     (25, "ITS follow-up", "31-32", "its_followup.py, its_followup.R, its_truth.py, its_estimates.py, its_depth.py, its_summary.py, arfken_download.py", [r"^its_followup", r"^its_depth"]),
     (26, "ITS overnight run", "33-34", "its_night.py, its_night.R, its_night_report.py, ncbi_references.py", [r"^its_night"]),
-    (27, "ITS rules night", "35", "its_rules_report.py", [r"^its_rules"]),
+    (27, "ITS rules night", "35-36", "its_rules_report.py", [r"^its_rules"]),
 ]
 # number, id of the results site, every pattern must match the folder name (lower case): the accession, and the region or the name where one accession holds two datasets
 DATASETS = [

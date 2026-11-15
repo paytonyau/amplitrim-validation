@@ -52,6 +52,7 @@ columns: AmpliTrim against DADA2 (filter and yield), against FIGARO (like for li
 | 33 | 26 | ITS overnight run: what AmpliTrim can recommend for ITS |
 | 34 | 26 | ITS overnight run: outcomes |
 | 35 | 27 | ITS rules night: can AmpliTrim compute truncQ, the trim strength and maxEE for ITS? |
+| 36 | 27 | ITS rules night: outcomes |
 
 ## 1. Datasets
 
@@ -1583,3 +1584,22 @@ AmpliTrim 0.2.0 (`--its`) is also run on the thinned reads of every ITS group, f
 **What has already been seen (disclosed).** All of run 26's results, including `tq10`, `tq20` and `sw15` on these datasets, and the number of distinct quality values of each group. Not seen: any arm of this section other than `tq10` and `sw15`.
 
 **Procedure.** As section 33: the code is written with tests, a smoke run at 300 read pairs per sample checks the paths (disclosed in section 36), this section and the code are committed, then the night, then the outcomes.
+
+## 36. ITS rules night: outcomes (15 November 2026)
+
+**The run.** Section 35 and its code were committed in `df9dace` before the night ran. The smoke run (300 read pairs per sample) came first, as section 35 said; at that depth `std` and `sw15` reproduced run 26's smoke run exactly, and its verdicts differed from the night's in places (`sw15` was not chosen there: `sw10` was, and P96 was met for `tq8`); they are not outcomes. The night: folder `C:\data\runs\27_its_rules` (named `its_rules` when it ran), 32 of 32 steps; the two real ITS studies took 40 and 107 minutes for their 12 arms. Results in `results/27_its_rules`; the summary of the criteria: `ITS_RULES_SUMMARY.md`.
+
+**The consistency checks.** `std` reproduced run 26's counts on all eight groups, sample by sample, so every criterion is decided; and `sw15` reproduced run 26's `sw15` (P101).
+
+**Outcomes** (5,000 read pairs per sample; safe means safe on the ATCC standard and on the piglet mixes, both markers).
+- **Question A, `truncQ` 3 to 8.** `tq3`, `tq4`, `tq5` and `tq6` gave the same counts as `std` on every group: these libraries hold no quality value from 3 to 6, so each cut where `truncQ = 2` cuts. They meet P94 (safe) and P97 and fail P95 (+0.0 points) and P96 (+0.00 points) by having no effect. `tq8` raised the ATCC standard's ITS2 yield by 54.5 points (P95 met) but is not safe (P94 not met: recall −2.2 points in the ITS2 piglet mixes, the limit being 2), and the share of denoised pairs that merge fell by 1.08 points (P96 not met).
+- **Question B, the trim strength.** `sw10` meets P98, P99 (+18.7 points) and P100. `sw20` is not safe (recall −4.4 points in the ITS2 mixes); `sw25` is not safe (spurious reads +5.99 points on the ATCC standard's ITS2, recall −4.4 points in the ITS2 mixes); both meet P99 and P100. P101 met.
+- **Question C, the computed maxEE.** P102 met (safe on both truths), P103 met (+33.6 points), P104 met (its2 +0%, its +0%). The rule computed 2,3 (ATCC ITS1), 3,9 (ATCC ITS2), 2,4 and 2,6 (the piglet isolates), 2,2 and 2,6 (the piglet mixes) and 2,2 on both real ITS studies.
+
+**Described (no criterion).** On the ATCC standard's ITS2 the trim at quality 15 kept 83.0% of the pairs after chimera removal with recall 94.4%; the computed maxEE kept 59.3% with recall 66.7% (no strain recovered); `tq8` 80.2% with recall 77.8%. On the first ITS study `sw25` lowered the median ASVs by 28%; on the second ITS study (3 quality values) every `truncQ` arm up to 8 equalled `std`.
+
+**What follows (as section 35 said).**
+1. A: no value from 3 to 8 is both safe and useful, so `truncQ` stays 2; the report says that 3 to 10 were tested, and that 3 to 6 do nothing on these data. P96 fails for every arm: removing poor ends lets more pairs pass the filter, it does not make them merge better.
+2. B: of the strengths that are safe and useful (`sw10`, and `sw15` as in section 34), `sw15` has the larger ITS2 yield and stays the advised strength. Only one strength is better than the others, so no per-dataset choice of strength follows.
+3. C: AmpliTrim 0.3 may compute maxEE for ITS by this rule; the report says it was tested on short ITS1 and ITS2 mock communities. The trim and the computed maxEE were tested apart; whether they may be combined is not decided here.
+4. Not claimed: accuracy on full-length ITS; taxonomy; abundances; the members left unjudged; any `truncQ` value on data with quality values from 3 to 7.
