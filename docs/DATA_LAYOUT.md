@@ -45,6 +45,8 @@ The reads are public and are not in this repository. Re-fetch them with `validat
 | Mixes MixA, MixB and MixC of Arfken et al. 2023, ITS2 | PRJNA693350 | `19_mock_ITS2_arfken_mixes_PRJNA693350` | (label `arfken_mix_its2`) |
 | The ATCC mycobiome standard MSA-1010 of Arfken et al. 2023, ITS1 (overnight run; ten strains in triplicate) | PRJNA693350 | `20_mock_ITS1_arfken_atcc_PRJNA693350` | (label `atcc_its1`; runs in `arfken_atcc_runs.tsv`) |
 | The ATCC mycobiome standard MSA-1010 of Arfken et al. 2023, ITS2 | PRJNA693350 | `21_mock_ITS2_arfken_atcc_PRJNA693350` | (label `atcc_its2`) |
+| The fungal mock communities of Bakker 2018 (19 isolates; even, staggered A and B), ITS1, the PCR conditions (about 2×195 nt) | PRJNA377530 | `22_mock_ITS1_bakker_pcr_PRJNA377530` | (label `bakker_pcr_its1`, in `prepared/its1/ready`; runs in `bakker_runs.tsv`) |
+| The same communities, the polymerases (2×250 nt; ITS1 and ITS2 in the same files, split by primer) | PRJNA377530 | `23_mock_ITSmix_bakker_polymerase_PRJNA377530` | (labels `bakker_pol_its1` and `bakker_pol_its2`, in `prepared/its1/ready` and `prepared/its2/ready`) |
 
 ## The runs
 
@@ -74,6 +76,7 @@ The number of a run is its number in `validation/README.md` and in `python valid
 | 25 | `25_its_followup`, `25_its_followup_arfken`, `25_its_depth_1000`, `25_its_depth_20000`, `25_its_depth`, `25_its_followup_summary` (the ITS follow-up: the pairs that DADA2 refuses, the truth test on the Arfken mixes, AmpliTrim's estimates against DADA2, the depth series; `ITS_FOLLOWUP_SUMMARY.md`) | 31-32 |
 | 26 | `26_its_night` (the ITS overnight run: every arm of every dataset, the stricter estimates; `ITS_NIGHT_SUMMARY.md`) | 33-34 |
 | 27 | `27_its_rules` (the ITS rules night: truncQ, the trim strengths and the computed maxEE on every ITS dataset; `ITS_RULES_SUMMARY.md`) | 35-36 |
+| 28 | `28_its_bakker` (the Bakker night: the trim, the computed maxEE and their combination on three mock communities; `ITS_BAKKER_SUMMARY.md`) | 37 |
 
 Runs 15 to 20 were planned in `FUTURE.md` (the long-read test plan), not in numbered sections of the register.
 

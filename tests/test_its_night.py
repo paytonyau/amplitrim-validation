@@ -277,3 +277,37 @@ def test_the_rules_night_runs_its_steps_and_writes_the_arms_with_the_computed_ma
     assert sorted(k.split("/")[1] for k in status if k.startswith("atcc_its1/")) == ["arms", "eer", "thin", "trims"] and "mock3/arms" in status
     assert not any("-c" in c for c, _ in world.calls)                                # no AmpliTrim in the rules night
     assert "its_rules_report.py" in logged[-1]
+
+
+# ------------------------------------------------------------------ the Bakker night (--plan bakker, register section 37)
+def test_the_bakker_night_runs_eleven_datasets_six_arms_and_computes_maxee_on_the_trimmed_reads_for_sweer(tmp_path):
+    world = World()
+    base = tmp_path / "data"
+    for lab in ("a1", "b3"):
+        for smp in ("A", "B"):
+            for m in (1, 2):
+                fq(base / lab / f"{smp}_R{m}.fastq.gz", [("ACGT" * 27 + "AC", "I" * 60 + "5" * 10 + "$" * 40)] * 6)   # a Q3 tail: about 20 expected errors untrimmed, 0.1 trimmed
+    logged = []
+    rc = N.main(["--out", str(tmp_path / "night"), "--base", str(base), "--plan", "bakker", "--pairs", "4", "--dry-run"], run=world, thin=fake_thin, rscript="Rscript-fake",
+                sixteen=[], log=logged.append)
+    assert rc == 0 and "11 datasets. Nothing was run." in logged[-1] and any(l.startswith("bakker_pol_its2") for l in logged)
+    import argparse
+    a = argparse.Namespace(base=base, dataset=[f"atcc_its1={base / 'a1'}"], extra=[], no_16s=True, only="", pairs=4, plan="bakker")
+    labels = [p[0] for p in N.plan(a, [])]
+    assert labels[-3:] == ["bakker_pcr_its1", "bakker_pol_its1", "bakker_pol_its2"] and len(labels) == 11
+    night = tmp_path / "night2"
+    rc = N.main(["--out", str(night), "--base", str(base), "--plan", "bakker", "--only", "atcc_its1", "--pairs", "4", "--dataset", f"atcc_its1={base / 'a1'}"],
+                run=world, thin=fake_thin, rscript="Rscript-fake", sixteen=[], log=logged.append)
+    assert rc == 0, "\n".join(logged)
+    d = night / "atcc_its1"
+    rows = [l.split("\t") for l in (d / "arms.tsv").read_text().splitlines()[1:]]
+    assert [r[0] for r in rows] == ["std", "sw10", "sw15", "tq10", "eer", "sweer"]
+    sweer, eer = rows[-1], rows[-2]
+    assert sweer[2].endswith("reads_sw15") and eer[2].endswith("reads")
+    assert eer[5:7] == ["21", "21"] and sweer[5:7] == ["2", "2"]                          # the computed maxEE follows the reads it is computed on
+    assert sweer[5:7] == [str(x) for x in json.loads((d / "eer_sw15.json").read_text())["max_ee"]]
+    assert eer[5:7] == [str(x) for x in json.loads((d / "eer.json").read_text())["max_ee"]]
+    assert (d / "reads_sw10").is_dir() and (d / "reads_sw15").is_dir() and not (d / "reads_sw20").exists()
+    status = json.loads((night / "night_status.json").read_text())
+    assert sorted(k.split("/")[1] for k in status) == ["arms", "eer", "eer_sw15", "thin", "trims"]
+    assert "its_bakker_report.py" in logged[-1]

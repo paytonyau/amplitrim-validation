@@ -55,6 +55,14 @@ WINDOW, WINDOW_Q = 4, 15
 RULES_ARMS = [("std", "paired", "reads", 0, 0, 2, 2, 2, 12)] + [(f"tq{q}", "paired", "reads", 0, 0, 2, 2, q, 12) for q in (3, 4, 5, 6, 8, 10)] \
     + [(f"sw{q}", "paired", f"reads_sw{q}", 0, 0, 2, 2, 2, 12) for q in (10, 15, 20, 25)]
 SW_STRENGTHS = (10, 15, 20, 25)
+# --plan bakker (the third mock community, register section 37): the 8 ITS datasets and Bakker's 3, the advised trim, its weaker form, the computed maxEE,
+# the trim with maxEE computed on the trimmed reads (sweer), and truncQ = 10 as the known-unsafe reference
+BAKKER_FOLDERS = {"bakker_pcr_its1": "22_mock_ITS1_bakker_pcr_PRJNA377530/prepared/its1/ready",
+                  "bakker_pol_its1": "23_mock_ITSmix_bakker_polymerase_PRJNA377530/prepared/its1/ready",
+                  "bakker_pol_its2": "23_mock_ITSmix_bakker_polymerase_PRJNA377530/prepared/its2/ready"}
+BAKKER_ARMS = [("std", "paired", "reads", 0, 0, 2, 2, 2, 12), ("sw10", "paired", "reads_sw10", 0, 0, 2, 2, 2, 12),
+               ("sw15", "paired", "reads_sw15", 0, 0, 2, 2, 2, 12), ("tq10", "paired", "reads", 0, 0, 2, 2, 10, 12)]
+BAKKER_STRENGTHS = (10, 15)
 RULE_Q, TRUNC_Q, MIN_LEN = 0.75, 2, 50
 
 
@@ -222,12 +230,15 @@ class Night:
     def step_sw15(self, d: Path):
         trim_folder(d / "reads", d / "reads_sw15")
 
-    def step_trims(self, d: Path):
-        for q in SW_STRENGTHS:
+    def step_trims(self, d: Path, strengths=SW_STRENGTHS):
+        for q in strengths:
             trim_folder(d / "reads", d / f"reads_sw{q}", q)
 
     def step_eer(self, d: Path):
         (d / "eer.json").write_text(json.dumps(ee_rule(d / "reads"), indent=1), encoding="utf-8")
+
+    def step_eer_sw15(self, d: Path):
+        (d / "eer_sw15.json").write_text(json.dumps(ee_rule(d / "reads_sw15"), indent=1), encoding="utf-8")
 
     def step_mfirst(self, d: Path):
         out = d / "reads_mfirst"
@@ -290,9 +301,19 @@ def rules_rows(d: Path) -> list:
     return rows + [["eer", "paired", str(d / "reads"), 0, 0, ef, er, 2, 12]]
 
 
+def bakker_rows(d: Path) -> list:
+    """The arms of the Bakker night for one dataset: BAKKER_ARMS, eer (maxEE computed on the reads) and sweer (the trim, then maxEE computed on the trimmed reads)."""
+    rows = [[arm, mode, str(d / reads), tf, tr, a, b, tq, mo] for arm, mode, reads, tf, tr, a, b, tq, mo in BAKKER_ARMS]
+    e = json.loads((d / "eer.json").read_text(encoding="utf-8"))["max_ee"]
+    w = json.loads((d / "eer_sw15.json").read_text(encoding="utf-8"))["max_ee"]
+    return rows + [["eer", "paired", str(d / "reads"), 0, 0, e[0], e[1], 2, 12], ["sweer", "paired", str(d / "reads_sw15"), 0, 0, w[0], w[1], 2, 12]]
+
+
 def plan(a, sixteen) -> list:
     """(label, source folder, ITS or not, pairs per sample)."""
     its = {k: Path(a.base) / v for k, v in ITS_FOLDERS.items()}
+    if getattr(a, "plan", "night") == "bakker":
+        its.update({k: Path(a.base) / v for k, v in BAKKER_FOLDERS.items()})
     for item in a.dataset:
         k, sep, v = item.partition("=")
         if not sep or k not in its:
@@ -318,7 +339,8 @@ def main(argv=None, run=subprocess.run, thin=None, rscript=None, sixteen=None, a
     ap.add_argument("--config", type=Path, help="amplitrim_paths.json, for the 16S controls")
     ap.add_argument("--dataset", action="append", default=[], metavar="LABEL=FOLDER")
     ap.add_argument("--extra", action="append", default=[], metavar="LABEL=FOLDER", help="one more ITS dataset (for example a third mock community)")
-    ap.add_argument("--plan", choices=["night", "rules"], default="night", help="night: the ITS overnight run (section 33); rules: the ITS rules night (section 35)")
+    ap.add_argument("--plan", choices=["night", "rules", "bakker"], default="night",
+                    help="night: the ITS overnight run (section 33); rules: the ITS rules night (section 35); bakker: the third mock community (section 37)")
     ap.add_argument("--pairs", type=int, default=5000)
     ap.add_argument("--only", default="", help="labels to run, e.g. atcc_its1,its2 (default: all)")
     ap.add_argument("--no-16s", action="store_true")
@@ -328,7 +350,7 @@ def main(argv=None, run=subprocess.run, thin=None, rscript=None, sixteen=None, a
     ap.add_argument("--final-run", type=Path, help="the final run's command-line reports (results/24_night10_closing_2026-11-06/cli of the archive; found by itself when the archive's "
                                                      "helpers are used): the fallback cut of a 16S control that AmpliTrim cannot analyse")
     a = ap.parse_args(argv)
-    if a.plan == "rules":
+    if a.plan in ("rules", "bakker"):
         a.no_16s = True                                                 # no question of the rules night concerns 16S
     if sixteen is None:
         sixteen = []
@@ -358,7 +380,7 @@ def main(argv=None, run=subprocess.run, thin=None, rscript=None, sixteen=None, a
         import its_estimates                                            # the archive's: AmpliTrim started from --out, so the archive's early copy cannot shadow it
         installed = installed or its_estimates.installed
         amplitrim_call = amplitrim_call or its_estimates.CALL
-    version = installed(run, a.out) if a.plan == "night" else ("not used", "the rules night does not run AmpliTrim")
+    version = installed(run, a.out) if a.plan == "night" else ("not used", "this night does not run AmpliTrim")
     if a.plan == "night" and a.expect_version != "any" and version[0] != a.expect_version:
         log(f"The AmpliTrim in this Python is version {version[0]} ({version[1]}), not {a.expect_version}. Nothing was run.")
         return 2
@@ -379,7 +401,10 @@ def main(argv=None, run=subprocess.run, thin=None, rscript=None, sixteen=None, a
     for label, src, its, pairs in todo:
         d = a.out / label
         log(label)
-        if its and a.plan == "rules":
+        if its and a.plan == "bakker":
+            steps = [("thin", lambda d=d, s=src, p=pairs: night.step_thin(s, d, p)), ("trims", lambda d=d: night.step_trims(d, BAKKER_STRENGTHS)),
+                     ("eer", lambda d=d: night.step_eer(d)), ("eer_sw15", lambda d=d: night.step_eer_sw15(d)), ("arms", lambda d=d: night.step_arms(d, bakker_rows(d)))]
+        elif its and a.plan == "rules":
             steps = [("thin", lambda d=d, s=src, p=pairs: night.step_thin(s, d, p)), ("trims", lambda d=d: night.step_trims(d)), ("eer", lambda d=d: night.step_eer(d)),
                      ("arms", lambda d=d: night.step_arms(d, rules_rows(d)))]
         elif its:
@@ -396,7 +421,7 @@ def main(argv=None, run=subprocess.run, thin=None, rscript=None, sixteen=None, a
     lines += [f"| {k} | {v.get('state')} | {v.get('seconds', '')} | {v.get('error', '')[:200]} |" for k, v in sorted(night.status.items())]
     (a.out / "NIGHT_STATUS.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     log(f"\n{len(night.status) - len(bad)} steps done, {len(bad)} not. written: {a.out / 'NIGHT_STATUS.md'}")
-    log((f"Next: python validation\\its_rules_report.py --out {a.out}" if a.plan == "rules" else f"Next: python validation\\its_night_report.py --out {a.out}") if not bad else "Start the same command again to retry what failed; finished steps are kept.")
+    log((f"Next: python validation\\its_bakker_report.py --out {a.out}" if a.plan == "bakker" else f"Next: python validation\\its_rules_report.py --out {a.out}" if a.plan == "rules" else f"Next: python validation\\its_night_report.py --out {a.out}") if not bad else "Start the same command again to retry what failed; finished steps are kept.")
     return 0 if not bad else 2
 
 

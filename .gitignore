@@ -23,6 +23,7 @@ report/
 !results/**/report/
 !validation/msa1003_refined_variants.fasta
 !validation/references_its/*.fasta
+!validation/references_bakker/*.fasta
 
 # development material stays on the C: data drive (C:\amplitrim_v2, C:\data): the local dataset paths and the run outputs are not committed
 # (the text outputs of the runs reach the archive only through validation/collect_results.py, into results/)

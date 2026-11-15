@@ -53,6 +53,7 @@ columns: AmpliTrim against DADA2 (filter and yield), against FIGARO (like for li
 | 34 | 26 | ITS overnight run: outcomes |
 | 35 | 27 | ITS rules night: can AmpliTrim compute truncQ, the trim strength and maxEE for ITS? |
 | 36 | 27 | ITS rules night: outcomes |
+| 37 | 28 | The Bakker night: do the ITS rules hold on a third mock community? |
 
 ## 1. Datasets
 
@@ -1603,3 +1604,60 @@ AmpliTrim 0.2.0 (`--its`) is also run on the thinned reads of every ITS group, f
 2. B: of the strengths that are safe and useful (`sw10`, and `sw15` as in section 34), `sw15` has the larger ITS2 yield and stays the advised strength. Only one strength is better than the others, so no per-dataset choice of strength follows.
 3. C: AmpliTrim 0.3 may compute maxEE for ITS by this rule; the report says it was tested on short ITS1 and ITS2 mock communities. The trim and the computed maxEE were tested apart; whether they may be combined is not decided here.
 4. Not claimed: accuracy on full-length ITS; taxonomy; abundances; the members left unjudged; any `truncQ` value on data with quality values from 3 to 7.
+
+## 37. The Bakker night: do the ITS rules hold on a third mock community? (written 15 November 2026, before the run)
+
+**Why.** Runs 26 and 27 (sections 33 to 36) found, on two mock communities sequenced as 2×300 MiSeq reads in one laboratory, that a sliding-window trim (window 4, mean quality 15) and a maxEE computed from the reads are safe and useful for ITS, and that `truncQ` should stay 2. They left three questions: whether these rules hold on another mock community, with other read lengths and error-prone PCR; whether the trim may be combined with the computed maxEE; and whether the trigger "fewer than half the pairs pass at maxEE 2,2" is needed for safety.
+
+**The third mock community.** Bakker MG (2018), *A fungal mock community control for amplicon sequencing experiments*, Molecular Ecology Resources 18(3):541-556 (doi:10.1111/1755-0998.12760; BioProject PRJNA377530): 19 fungal isolates in three communities (even, staggered A, staggered B), in triplicate. Two sequencing runs:
+
+| Label | Run | Locus | Reads | Conditions (per community, in triplicate) |
+|---|---|---|---|---|
+| `bakker_pcr_its1` | the first | ITS1 | about 2×195 nt | the standard workflow, a high PCR cycle number, a long extension |
+| `bakker_pol_its1` | the second | ITS1 | 2×250 nt | the polymerases GoTaq, Phusion and PreAmp |
+| `bakker_pol_its2` | the second | ITS2 | 2×250 nt | the same |
+
+The primers are those of the paper's methods (sections 2.3 and 2.4), and the primer census of the reads (`PRIMER_CENSUS.md`) confirmed them: BITS and B58S3 (Bokulich & Mills 2013) on the first run, an ITS1 fragment from the end of 18S to the start of 5.8S; ITS1F and ITS2 (ITS1) and ITS3-KYO2 and ITS4-KYO3 (ITS2) on the second, whose files hold both amplicons. Each read pair is assigned to its dataset by its primers (`bakker_prep.py`): the forward primer at the start of one read and the reverse primer at the start of the other, after a spacer of up to 10 bases with up to 2 mismatches; a pair whose forward primer is on R2 is swapped; the spacer and the primers are cut off. Pairs without the expected pair of primers are dropped (on the second run about 2% begin with N and a few per cent carry a primer with more mismatches; `PREP_REPORT.md`).
+
+**Truth.** The ITS sequences of the 19 isolates in Appendix S2 of the paper, cut with each dataset's primers (in-silico PCR, up to 3 mismatches per primer, primers removed) into one reference file per dataset (`validation/references_bakker`, with `REFERENCES_REPORT.md`): `bakker_pcr_its1` 22 amplicons of 105 to 366 nt, `bakker_pol_its1` 22 of 177 to 438 nt, `bakker_pol_its2` 23 of 296 to 514 nt; every isolate has a product in every set (one of the five *Rhizophagus irregularis* ITS2 variants has none, its siblings do). Three ITS1 amplicons carry ambiguity codes (*Fusarium verticillioides* NRRL 20956, 2 codes; *R. irregularis* variants A1.a and A1.d, 4 and 3 codes); each is written as every variant its codes allow (47 sequences in each ITS1 file), so that a perfect read is not counted as edits away from its reference. *F. oxysporum* and *F. verticillioides* are 1 edit apart on both ITS1 fragments (6 on ITS2), closer than the 2-edit rule can tell apart, so on the ITS1 datasets they count as one member, as the paper too could not separate them on ITS1; no other two isolates are within 6 edits in any set. The references are of the very strains, so every read is judged: true within 2 edits of a reference, spurious otherwise, as in section 33. Recall is over the members expected in every sample: 18 on the ITS1 datasets, 19 on ITS2. All 19 isolates are in every community: the paper's Table 2 lists all 19 in each, in equal 18S rRNA gene abundance in the even community and at 1- to 2,000-fold differences in staggered A and B, so the rarest members of the staggered communities may be below detection at 5,000 read pairs per sample, alike in every arm. On the first run the longest amplicon (*Saccharomyces cerevisiae*, 366 nt without the primers, 402 with them) is longer than the two reads together (about 2×195 nt), so it cannot be found by any arm, as the paper reports; this lowers recall alike in every arm, and the comparisons are against `std` on the same reads. A trim may also take away the overlap of pairs that only just overlap; the share of denoised pairs that merge is reported for every arm, so that such a loss shows itself.
+
+**The other truths and datasets, as in sections 33 and 35.** The ATCC standard against the NCBI references, the piglet mixes against the isolates' own sequences, the piglet isolates (which give the mixes' truth) and the two real ITS studies (flags only). All datasets are thinned with the same function to 5,000 read pairs per sample, so that the eight earlier datasets have the same reads as in runs 26 and 27.
+
+**Arms** (every dataset; no truncation, `minLen = 50`, `minOverlap = 12`, `maxMismatch = 0` and chimera removal throughout):
+
+| Arm | | Question |
+|---|---|---|
+| `std` | `truncQ = 2`, maxEE 2,2 | the baseline and the consistency check |
+| `sw15` | the sliding-window trim (window 4, mean quality 15), then maxEE 2,2 | 1, 3 |
+| `sw10` | the trim at mean quality 10, then maxEE 2,2 | described |
+| `eer` | maxEE computed from the reads by the rule of section 35 | 2 |
+| `sweer` | the trim at mean quality 15, then maxEE computed by the same rule on the trimmed reads | 4 |
+| `tq10` | `truncQ = 10`, maxEE 2,2: the known-unsafe reference | a check |
+
+**The consistency checks.** `std` must reproduce run 26's counts on the eight earlier datasets, sample by sample; if it does not, no criterion is decided until the difference is explained. `sw15` must reproduce run 26 and `eer` run 27 (P113).
+
+**Criteria** (written before the run; "safe" means: against `std`, the share of reads in spurious sequences rises by at most 1 point and recall falls by at most 2 points, on every truth dataset: the ATCC standard (ITS1, ITS2), the piglet mixes (ITS1, ITS2) and Bakker's three datasets).
+- **P105.** `sw15` is safe on every truth dataset.
+- **P106.** On every truth dataset where fewer than 50% of the pairs pass at maxEE 2,2 (`std`), `sw15` raises the yield (after chimera removal, of the input pairs) by at least 5 points.
+- **P107 (the trigger).** On every truth dataset where at least 50% of the pairs pass at maxEE 2,2, `sw15` is safe and loses at most 2 points of yield.
+- **P108.** `eer` is safe on every truth dataset.
+- **P109.** `eer` loses at most 1 point of yield on every truth dataset.
+- **P110.** `sweer` is safe on every truth dataset.
+- **P111.** `sweer` raises the ATCC standard's ITS2 yield by at least 2 points over `sw15`, and loses at most 1 point against `sw15` on every truth dataset.
+- **P112 (a flag), for `sw15`, `eer` and `sweer`.** On the two real ITS studies the median ASVs per sample rise by at most 25%.
+- **P113.** `sw15` reproduces run 26 and `eer` reproduces run 27 on the eight earlier datasets.
+- **P114 (a check).** `tq10` is not safe on at least one truth dataset, as in runs 26 and 27.
+
+*Described, no criterion:* the share of denoised pairs that merge, for every arm and dataset; every arm on Bakker's datasets by condition (standard, high cycle number, long extension, GoTaq, Phusion, PreAmp); the maxEE computed for every dataset, before and after the trim; the members found by no arm; `sw10`.
+
+**What follows (decided now).**
+1. P105 and P106: the trim advice holds on a third mock community, with other read lengths and error-prone PCR. If P105 fails, the advice is restricted to what it was safe on, and the report names where it was not.
+2. P107: if it holds, the trim did not harm data that pass well at 2,2, and the 50% trigger is not needed for safety (it may stay as a guide to when the trim helps); if it fails, the trigger stays.
+3. P108 and P109: the computed maxEE for ITS holds on a third mock community; if either fails, it is not used in 0.3.
+4. P110 and P111: 0.3 may combine the trim with maxEE computed on the trimmed reads. If P110 holds and P111 does not, they stay separate; if P110 fails, they are never combined.
+5. P113 fails: the differences are reported and explained before any other outcome is used. P114 fails: reported, as a contradiction of runs 26 and 27 to be explained.
+6. Not claimed in any case: accuracy on full-length ITS; taxonomy; abundances; Bakker's own conclusions about PCR conditions.
+
+**What has been seen (disclosed).** All results of runs 24 to 27, which include `std`, `sw10`, `sw15`, `eer` and `tq10` on the eight earlier datasets: on those datasets these arms are known (`sw15`, `eer` safe; `tq10` not), so P105, P107, P108 and P109 are decided there by results already seen, and what is new is Bakker's three datasets and the arm `sweer`. If no Bakker dataset passes below 50% at maxEE 2,2, P106 rests on datasets already seen only, and section 38 says so. Also seen: the paper itself (which members it found and lost on each run with its own pipeline), the primer census and the preparation report of Bakker's reads (which pairs carry which primers; no arm was run) and the reference report. Not seen: any arm on Bakker's reads, and `sweer` anywhere.
+
+**Procedure.** As sections 33 and 35: the code is written with tests, a smoke run at 300 read pairs per sample checks the paths (disclosed in section 38), this section, the code, the references and the reports of the census and the preparation are committed, then the night, then the outcomes.
