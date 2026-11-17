@@ -39,16 +39,17 @@ def dada2_share(path: Path) -> dict:
     return {**tot, "pass": tot["filtered"] / n, "merged_share": tot["merged"] / n}
 
 
-def load_amplitrim(folder: Path):
-    """AmpliTrim imported from the repository folder; refuses any version but 0.3.x, or a copy installed elsewhere."""
+def load_amplitrim(folder: Path, want: str = "0.3."):
+    """AmpliTrim imported from the repository folder; refuses any version not starting with `want` (0.3. for the trim check, 0.4. for the v0.4 night),
+    or a copy installed elsewhere."""
     sys.path.insert(0, str(Path(folder).resolve()))
     for name in [m for m in sys.modules if m == "amplitrim" or m.startswith("amplitrim.")]:
         del sys.modules[name]                                                     # an AmpliTrim already imported (the archive holds an early copy) is set aside
     import amplitrim
     from amplitrim import pipeline
     here = Path(amplitrim.__file__).resolve()
-    if not str(here).startswith(str(Path(folder).resolve())) or not amplitrim.__version__.startswith("0.3."):
-        raise SystemExit(f"AmpliTrim 0.3 is not the one imported: version {amplitrim.__version__} from {here}")
+    if not str(here).startswith(str(Path(folder).resolve())) or not amplitrim.__version__.startswith(want):
+        raise SystemExit(f"AmpliTrim {want.rstrip('.')} is not the one imported: version {amplitrim.__version__} from {here}")
     return amplitrim.__version__, pipeline
 
 

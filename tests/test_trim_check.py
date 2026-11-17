@@ -4,6 +4,7 @@ import gzip
 import importlib.util
 import os
 import random
+import re
 import sys
 from pathlib import Path
 
@@ -81,7 +82,7 @@ def dada2_filter(quals, trim):
     return sum(one(f) and one(r) for f, r in quals)
 
 
-@pytest.mark.skipif(not os.environ.get("AMPLITRIM_REPO"), reason="needs AmpliTrim 0.3: set AMPLITRIM_REPO to its repository folder")
+@pytest.mark.skipif(not os.environ.get("AMPLITRIM_REPO"), reason="needs AmpliTrim 0.3 or later: set AMPLITRIM_REPO to its repository folder")
 def test_amplitrims_prediction_equals_an_independent_dada2_filter(tmp_path):
     rng = random.Random(3)
     pairs = make_night(tmp_path / "night", rng)
@@ -92,7 +93,9 @@ def test_amplitrims_prediction_equals_an_independent_dada2_filter(tmp_path):
     saved_modules = {m: sys.modules[m] for m in list(sys.modules) if m == "amplitrim" or m.startswith("amplitrim.")}
     saved_path, saved_datasets = list(sys.path), list(T.DATASETS)
     try:
-        version, pipeline = T.load_amplitrim(Path(os.environ["AMPLITRIM_REPO"]))
+        repo = Path(os.environ["AMPLITRIM_REPO"])
+        held = re.search(r'__version__ = "(\d+\.\d+)\.', (repo / "amplitrim" / "__init__.py").read_text(encoding="utf-8")).group(1)
+        version, pipeline = T.load_amplitrim(repo, want=held + ".")         # the version the repository holds (0.3 for run 30; 0.4 and later since)
         T.DATASETS[:] = ["atcc_its1"]
         rc = T.main(["--night", str(tmp_path / "night"), "--results", str(tmp_path / "results"), "--out", str(tmp_path / "out")], pipeline=pipeline)
     finally:                                                                      # the other tests keep the AmpliTrim they had

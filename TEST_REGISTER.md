@@ -59,6 +59,7 @@ columns: AmpliTrim against DADA2 (filter and yield), against FIGARO (like for li
 | 40 | 29 | The Bakker re-run: outcomes |
 | 41 | 30 | The trim check: does AmpliTrim 0.3 predict the share of pairs that pass DADA2's filter after the trim? |
 | 42 | 30 | The trim check: outcomes |
+| 43 | 31 | The v0.4 night: a fourth mock community, the trim's window, minLen, truncQ 3 to 7, forward reads, a better ITS yield estimate, the user's settings, and 16S unchanged |
 
 ## 1. Datasets
 
@@ -1759,3 +1760,110 @@ The primers are those of the paper's methods (sections 2.3 and 2.4), and the pri
 **Described.** The predictions equal DADA2's exactly, untrimmed and trimmed, on the five datasets that AmpliTrim analysed in full (the ATCC standard's ITS1 and ITS2, the ITS1 and ITS2 piglet mixes, and the second ITS study, each under its subsample of 50,000 read pairs); the small differences elsewhere come from the subsample. The predicted yield after the trim, against DADA2's merged share: on the mock communities within 4.2 points except the ITS1 piglet isolates (+12.9 points: 83.95% predicted, 71.06% merged); on the two real ITS studies far too high (+27.5 and +70.2 points), as every ITS yield estimate is (sections 28 to 32).
 
 **What follows (as section 41 said).** P115 is met: AmpliTrim 0.3's report says that the predicted pass rate after the trim was checked against DADA2 on these eleven datasets, with the largest difference, and `summary.json` gives `trim_advice.checked: true`; 0.3.0 may be released. The yield after the trim stays described as an upper bound. P116 is met: 0.3's filter prediction agrees with 0.2.0's validated one.
+
+## 43. The v0.4 night: a fourth mock community, the trim's window, minLen, truncQ 3 to 7, forward reads, a better ITS yield estimate, the user's settings, and 16S unchanged (written 17 November 2026, before the run)
+
+### Why
+
+AmpliTrim 0.3 (sections 33 to 42) computes maxEE for ITS and advises a sliding-window trim (window 4, mean quality 15) when fewer than half the pairs pass at maxEE 2,2; both were safe on three fungal mock communities, and the trim's predicted pass rate was checked against DADA2 (section 42). Several questions were left open (FUTURE.md, section 42), and 0.4 lets the user set every filter setting. This night answers, with the data at hand:
+
+| | Question |
+|---|---|
+| A | Do the 0.3 rules (the trim, the computed maxEE) hold on a fourth, much richer mock community (Pauvert et al. 2019, 189 strains)? |
+| B | Which trim is best: the gentlest that is safe and keeps the most pairs merged? Windows of 2 to 20 bases at mean quality 15, and mean quality 12 and 18 at window 4. |
+| C | Is `minLen = 50` right, and do short real amplicons get lost at 100 or 150? |
+| D | Do `truncQ` values 3, 5 and 7 differ from 2 where the qualities allow it, and are they safe? (Run 27 could not tell: the earlier mocks hold no quality from 3 to 6.) |
+| E | Are forward reads alone safe on all four mock communities, and how many members do they find? And for single-end data: does the trim help forward reads alone, or does it split one member into many ASVs of different lengths? |
+| F | Can an ITS yield estimate that allows no differences in the overlap replace the present upper bound? |
+| G | Does AmpliTrim 0.4 predict DADA2's filter for the settings a user can now choose (`truncQ`, `minLen`, the trim's window and quality)? |
+| H | Does AmpliTrim 0.4 at its defaults give exactly what 0.3 gives on the 16S datasets of the paper? |
+
+**Left out, as decided in the plan (FUTURE.md):** an independent test of the 16S maxEE rule (it needs 16S mock data not used so far), full-length ITS with a known answer, and NovaSeq or 2×150 reads (no such data at hand). Also left out: keeping the primers on the reads (Pauvert et al. recommend it for DADA2, but AmpliTrim assumes primers removed).
+
+### The fourth mock community
+
+Pauvert C, Buée M, Laval V, et al. (2019), *Fungal Ecology* 41:23-33 (doi:10.1016/j.funeco.2019.03.005): an equimolar mixture of 189 strains (Ascomycota, Basidiomycota, Mucoromycota), three replicates (`DikA`, `DikB`, `DikC`), ITS1F/ITS2, MiSeq 2×250 nt, primers on the reads; reads from Dataverse (doi:10.15454/8CVWRR), saved in `C:\data\24_mock_ITS1_pauvert_dataverse\raw` (`Forward_R1_ITSEnz.Dik?.fastq.gz`, `Reverse_R2_ITSEnz.Dik?.fastq.gz`). Label `pauvert_its1`.
+
+- **Preparation** (`pauvert_prep.py`, the functions of `bakker_prep.py`): each pair is kept when ITS1F starts one read and ITS2 the other (spacer up to 10 bases, up to 2 mismatches; swapped mates are turned); both primers are cut at the start of the reads and, where a read runs past the amplicon, at its end (`trim3`); written as `DikA_R1.fastq.gz` and so on, in `prepared/its1/ready`. Overhangs of at least 3 bases must be at most 1% of the reads of `std` (the gate of section 40).
+- **Truth** (`pauvert_prep.py`): the authors' Table S1 (`mmc2.csv`). Each strain's Sanger sequence starts right after ITS1F. A *complete* sequence, holding the reverse-complemented ITS2 site (up to 3 mismatches), is cut before it. A *partial* sequence (the Sanger read stopped before the site, mostly within ITS1, at about 233 to 245 bases: many Basidiomycota have a long ITS1) is kept whole and judged as a prefix: a sequence matches it when its first bases, as many as the reference has (give or take 2, for indels), are within 2 edits of it. Ambiguity codes are written as every variant they allow, up to 64. Left out: a sequence with more variants, and a partial one shorter than 150 bases. Strains whose sequences are identical or within 2 edits (a partial one against the other's first bases) count as one member. True: within 2 edits of any reference so judged; spurious: otherwise (every kept strain as a reference). *A known cost:* on a strain with a partial reference, an error beyond the reference's end goes unseen, so spurious reads there are undercounted; recall is unaffected.
+- **Computed from Table S1 before any read was seen:** 130 complete and 57 partial references; left out *Rhizoctonia solani* AG 2-2 (16 ambiguity codes in the cut sequence) and *Strobilomyces strobilaceus* (a partial sequence of 81 bases); 164 members, 13 of them holding more than one strain (among them six *Botrytis* strains, four *Fusarium* strains of the *F. oxysporum* and *F. fujikuroi* complexes, as the authors found); 151 expected.
+- **Expected members:** the members holding a strain the authors found in the raw reads (`Present_In_Raw_MiSeq_Data = Yes`, 160 strains; 151 members as merged above); recall is the share of them found per sample. This set was fixed by the authors, before any of our runs.
+- **Depth:** all read pairs of the three replicates (about 44,000 to 56,000 each), not 5,000: with 160 expected members, 5,000 pairs would leave many below detection and make recall noisy. (Every other dataset keeps 5,000 pairs per sample, so that it reproduces runs 26 to 29.)
+
+### Datasets
+
+Twelve ITS datasets: the eight of runs 26 to 29 and Bakker's three (thinned as in run 29, reads prepared as in run 29), and `pauvert_its1`. Truth on eight: the ATCC standard (ITS1, ITS2), the piglet mixes (ITS1, ITS2), Bakker's three, Pauvert. The two real ITS studies give the ASV flags. The 16S datasets of the paper (twelve, as in run 24) for H.
+
+### Arms (every ITS dataset; DADA2 as in section 37: no truncation, `truncQ = 2`, `minLen = 50`, maxEE 2,2, `minOverlap = 12`, `maxMismatch = 0`, chimera removal)
+
+| Arm | Change | Question |
+|---|---|---|
+| `std` | none | baseline; consistency with run 29 |
+| `sw15` | the trim, window 4, mean quality 15 | A; consistency with run 29 |
+| `w2`, `w3`, `w5`, `w6`, `w8`, `w10`, `w12`, `w16`, `w20` | the trim with a window of 2 to 20 bases, mean quality 15 | B |
+| `q12`, `q18` | the trim with window 4, mean quality 12 or 18 (run 27 tested 10, 15, 20, 25) | B |
+| `ml20`, `ml100`, `ml150` | the trim (`sw15`), then `minLen` 20, 100 or 150 | C |
+| `tq3`, `tq5`, `tq7` | `truncQ` 3, 5 or 7 | D |
+| `eer` | maxEE computed from the reads (section 35's rule) | A; consistency with run 29 |
+| `fwd` | forward reads alone (the `std` filter on R1, no merging) | E |
+| `fwd15` | forward reads alone, trimmed first (`sw15`): single-end data | E |
+
+Twenty-two arms on twelve datasets. Every trim is the code of `amplitrim/trim.py` (`sliding_cut`).
+
+### F: the ITS yield estimate
+
+For every ITS dataset, AmpliTrim 0.4's own merge test is run on the reads that pass the filter (untrimmed, and trimmed with `sw15`), with vsearch allowing 10 (today's), 5, 2 and 0 differences in the overlap; each estimate (share of the input pairs) is compared with DADA2's merged share (merged / input, before chimera removal) of `std` and of `sw15`.
+
+### G: the user's settings in AmpliTrim 0.4
+
+AmpliTrim 0.4 (built and committed with this section) runs on each ITS dataset's thinned reads with `--trunc-q 3`, `5`, `7`; with `--min-len 20`, `100`, `150` (its prediction after the trim); and with every trim of B (`--trim-window`, `--trim-quality`); each predicted pass rate is compared with DADA2's of the matching arm (`tq3`..., `ml20`..., `w2`..., `q12`, `q18`).
+
+### H: 16S unchanged
+
+AmpliTrim 0.4 runs on each of the twelve 16S datasets as run 24 ran 0.2.0 (the whole dataset), at its defaults, and once more with every new option given at its default (`--trunc-q 2 --min-len 50 --max-mismatch 0 --trim-advice-below 0.5`).
+
+### Gates (if one fails, no criterion is decided until the failure is explained)
+
+- *Consistency:* on the eleven earlier ITS datasets, `std`, `sw15` and `eer` reproduce run 29's counts, sample by sample.
+- *Overhangs:* on Bakker's three datasets and Pauvert, at most 1% of the reads of `std` carry primer overhangs of at least 3 bases.
+- *The truth of Pauvert:* at least 120 expected members remain after the exclusions (151, computed above); the counts of excluded and merged strains are reported before any arm is judged.
+
+### Criteria (written before the run; "safe" as in sections 33 and 37: against the reference arm, spurious reads rise by at most 1 point and recall falls by at most 2 points, on every truth dataset)
+
+- **P117 (A).** `sw15` is safe against `std` on Pauvert.
+- **P118 (A).** `eer` is safe against `std` on Pauvert.
+- **P119 (B), per trim `w2` to `w20`, `q12`, `q18`.** The trim is safe against `std` on every truth dataset.
+- **P120 (B), per trim.** On the ATCC standard's ITS2, its yield (after chimera removal) is at least 2 points above `sw15`'s, and on no truth dataset more than 1 point below.
+- **P130 (B), the best trim, chosen by a rule fixed now.** Among the trims that meet P119 (`sw15` included): the highest mean yield over the eight truth datasets; trims within 0.5 points of the highest count as tied, and among them the one that removes the fewest bases (mean bases cut per read, both mates) is the best. Reported: the best trim, and whether it is `sw15`.
+- **P121 (C), per `minLen` 20, 100, 150.** Safe against `sw15` on every truth dataset.
+- **P122 (D), per `truncQ` 3, 5, 7.** Safe against `std` on every truth dataset where its counts differ from `std`'s (a value that changes nothing is reported as such and not judged).
+- **P123 (D), per `truncQ`.** On some truth dataset where it differs, the yield is at least 5 points above `std`'s.
+- **P124 (E).** `fwd` is safe against `std` on every truth dataset, and its recall is not below `std`'s on any.
+- **P129 (E, single-end).** `fwd15` is safe against `fwd` on every truth dataset; and, a flag, the median number of ASVs per expected member found rises by at most 25% against `fwd` (the trim leaves reads of different lengths, which DADA2 counts as different sequences).
+- **P125 (F).** Over the twelve ITS datasets, the mean absolute difference between the estimate allowing 0 differences and DADA2's merged share is at least 5 points smaller than that of today's estimate (10 differences), for `std` and for `sw15`, and no dataset differs by more than 10 points.
+- **P126 (G).** Every predicted pass rate of G is within 1 point of DADA2's on every ITS dataset.
+- **P127 (H).** On every 16S dataset AmpliTrim 0.4 recommends the same `truncLenF`, `truncLenR` and maxEE as run 24 did with 0.2.0, with the estimated yield within 0.01 points, and the run with every new option at its default gives the same as the run without.
+- **P128 (a flag), per arm `sw15`, every trim of B, `eer`, `tq3`, `tq5`, `tq7`, `fwd`.** On the two real ITS studies, the median ASVs per sample rise by at most 25% against `std`.
+
+*Described, no criterion:* for every trim, the mean bases cut per read (each mate) and the share of filtered pairs that merge; the distinct read lengths and ASVs per member of `fwd` and `fwd15`; every arm on Pauvert by replicate; the members of Pauvert found by no arm, and the authors' reasons for the absent ones; the cut lengths of every trim; the distinct quality values of every dataset (which `truncQ` values can differ); the estimates of F at every number of differences; Bakker by PCR condition.
+
+### What follows (decided now)
+
+1. **A:** P117 and P118 met: the 0.3 rules hold on a fourth mock community; the report and the paper say four. Either not met: the report states where it was not safe, and the advice is restricted.
+2. **B:** the best trim of P130 becomes the default of `amplitrim trim` only if it also meets P120 against `sw15`; otherwise window 4 and mean quality 15 stay, and the report gives the trims tested and the best of them.
+3. **C:** `minLen` 50 stays unless 20 meets P121 and keeps more members; a value that fails P121 is named in the report as unsafe (with the shortest amplicons it lost).
+4. **D:** a `truncQ` that meets P122 and P123 becomes an option the report may name for unbinned data, beside the trim; otherwise `truncQ` stays 2, and 3 to 10 are reported as tested.
+5. **E, single-end:** P129 met: the report may advise the trim for single-end ITS data as well; its safety met but its flag not: the report says the trim splits members into length variants on single-end data and is not advised there; safety not met: not advised for single-end data.
+6. **E:** P124 met: the report says forward reads alone were safe on four mock communities (still named as an option, not advised, because of the ASVs on the real full-length study); not met: the report says where they were not.
+7. **F:** P125 met: AmpliTrim 0.4 reports the ITS yield from the estimate allowing 0 differences (16S unchanged), and no longer calls it only an upper bound; not met: the ITS yield stays an upper bound.
+8. **G:** P126 met: every user setting's prediction is called checked; any setting that misses it is marked in the report as not checked.
+9. **H:** P127 must hold before 0.4 is released; a difference is explained and fixed first.
+10. Not claimed in any case: accuracy on full-length ITS; taxonomy; abundances; NovaSeq or reads shorter than 2×195; long reads (PacBio, Nanopore), where a read covers the whole amplicon and its end is sequence, not a poor tail.
+
+### What has been seen (disclosed)
+
+All results of runs 24 to 30. Pauvert's Table S1 and the paper, and the truth computed from Table S1 (above): a first version that left out the 57 partial references gave 102 expected members and failed the gate, which led to the prefix rule; not any of Pauvert's reads. On the eleven earlier datasets `std`, `sw15` and `eer` are known (runs 26 to 29); new there: `w3`, `w8`, `w12`, `ml20`, `ml100`, `ml150`, `tq3`, `tq5`, `tq7` (run 27's `tq3` to `tq6` had no effect on most of them), `fwd` beyond the ATCC standard, and F and G.
+
+### Procedure
+
+AmpliTrim 0.4 is built with its tests; the night's code with its tests; Pauvert's reads are prepared and its truth built (their reports committed); a smoke run at 300 read pairs per sample (Pauvert: 3,000) checks the paths and the gates; this section, AmpliTrim 0.4's commit and the code are committed; the night runs into `C:\data\runs\v04_night`, and after each ITS dataset it records the bases each trim cut (`cut.json`) and deletes that dataset's trimmed copies and filtered reads, whose results are already in its tables; the outcomes follow in section 44. Expected length: ten to twelve hours.

@@ -5,7 +5,7 @@
 #   mode single : the same on the R1 files only (forward reads alone, or pairs merged before DADA2); truncR and maxEER are not used
 #   mode fwd    : the denoised forward reads of the paired arm named in `reads`, without merging
 #   mode overlap: mergePairs again on the denoised reads of the paired arm named in `reads`, with this row's minOverlap
-# truncF and truncR of 0 mean no truncation (the ITS setting). minLen = 50 and maxN = 0 in every arm.
+# truncF and truncR of 0 mean no truncation (the ITS setting). minLen = 50 (or the row's own minLen column, when the table has one) and maxN = 0 in every arm.
 # Writes, for every arm, <out_dir>/<arm>/samples.tsv (sample, input, filtered, denoised, merged, nonchim, asvs), <out_dir>/<arm>/seqs.tsv (sample, sequence, abundance:
 # the sequences after chimera removal) and <out_dir>/<arm>/DONE. An arm whose DONE is there is not run again, so a stopped night can be started again.
 # denoised: for a paired arm the pairs of denoised reads that enter the merge step, for a single arm the denoised reads; merged: the pairs merged (single: = denoised);
@@ -18,6 +18,8 @@ arms <- read.delim(a[1], stringsAsFactors = FALSE, colClasses = "character")
 out_dir <- a[2]
 mt <- if (length(a) >= 3) as.logical(a[3]) else TRUE
 MIN_LEN <- 50
+# minLen of a row: its own column minLen when the table has one (the v0.4 night, section 43), otherwise MIN_LEN, as in every earlier night
+min_len_of <- function(r) if (!is.null(r$minLen) && !is.na(r$minLen) && nzchar(r$minLen)) int(r$minLen) else MIN_LEN
 int <- function(x) as.integer(x)
 num <- function(x) as.numeric(x)
 sname <- function(f) sub("_R[12].*$", "", basename(f))
@@ -87,7 +89,7 @@ run_paired <- function(r, dir) {
   fd <- file.path(dir, "filtered"); dir.create(fd, showWarnings = FALSE, recursive = TRUE)
   f1 <- file.path(fd, basename(fn1)); f2 <- file.path(fd, basename(fn2))
   out <- suppressWarnings(filterAndTrim(fn1, f1, fn2, f2, truncLen = c(int(r$truncF), int(r$truncR)), maxN = 0, maxEE = c(num(r$maxEEF), num(r$maxEER)),
-                                        truncQ = int(r$truncQ), minLen = MIN_LEN, rm.phix = FALSE, compress = TRUE))
+                                        truncQ = int(r$truncQ), minLen = min_len_of(r), rm.phix = FALSE, compress = TRUE))
   keep <- file.exists(f1) & file.exists(f2)
   o <- list(fn1 = fn1, out = out, keep = keep, f1 = f1, f2 = f2, dF = list(), dR = list())
   if (any(keep)) {
@@ -104,7 +106,7 @@ run_single <- function(r, dir) {
   stopifnot(length(fn1) > 0)
   fd <- file.path(dir, "filtered"); dir.create(fd, showWarnings = FALSE, recursive = TRUE)
   f1 <- file.path(fd, basename(fn1))
-  out <- suppressWarnings(filterAndTrim(fn1, f1, truncLen = int(r$truncF), maxN = 0, maxEE = num(r$maxEEF), truncQ = int(r$truncQ), minLen = MIN_LEN, rm.phix = FALSE,
+  out <- suppressWarnings(filterAndTrim(fn1, f1, truncLen = int(r$truncF), maxN = 0, maxEE = num(r$maxEEF), truncQ = int(r$truncQ), minLen = min_len_of(r), rm.phix = FALSE,
                                         compress = TRUE))
   keep <- file.exists(f1); dF <- list()
   if (any(keep)) {

@@ -70,6 +70,8 @@ Every file of this folder, by what it is for. The scripts import one another by 
 | `bakker_prep.py` | Bakker's reads assigned to ITS1 or ITS2 by their primers and trimmed, and the reference amplicons cut from Appendix S2 (section 37; the result is in `references_bakker/`) |
 | `bakker_overhang.py` | Bakker's ASVs as exact references, references with primer overhangs, or other: the check of section 38 and the gate of section 39 |
 | `trim_check.py` | Does AmpliTrim 0.3 predict the share of pairs that pass DADA2's filter after the trim? Run 29's reads against DADA2's counts (section 41; P115, P116) |
+| `pauvert_prep.py` | The fourth mock community (Pauvert et al. 2019, 189 strains): its reads made ready and its truth from Table S1, with partial references judged as prefixes (section 43) |
+| `v04_report.py` | The v0.4 night: gates, criteria P117 to P130, the best trim, the ITS yield estimate, AmpliTrim 0.4's predictions, 16S unchanged (section 43) |
 | `msa1003_refined_variants.fasta` | The reference refined on Night 8 (69 sequences: the 60 genome variants, with the two *H. pylori* variants replaced by the sequence of the sample, and ten variants that passed the refinement rule of `FUTURE.md`; the added variants carry `0_copies`); to be used only on data that were not used to derive it |
 | `msa1003_refined_provenance.tsv` | For each of the 11 sequences that replace or extend the genome variants: its strain, how it was treated, the organisms of its 100% BLAST matches and its reads in the two libraries of Night 8 |
 | `msa1003_night8_asv_set.txt` | The names of the 49 sequences that were final ASVs in Night 8 (38 genome variants, the 10 added ones and the *H. pylori* sequence): the replication set of Night 9 |
@@ -122,6 +124,7 @@ The numbers are those of `python validation/organise_data.py --table`, and the s
 | 28 | Bakker night | `its_bakker_report.py`, `bakker_prep.py` | 37-38 |
 | 29 | Bakker re-run | `bakker_overhang.py`, `bakker_prep.py` | 39-40 |
 | 30 | Trim check | `trim_check.py` | 41-42 |
+| 31 | v0.4 night | `its_night.py`, `v04_report.py`, `pauvert_prep.py` | 43 |
 | | The long unattended battery that runs many of the tests above in one command | `overnight.py`, `run_overnight.bat` (the batch file starts it on Windows) | |
 
 `night1_v2.py` ran night 1 and prepared its datasets (register section 11). It was missing from this archive until 7 November 2026; the only copy found, last modified on 9 October 2026, was added unchanged. Night 1 itself ran on 9 October 2026. The script has not been re-run here and has no test.

@@ -64,6 +64,46 @@ BAKKER_ARMS = [("std", "paired", "reads", 0, 0, 2, 2, 2, 12), ("sw10", "paired",
                ("sw15", "paired", "reads_sw15", 0, 0, 2, 2, 2, 12), ("tq10", "paired", "reads", 0, 0, 2, 2, 10, 12)]
 BAKKER_STRENGTHS = (10, 15)
 RULE_Q, TRUNC_Q, MIN_LEN = 0.75, 2, 50
+# --plan v04 (the v0.4 night, register section 43): the eleven ITS datasets of run 29 and Pauvert's (all its pairs), fourteen arms, the estimates of the merge
+# on std and sw15, AmpliTrim 0.4's predictions at the settings a user can set (G), and AmpliTrim 0.4 on the whole 16S datasets (H)
+PAUVERT_FOLDERS = {"pauvert_its1": "24_mock_ITS1_pauvert_dataverse/prepared/its1/ready"}
+V04_WINDOWS, V04_QUALITIES, V04_MINLENS, V04_TRUNCQ = (2, 3, 5, 6, 8, 10, 12, 16, 20), (12, 18), (20, 100, 150), (3, 5, 7)
+
+
+def v04_rows(d: Path) -> list:
+    """The twenty-two arms of the v0.4 night for one dataset, with a minLen column (section 43)."""
+    e = json.loads((d / "eer.json").read_text(encoding="utf-8"))["max_ee"]
+    rows = [["std", "paired", d / "reads", 0, 0, 2, 2, 2, 12, MIN_LEN], ["sw15", "paired", d / "reads_sw15", 0, 0, 2, 2, 2, 12, MIN_LEN]]
+    rows += [[f"w{w}", "paired", d / f"reads_w{w}", 0, 0, 2, 2, 2, 12, MIN_LEN] for w in V04_WINDOWS]
+    rows += [[f"q{q}", "paired", d / f"reads_q{q}", 0, 0, 2, 2, 2, 12, MIN_LEN] for q in V04_QUALITIES]
+    rows += [[f"ml{m}", "paired", d / "reads_sw15", 0, 0, 2, 2, 2, 12, m] for m in V04_MINLENS]
+    rows += [[f"tq{q}", "paired", d / "reads", 0, 0, 2, 2, q, 12, MIN_LEN] for q in V04_TRUNCQ]
+    rows += [["eer", "paired", d / "reads", 0, 0, e[0], e[1], 2, 12, MIN_LEN],
+             ["fwd", "fwd", "std", 0, 0, 2, 2, 2, 12, MIN_LEN], ["fwd15", "fwd", "sw15", 0, 0, 2, 2, 2, 12, MIN_LEN]]
+    return [[str(x) for x in r] for r in rows]
+
+
+def predictions(pipeline, reads: Path, work: Path) -> dict:
+    """G (section 43): AmpliTrim's predicted share of pairs passing DADA2's filter, as `amplitrim --its` computes it, at each setting a user can set:
+    truncQ 2, 3, 5, 7 (untrimmed, maxEE 2,2), and after the trim at windows 3, 4, 8, 12 (minLen 50) and minLen 20, 100, 150 (window 4)."""
+    from dataclasses import replace
+    s = pipeline.Settings(input_dir=reads, work_dir=work, marker="its")
+    out = {"truncQ": {}, "window": {}, "quality": {}, "minLen": {}}
+    first = None
+    for q in (2,) + V04_TRUNCQ:
+        r = pipeline._run_once(replace(s, trunc_q=q, max_ee=2.0))
+        out["truncQ"][str(q)] = r.candidates[0].ee_pass_rate if r.candidates else None
+        if q == 2:
+            first = r
+    first.pass_rate_default = out["truncQ"]["2"]
+    for w in (4,) + V04_WINDOWS:
+        out["window"][str(w)] = pipeline._its_after_trim(first, replace(s, trim_window=w), work)["pass_rate"]
+    for q in V04_QUALITIES:
+        out["quality"][str(q)] = pipeline._its_after_trim(first, replace(s, trim_quality=float(q)), work)["pass_rate"]
+    for m in V04_MINLENS:
+        out["minLen"][str(m)] = pipeline._its_after_trim(first, replace(s, min_len=m), work)["pass_rate"]
+    out["pairs"] = first.sub.n_pairs
+    return out
 
 
 # ----------------------------------------------------------------------------------------------------------- pure helpers (unit-tested)
@@ -87,7 +127,7 @@ def fastq_records(path: Path):
             yield h.rstrip("\n"), s, p, qq
 
 
-def trim_folder(src: Path, dst: Path, q: float = WINDOW_Q) -> int:
+def trim_folder(src: Path, dst: Path, q: float = WINDOW_Q, window: int = WINDOW) -> int:
     """The sliding-window trim (sw15 by default; sw10, sw20, sw25 with q): every read of every FASTQ in src cut by sliding_cut, written to dst under the same name
     (both mates, so the pairs stay in order). Returns the files written."""
     dst.mkdir(parents=True, exist_ok=True)
@@ -97,7 +137,7 @@ def trim_folder(src: Path, dst: Path, q: float = WINDOW_Q) -> int:
         part = out.with_name(out.name + ".part")
         with gzip.open(part, "wt", newline="\n") if f.name.endswith(".gz") else open(part, "w", newline="\n") as o:
             for h, s, p, qq in fastq_records(f):
-                k = sliding_cut(qq, q=q)
+                k = sliding_cut(qq, window=window, q=q)
                 o.write(f"{h}\n{s[:k]}\n{p}\n{qq[:k]}\n")
         part.replace(out)
         n += 1
@@ -250,7 +290,8 @@ class Night:
 
     def step_arms(self, d: Path, rows: list):
         arms = d / "arms.tsv"
-        arms.write_text("\t".join(COLS) + "\n" + "".join("\t".join(str(x) for x in r) + "\n" for r in rows), encoding="utf-8")
+        cols = COLS + ["minLen"] if rows and len(rows[0]) == len(COLS) + 1 else COLS        # the v0.4 night gives each arm its minLen
+        arms.write_text("\t".join(cols) + "\n" + "".join("\t".join(str(x) for x in r) + "\n" for r in rows), encoding="utf-8")
         if not self.rscript:
             raise RuntimeError("Rscript was not found (R with DADA2 is needed)")
         self.call([self.rscript, HERE / "its_night.R", arms, d / "dada2", "TRUE"])
@@ -272,8 +313,8 @@ class Night:
         if not (rep / "summary.json").is_file():
             raise RuntimeError("AmpliTrim wrote no summary.json")
 
-    def step_estimates(self, d: Path):
-        filt = d / "dada2" / "std" / "filtered"
+    def step_estimates(self, d: Path, arm: str = "std"):
+        filt = d / "dada2" / arm / "filtered"
         tmp = d / "tmp_plain"
         lines = ["sample\tfiltered_pairs\t" + "\t".join(f"merged_d{k}" for k in DIFFS)]
         for s, r1, r2 in pairs_in(filt):
@@ -286,7 +327,55 @@ class Night:
                 got.append(count_fastq(merged))
             lines.append(f"{s}\t{n}\t" + "\t".join(str(g) for g in got))
         shutil.rmtree(tmp, ignore_errors=True)
-        (d / "estimates.tsv").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        (d / ("estimates.tsv" if arm == "std" else f"estimates_{arm}.tsv")).write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    def step_windows(self, d: Path):
+        """The trims of the v0.4 night: window 4 at mean quality 15 (sw15, as run 29), windows 2 to 20 at 15, and window 4 at 12 and 18."""
+        trim_folder(d / "reads", d / "reads_sw15", WINDOW_Q, WINDOW)
+        for w in V04_WINDOWS:
+            trim_folder(d / "reads", d / f"reads_w{w}", WINDOW_Q, w)
+        for q in V04_QUALITIES:
+            trim_folder(d / "reads", d / f"reads_q{q}", q, WINDOW)
+
+    def step_predict(self, d: Path, pipeline):
+        work = d / "predict_work"
+        try:
+            (d / "predict.json").write_text(json.dumps(predictions(pipeline, d / "reads", work), indent=1), encoding="utf-8")
+        finally:
+            shutil.rmtree(work, ignore_errors=True)
+
+    def step_tidy(self, d: Path):
+        """The v0.4 night: the bases each trim cut are written to cut.json, then the trimmed copies and DADA2's filtered reads are deleted (their results
+        are in samples.tsv, seqs.tsv, estimates*.tsv, predict.json), so that the night holds about one dataset's bulk at a time."""
+        def count(folder):
+            n = b = 0
+            for f in sorted(Path(folder).glob("*.fastq*")):
+                op = gzip.open if f.name.endswith(".gz") else open
+                with op(f, "rt") as fh:
+                    for i, line in enumerate(fh):
+                        if i % 4 == 1:
+                            n, b = n + 1, b + len(line.rstrip("\n"))
+            return n, b
+        n0, b0 = count(d / "reads")
+        trims = {"sw15": d / "reads_sw15"} | {f"w{w}": d / f"reads_w{w}" for w in V04_WINDOWS} | {f"q{q}": d / f"reads_q{q}" for q in V04_QUALITIES}
+        cut = {}
+        for arm, folder in trims.items():
+            if folder.is_dir():
+                n1, b1 = count(folder)
+                cut[arm] = (b0 - b1) / n0 if n0 and n1 == n0 else None
+        (d / "cut.json").write_text(json.dumps({"reads": n0, "bases": b0, "mean_bases_cut": cut}, indent=1), encoding="utf-8")
+        for folder in trims.values():
+            shutil.rmtree(folder, ignore_errors=True)
+        for f in (d / "dada2").glob("*/filtered"):
+            shutil.rmtree(f, ignore_errors=True)
+
+    def step_regress(self, d: Path, reads: Path, api):
+        """H (section 43): AmpliTrim 0.4 on the whole 16S dataset at its defaults, and with every new setting given at its default."""
+        for name, kw in (("a04", {}), ("a04_explicit", {"trunc_q": 2, "max_mismatch": 0, "min_len": 50, "trim_window": 4, "trim_quality": 15.0, "trim_advice_below": 0.5})):
+            try:
+                api.recommend(reads, d / name / "work", d / name, **kw)
+            finally:
+                shutil.rmtree(d / name / "work", ignore_errors=True)
 
 
 def cut_of(d: Path) -> tuple:
@@ -312,8 +401,10 @@ def bakker_rows(d: Path) -> list:
 def plan(a, sixteen) -> list:
     """(label, source folder, ITS or not, pairs per sample)."""
     its = {k: Path(a.base) / v for k, v in ITS_FOLDERS.items()}
-    if getattr(a, "plan", "night") == "bakker":
+    if getattr(a, "plan", "night") in ("bakker", "v04"):
         its.update({k: Path(a.base) / v for k, v in BAKKER_FOLDERS.items()})
+    if getattr(a, "plan", "night") == "v04":
+        its.update({k: Path(a.base) / v for k, v in PAUVERT_FOLDERS.items()})
     for item in a.dataset:
         k, sep, v = item.partition("=")
         if not sep or k not in its:
@@ -324,7 +415,8 @@ def plan(a, sixteen) -> list:
         if not sep or not k or k in its:
             raise SystemExit(f"--extra wants a new LABEL=FOLDER, not {item!r}")
         its[k] = Path(v)
-    out = [(k, its[k], True, a.pairs) for k in its]
+    full = (3000 if getattr(a, "smoke", False) else 0) if getattr(a, "plan", "night") == "v04" else None     # Pauvert: every pair (section 43)
+    out = [(k, its[k], True, full if (full is not None and k in PAUVERT_FOLDERS) else a.pairs) for k in its]
     if not a.no_16s:
         for ds in sixteen:
             out.append((f"16s_{ds['name']}", Path(ds["reads"]), False, 0 if ds["pairs"] == 0 else a.pairs))
@@ -339,7 +431,8 @@ def main(argv=None, run=subprocess.run, thin=None, rscript=None, sixteen=None, a
     ap.add_argument("--config", type=Path, help="amplitrim_paths.json, for the 16S controls")
     ap.add_argument("--dataset", action="append", default=[], metavar="LABEL=FOLDER")
     ap.add_argument("--extra", action="append", default=[], metavar="LABEL=FOLDER", help="one more ITS dataset (for example a third mock community)")
-    ap.add_argument("--plan", choices=["night", "rules", "bakker"], default="night",
+    ap.add_argument("--amplitrim", type=Path, help="--plan v04: the AmpliTrim repository folder holding version 0.4 (G and H)")
+    ap.add_argument("--plan", choices=["night", "rules", "bakker", "v04"], default="night",
                     help="night: the ITS overnight run (section 33); rules: the ITS rules night (section 35); bakker: the third mock community (section 37)")
     ap.add_argument("--pairs", type=int, default=5000)
     ap.add_argument("--only", default="", help="labels to run, e.g. atcc_its1,its2 (default: all)")
@@ -350,6 +443,14 @@ def main(argv=None, run=subprocess.run, thin=None, rscript=None, sixteen=None, a
     ap.add_argument("--final-run", type=Path, help="the final run's command-line reports (results/24_night10_closing_2026-11-06/cli of the archive; found by itself when the archive's "
                                                      "helpers are used): the fallback cut of a 16S control that AmpliTrim cannot analyse")
     a = ap.parse_args(argv)
+    a04 = None
+    if a.plan == "v04":
+        if not a.amplitrim:
+            ap.error("--plan v04 needs --amplitrim, the AmpliTrim repository folder holding version 0.4")
+        import trim_check                                                # the archive's: imports AmpliTrim from the repository folder, refusing any other copy
+        v, pl = trim_check.load_amplitrim(a.amplitrim, want="0.4.")
+        import amplitrim.api as a04_api
+        a04 = (v, pl, a04_api)
     if a.plan in ("rules", "bakker"):
         a.no_16s = True                                                 # no question of the rules night concerns 16S
     if sixteen is None:
@@ -397,11 +498,20 @@ def main(argv=None, run=subprocess.run, thin=None, rscript=None, sixteen=None, a
         except ImportError:
             final = None
     night = Night(a.out, run=run, rscript=rscript, thin=thin, log=log)
+    if a04:
+        version = (a04[0], f"from {a.amplitrim}")
     log(f"AmpliTrim {version[0]} ({version[1]}); Rscript {rscript}\n")
     for label, src, its, pairs in todo:
         d = a.out / label
         log(label)
-        if its and a.plan == "bakker":
+        if a.plan == "v04" and its:
+            steps = [("thin", lambda d=d, s=src, p=pairs: night.step_thin(s, d, p)), ("windows", lambda d=d: night.step_windows(d)),
+                     ("eer", lambda d=d: night.step_eer(d)), ("arms", lambda d=d: night.step_arms(d, v04_rows(d))),
+                     ("estimates", lambda d=d: night.step_estimates(d, "std")), ("estimates_sw15", lambda d=d: night.step_estimates(d, "sw15")),
+                     ("predict", lambda d=d: night.step_predict(d, a04[1])), ("tidy", lambda d=d: night.step_tidy(d))]
+        elif a.plan == "v04":
+            steps = [("regress", lambda d=d, s=src: night.step_regress(d, s, a04[2]))]
+        elif its and a.plan == "bakker":
             steps = [("thin", lambda d=d, s=src, p=pairs: night.step_thin(s, d, p)), ("trims", lambda d=d: night.step_trims(d, BAKKER_STRENGTHS)),
                      ("eer", lambda d=d: night.step_eer(d)), ("eer_sw15", lambda d=d: night.step_eer_sw15(d)), ("arms", lambda d=d: night.step_arms(d, bakker_rows(d)))]
         elif its and a.plan == "rules":
@@ -421,7 +531,7 @@ def main(argv=None, run=subprocess.run, thin=None, rscript=None, sixteen=None, a
     lines += [f"| {k} | {v.get('state')} | {v.get('seconds', '')} | {v.get('error', '')[:200]} |" for k, v in sorted(night.status.items())]
     (a.out / "NIGHT_STATUS.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     log(f"\n{len(night.status) - len(bad)} steps done, {len(bad)} not. written: {a.out / 'NIGHT_STATUS.md'}")
-    log((f"Next: python validation\\its_bakker_report.py --out {a.out}" if a.plan == "bakker" else f"Next: python validation\\its_rules_report.py --out {a.out}" if a.plan == "rules" else f"Next: python validation\\its_night_report.py --out {a.out}") if not bad else "Start the same command again to retry what failed; finished steps are kept.")
+    log((f"Next: python validation\\v04_report.py --out {a.out}" if a.plan == "v04" else f"Next: python validation\\its_bakker_report.py --out {a.out}" if a.plan == "bakker" else f"Next: python validation\\its_rules_report.py --out {a.out}" if a.plan == "rules" else f"Next: python validation\\its_night_report.py --out {a.out}") if not bad else "Start the same command again to retry what failed; finished steps are kept.")
     return 0 if not bad else 2
 
 
