@@ -61,6 +61,7 @@ columns: AmpliTrim against DADA2 (filter and yield), against FIGARO (like for li
 | 42 | 30 | The trim check: outcomes |
 | 43 | 31 | The v0.4 night: a fourth mock community, the trim's window, minLen, truncQ 3 to 7, forward reads, a better ITS yield estimate, the user's settings, and 16S unchanged |
 | 44 | 31 | The v0.4 night: outcomes |
+| 45 | 32 | The recovery report: how many known members each mock community gave back |
 
 ## 1. Datasets
 
@@ -1889,3 +1890,16 @@ AmpliTrim 0.4 is built with its tests; the night's code with its tests; Pauvert'
 **What follows (as section 43 fixed it).** 1. The report and the paper say that the 0.3 rules hold on four mock communities. 2. `amplitrim trim` keeps window 4 and mean quality 15; the report gives the twelve trims tested and that this one was the best by the rule. 3. `minLen` stays 50; the report says that 150 lost short amplicons. 4. Forward reads alone: safe on four mock communities, still named and not advised (the ASVs on the real studies). 5. Single-end data: the trim is not advised. 6. The ITS yield stays an upper bound. 7. The predictions at the tested settings (`truncQ` 2 to 7, `minLen` 20 to 150, windows 2 to 20, mean quality 12 to 18) are called checked. 8. AmpliTrim 0.4 may be released.
 
 **A judgement made after the results, disclosed.** Section 43 said that a `truncQ` meeting P122 and P123 *may* be named as an option. `truncQ` 7 met both, but the DADA2 authors recommend against `truncQ`, because the length variation it brings makes DADA2 less sensitive, and prefer `truncLen`, `maxEE` or `minQ` (B. Callahan, DADA2 issue #1884, 5 February 2024); and `truncQ` 8 was not safe in run 27. So the report names `truncQ` 7 as tested and safe on these data but does not advise it. The same remark on length variation bears on the trim: for paired-end ITS the merge restores the amplicon's length and the trim was safe on four mock communities, with small losses of recall on rich, good data (Pauvert -1.1, Bakker ITS2 -1.2 points, within the limit); for single-end reads it was not safe (P129). The paper cites the remark and states this limit.
+
+## 45. The recovery report: how many known members each mock community gave back (written 18 November 2026; described, no criteria)
+
+**Why.** Sections 33 to 44 judged settings by changes in recall against a reference arm. Readers also need the plain number: how many of a mock community's members DADA2 gives back, per sample and in all, and how that compares with what the community's authors found. Nothing is decided by this section.
+
+**Method** (`validation/recovery_report.py`). For each mock community: the members expected in each sample, and the members found, counted two ways: holding at least 0.1% of the sample's reads (the rule of sections 33 to 44) and holding at least one read (as most papers count); then the members found in any sample, and in all samples (of those expected in every sample).
+- *ITS:* run 31's arms `std` (DADA2's defaults) and `sw15` (the trim), on the eight truth datasets, judged as in sections 33 to 44 (within 2 edits; Pauvert's partial references as prefixes; the piglet mixes against their own isolates, each mix expecting only its members). The ATCC standard is judged on its six members with strain-matched reference sequences (of ten). Bakker's staggered communities hold members up to 2,000-fold apart, so no one sample can show them all. For Pauvert, the strains held by the members found are given as well.
+- *16S:* run 26's 16S controls (DADA2 at AmpliTrim's cut, maxEE 2,2, 5,000 pairs per sample) on the five mock communities with expected sequences (mock A, mock B, the two D6300 regions, the MiSeq SOP mock), judged as `mock_check.py` judges (an ASV identical to part of a reference, vsearch); a strain is found when one of its variants is.
+- *Published, for comparison:* Pauvert et al. (2019): 75.8% of the 189 strains per replicate with their recommended DADA2 approach (R1 reads only, primers kept).
+
+**What has been seen (disclosed).** Pauvert's counts were computed first, after run 31: per replicate, 86 to 89 members at 0.1% and 122 to 123 with any read; 155 strains in any replicate, about 145 per replicate (76.5%), against the authors' 75.8%. The ITS rows of the other mock communities were computed once while the script was tested. The 16S counts have not been computed.
+
+**Procedure.** This section and the script are committed; the report runs into `C:\data\runs\recovery` (seconds); its output is collected with the run.
