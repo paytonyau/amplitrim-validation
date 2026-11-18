@@ -1,5 +1,12 @@
 # AmpliTrim: future development
 
+## Added on 18 November 2026 (after the v0.4 night: run 31, register sections 43 and 44)
+
+1. **Release AmpliTrim 0.4.0** with the decisions of section 44.
+2. **First candidate for v0.5: `minQ` for ITS.** DADA2's authors prefer `minQ` (a read is discarded when any base falls below it) to `truncQ`, because it keeps the reads' lengths (DADA2 issue #1884). It was never tested here. A registered comparison of `minQ` values against the trim, on the four mock communities, would show whether it rescues poor ITS data as well without the length variation.
+3. **`truncQ` 7** was safe on these data and `truncQ` 8 was not (run 27): any wider use needs more mock data, and the DADA2 authors advise against `truncQ`.
+4. Still open from section 42: full-length ITS with a known answer, other sequencers (NovaSeq, 2×150), an independent test of the 16S maxEE rule, and a better ITS yield estimate (allowing no differences was worse, section 44).
+
 ## Added on 15 November 2026 (after the trim check: run 30, register sections 41 and 42)
 
 1. **Release AmpliTrim 0.3.0** with the trim advice marked as checked (P115). After Zenodo issues the version's DOI, `CITATION.cff` gives it (until then the all-versions DOI).

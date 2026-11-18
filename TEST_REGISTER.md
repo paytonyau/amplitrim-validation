@@ -60,6 +60,7 @@ columns: AmpliTrim against DADA2 (filter and yield), against FIGARO (like for li
 | 41 | 30 | The trim check: does AmpliTrim 0.3 predict the share of pairs that pass DADA2's filter after the trim? |
 | 42 | 30 | The trim check: outcomes |
 | 43 | 31 | The v0.4 night: a fourth mock community, the trim's window, minLen, truncQ 3 to 7, forward reads, a better ITS yield estimate, the user's settings, and 16S unchanged |
+| 44 | 31 | The v0.4 night: outcomes |
 
 ## 1. Datasets
 
@@ -1867,3 +1868,24 @@ All results of runs 24 to 30. Pauvert's Table S1 and the paper, and the truth co
 ### Procedure
 
 AmpliTrim 0.4 is built with its tests; the night's code with its tests; Pauvert's reads are prepared and its truth built (their reports committed); a smoke run at 300 read pairs per sample (Pauvert: 3,000) checks the paths and the gates; this section, AmpliTrim 0.4's commit and the code are committed; the night runs into `C:\data\runs\v04_night`, and after each ITS dataset it records the bases each trim cut (`cut.json`) and deletes that dataset's trimmed copies and filtered reads, whose results are already in its tables; the outcomes follow in section 44. Expected length: ten to twelve hours.
+
+## 44. The v0.4 night: outcomes (18 November 2026)
+
+**The run.** Section 43, AmpliTrim 0.4.0 (software `73c9a78`) and the night's code were committed in `5b20cd9` before the night ran; a smoke run at 300 read pairs per sample (Pauvert: 3,000) ran first and checked every step, its numbers not used. Folder `C:\data\runs\31_v04_night` (named `v04_night` when it ran); 108 steps, none failed; the real ITS study `its` took most of the time (its twenty-two arms about 7.5 hours). Results in `results/31_v04_night` (`V04_SUMMARY.md`, `v04_metrics.tsv`).
+
+**Gates.** All three passed: `std`, `sw15` and `eer` reproduced run 29 exactly on all eleven earlier datasets, sample by sample; primer overhangs of at least 3 bases in `std` were 0.00% on Bakker's three datasets and Pauvert's; Pauvert's truth kept 151 expected members.
+
+**Outcomes.**
+- **A. P117 met, P118 met.** On Pauvert (151 expected members), the trim (`sw15`) changed spurious reads by -0.02 points and recall by -1.1; the computed maxEE gave the same as the default.
+- **B. P119:** safe on every truth dataset: `sw15`, windows 5, 8, 10, 12, 16, 20, and mean quality 12; not safe: windows 2, 3 and 6 and mean quality 18 (each lost more than 2 points of recall somewhere, at most -11.9 for window 2 on Bakker's ITS2). **P120 not met by any trim.** **P130: the best trim is `sw15`** (mean yield over the eight truth datasets 88.53%; the next safe trim, window 5, 87.02%, more than 0.5 points below, so no tie: window 5 cuts fewer bases, 20.1 against 23.9 per read, but keeps fewer pairs).
+- **C. P121 met for minLen 20 and 100, not met for 150:** on Bakker's first run (an ITS1 fragment of about 105 nt) recall fell by 8.6 points.
+- **D. `truncQ` 3 and 5 changed nothing on any truth dataset (not judged: these qualities are absent). `truncQ` 7: P122 met and P123 met** (safe; yield up to +45.9 points).
+- **E. P124 met** (forward reads alone safe on all eight truth datasets, recall never lower); the flag P128 for `fwd` not met (median ASVs per sample +309% on the full-length study, +30% on the other). **P129 not met:** the trim before forward reads alone raised spurious reads on the ATCC standard (+3.60 and +7.22 points).
+- **F. P125 not met:** the estimate allowing no differences is further from DADA2's merged share than today's (mean absolute difference 18.1 against 9.4 points untrimmed, 28.1 against 10.6 trimmed).
+- **G. P126 met:** every predicted pass rate within 0.25 points of DADA2's (the largest on `its`, window 10).
+- **H. P127 met:** on all twelve 16S datasets AmpliTrim 0.4 recommends what 0.2.0 did in run 24, and the run with every new setting at its default gives the same.
+- **P128:** every flag met but `fwd`'s.
+
+**What follows (as section 43 fixed it).** 1. The report and the paper say that the 0.3 rules hold on four mock communities. 2. `amplitrim trim` keeps window 4 and mean quality 15; the report gives the twelve trims tested and that this one was the best by the rule. 3. `minLen` stays 50; the report says that 150 lost short amplicons. 4. Forward reads alone: safe on four mock communities, still named and not advised (the ASVs on the real studies). 5. Single-end data: the trim is not advised. 6. The ITS yield stays an upper bound. 7. The predictions at the tested settings (`truncQ` 2 to 7, `minLen` 20 to 150, windows 2 to 20, mean quality 12 to 18) are called checked. 8. AmpliTrim 0.4 may be released.
+
+**A judgement made after the results, disclosed.** Section 43 said that a `truncQ` meeting P122 and P123 *may* be named as an option. `truncQ` 7 met both, but the DADA2 authors recommend against `truncQ`, because the length variation it brings makes DADA2 less sensitive, and prefer `truncLen`, `maxEE` or `minQ` (B. Callahan, DADA2 issue #1884, 5 February 2024); and `truncQ` 8 was not safe in run 27. So the report names `truncQ` 7 as tested and safe on these data but does not advise it. The same remark on length variation bears on the trim: for paired-end ITS the merge restores the amplicon's length and the trim was safe on four mock communities, with small losses of recall on rich, good data (Pauvert -1.1, Bakker ITS2 -1.2 points, within the limit); for single-end reads it was not safe (P129). The paper cites the remark and states this limit.
