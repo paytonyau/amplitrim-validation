@@ -1,5 +1,17 @@
 # AmpliTrim: future development
 
+## Added on 21 November 2026 (after the decision of register section 46)
+
+1. **Release AmpliTrim 0.4.1:** the trim is advised for all paired-end ITS reads (section 46). The 0.4.0 tag stays as released.
+2. **Optional run: recovery by taxonomic rank.** Assign every ASV of the mock runs (default and trim) with a UNITE reference and count genus and species recovery against the names of the reference sequences, next to the sequence-level counts of section 45. Expected before it runs, not a result: rank-level counts will be at least as high as the sequence-level ones, and the trim's gain will keep its sign. Write its plan as its own register section before running it.
+3. **A tested threshold for "optional":** the 90% wording line of section 46 rests on three Bakker datasets. A run with more reads passing at 90% or more (other sequencers, other communities) would settle it.
+
+## Added on 19 November 2026 (after the decision of register section 46)
+
+1. **Release AmpliTrim 0.4.1:** the trim is advised for all paired-end ITS reads (section 46). The 0.4.0 tag stays as released.
+2. **Optional run: recovery by taxonomic rank.** Assign every ASV of the mock runs (default and trim) with a UNITE reference and count genus and species recovery against the names of the reference sequences, next to the sequence-level counts of section 45. Expected before it runs, not a result: rank-level counts will be at least as high as the sequence-level ones, and the trim's gain will keep its sign. Write its plan as its own register section before running it.
+3. **A tested threshold for "optional":** the 90% wording line of section 46 rests on three Bakker datasets. A run with more reads passing at 90% or more (other sequencers, other communities) would settle it.
+
 ## Added on 18 November 2026 (after the v0.4 night: run 31, register sections 43 and 44)
 
 1. **Release AmpliTrim 0.4.0** with the decisions of section 44.

@@ -62,6 +62,7 @@ columns: AmpliTrim against DADA2 (filter and yield), against FIGARO (like for li
 | 43 | 31 | The v0.4 night: a fourth mock community, the trim's window, minLen, truncQ 3 to 7, forward reads, a better ITS yield estimate, the user's settings, and 16S unchanged |
 | 44 | 31 | The v0.4 night: outcomes |
 | 45 | 32 | The recovery report: how many known members each mock community gave back |
+| 46 | 32 | A decision: the ITS trim is advised for all paired-end reads (AmpliTrim 0.4.1) |
 
 ## 1. Datasets
 
@@ -1903,3 +1904,28 @@ AmpliTrim 0.4 is built with its tests; the night's code with its tests; Pauvert'
 **What has been seen (disclosed).** Pauvert's counts were computed first, after run 31: per replicate, 86 to 89 members at 0.1% and 122 to 123 with any read; 155 strains in any replicate, about 145 per replicate (76.5%), against the authors' 75.8%. The ITS rows of the other mock communities were computed once while the script was tested. The 16S counts have not been computed.
 
 **Procedure.** This section and the script are committed; the report runs into `C:\data\runs\recovery` (seconds); its output is collected with the run.
+
+## 46. A decision: the ITS trim is advised for all paired-end reads (AmpliTrim 0.4.1) (written 19 November 2026; no run, no new criteria)
+
+**Why.** AmpliTrim 0.3 and 0.4.0 advised the trim of poor read ends only when fewer than half the read pairs passed DADA2's filter at maxEE 2,2. That line was a design choice made when the trim was built, after the poorest datasets had been seen. It was never tested as a threshold: no run varied it, and no criterion mentions it. Section 44 showed the trim to be safe on every mock dataset, including those above the line, which raised the question whether the line is needed.
+
+**What the registered results show above the line (run 31, sections 43 and 44; no new run).** The six truth datasets that passed at least half at maxEE 2,2:
+
+| Dataset | Pass at maxEE 2,2 | Reads kept: default → trim | Members found: default → trim |
+|---|---|---|---|
+| DS20 ATCC Standard ITS1 | 74.3% | 73.3% → 90.3% (+17.0) | 83.3% → 100% |
+| DS18 Arfken Mixes ITS1 | 74.5% | 72.1% → 87.5% (+15.4) | 76.7% → 76.7% |
+| DS24 Pauvert Mock | 78.6% | 73.1% → 83.6% (+10.5) | 57.8% → 56.7% (−1.1) |
+| DS22 Bakker ITS1 (PCR) | 91.0% | 86.8% → 92.0% (+5.2) | 58.8% → 58.2% (−0.6) |
+| DS23a Bakker ITS1 (Polymerases) | 93.5% | 91.0% → 96.1% (+5.1) | 52.1% → 54.3% (+2.2) |
+| DS23b Bakker ITS2 (Polymerases) | 91.4% | 88.9% → 95.1% (+6.2) | 61.4% → 60.2% (−1.2) |
+
+The trim kept 5.1 to 17.0 points more pairs on all six, added no false reads beyond the safety limit of 1 point (P119 met for window 4, mean quality 15, on every truth dataset), found one more of six members on DS20, and lost at most 1.2 points of the members found. Below the line it kept 46.7 (DS19) and 57.3 (DS21) points more. Run 29 measured the maxEE rule on the trimmed reads (arm `sweer`, P110 met): it was 2,2 on all seven truth datasets of runs 26 to 29 and changed nothing against the trim alone (P111 was not met only because it asked for a gain of at least 2 points). The Pauvert Mock (run 31) was not measured that way. 0.4.1 now measures the rule on the user's own trimmed reads and reports it.
+
+**The decision, made after seeing these results (disclosed as such).** For paired-end ITS reads the report advises the trim whatever share passes at maxEE 2,2. Where reads already pass at 90% or more it says the trim can recover only the pairs that fail, gives the figures above, and calls the trim optional. The 90% line is a wording line, not a decision line, and was not tested. The setting `--trim-advice-below` stays (default 1, that is always; 0.5 restores the 0.3 rule).
+
+**What this does not rest on.** No run tested "trim everything" as a policy; the evidence is the per-dataset comparison above, on four fungal mock communities (eight truth datasets) and, for the number of ASVs only, two real studies. The cost is real but small: about a point of recall on two of the three rich datasets. Single-end reads remain not advised (P129). The maxEE rule is now measured on the user's trimmed reads and reported; the validation tested the trim with maxEE 2,2 (the rule gave 2,2 on the trimmed reads of the seven datasets measured).
+
+**What changes.** `amplitrim` 0.4.1: the default of `--trim-advice-below`; the report's trim section and screen summary; the measured rule after the trim (`trim_advice.rule_after` in `summary.json`); tests. 16S output is unchanged. In the paper: Figure 1B, Methods 2.1 and 2.4, Results 3.8.
+
+**Definitions used by every table of this register** are in `docs/DEFINITIONS.md` (what a member, a true or false sequence and a found member are, and that none of them is a taxonomic rank).

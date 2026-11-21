@@ -80,7 +80,7 @@ The number of a run is its number in `validation/README.md` and in `python valid
 | 29 | `29_bakker_rerun` (the Bakker re-run: the eleven datasets again, Bakker's reads with the far primer cut; `ITS_BAKKER_SUMMARY.md`, `OVERHANG_CHECK.md`) | 39-40 |
 | 30 | `30_trim_check` (the trim check: AmpliTrim 0.3's predicted pass rates against DADA2's on run 29's eleven datasets; `TRIM_CHECK_SUMMARY.md`) | 41-42 |
 | 31 | `31_v04_night` (the v0.4 night: twelve ITS datasets with Pauvert's, twenty-two arms, the 16S regression; `V04_SUMMARY.md`) | 43-44 |
-| 32 | `32_recovery` (the recovery report: the known members found on every mock community, ITS and 16S; `RECOVERY.md`) | 45 |
+| 32 | `32_recovery` (the recovery report: the known members found on every mock community, ITS and 16S; `RECOVERY.md`) | 45-46 |
 
 Runs 15 to 20 were planned in `FUTURE.md` (the long-read test plan), not in numbered sections of the register.
 

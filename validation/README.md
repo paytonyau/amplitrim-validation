@@ -126,7 +126,7 @@ The numbers are those of `python validation/organise_data.py --table`, and the s
 | 29 | Bakker re-run | `bakker_overhang.py`, `bakker_prep.py` | 39-40 |
 | 30 | Trim check | `trim_check.py` | 41-42 |
 | 31 | v0.4 night | `its_night.py`, `v04_report.py`, `pauvert_prep.py` | 43-44 |
-| 32 | Recovery report | `recovery_report.py` | 45 |
+| 32 | Recovery report | `recovery_report.py` | 45-46 |
 | | The long unattended battery that runs many of the tests above in one command | `overnight.py`, `run_overnight.bat` (the batch file starts it on Windows) | |
 
 `night1_v2.py` ran night 1 and prepared its datasets (register section 11). It was missing from this archive until 7 November 2026; the only copy found, last modified on 9 October 2026, was added unchanged. Night 1 itself ran on 9 October 2026. The script has not been re-run here and has no test.
