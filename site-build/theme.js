@@ -1,13 +1,12 @@
 (function () {
-  var root = document.documentElement, list = document.querySelector('header.site nav ul');
+  var root = document.documentElement, list = document.querySelector('header.site .tools') || document.querySelector('header.site nav ul');
   if (!list) return;
   var button = document.createElement('button');
   button.type = 'button';
   button.className = 'theme';
   button.id = 'theme-toggle';
-  var item = document.createElement('li');
-  item.appendChild(button);
-  list.appendChild(item);
+  if (list.className === 'tools') list.appendChild(button);
+  else { var item = document.createElement('li'); item.appendChild(button); list.appendChild(item); }
   var query = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
   function current() {
     var chosen = root.getAttribute('data-theme');

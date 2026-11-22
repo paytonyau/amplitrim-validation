@@ -89,8 +89,8 @@ def hero(crumb, h1, intro="", extra=""):
     return f'<section class="hero"><div class="wrap">\n<p class="crumb">{crumb}</p>\n<h1>{esc(h1)}</h1>\n{extra}{f"<p>{intro}</p>" if intro else ""}\n</div></section>'
 
 
-def page(title, desc, body, depth):
-    return page_shell(title, desc, body, "../" * depth, NOTE)
+def page(title, desc, body, depth, here):
+    return page_shell(title, desc, body, "../" * depth, NOTE, here)
 
 
 # ------------------------------------------------------------------ the data
@@ -312,7 +312,7 @@ def its_dataset_page(D, row):
             + section("Every setting tried", f'<p class="legend">One row for each run and setting. False reads and members found need a known answer; a dash means there is none.</p>' + arms_table(D, code), "settings")
             + recov + pred_html
             + section("Where the numbers come from", "<p>" + ", ".join(code_(p) for p in srcs) + f", and <code>results/31_v04_night/{code}/predict.json</code> in the <a href=\"{BLOB}results\">results</a> of the validation archive. {more[3:-4] if more else ''}</p>", "sources"))
-    return page(f"{row['full_name']}: ITS results of the AmpliTrim validation", f"Every ITS setting tried on {row['full_name']}.", body, 3)
+    return page(f"{row['full_name']}: ITS results of the AmpliTrim validation", f"Every ITS setting tried on {row['full_name']}.", body, 3, "its/")
 
 
 def code_(s):
@@ -346,7 +346,7 @@ def its_overview(D):
                               num_cols=range(2, 10)) + '<p class="legend">Members found and false reads need a known answer, so real studies and the isolate datasets show a dash. Words: <a href="../definitions/">definitions</a>.</p>', "glance")
             + section("More on the ITS runs", '<ul><li><a href="trims/">The twelve trims compared</a></li><li><a href="settings/">The other settings: minLen, truncQ, forward reads only, and the predictions</a></li>'
                       '<li><a href="../recovery/">Recovery of the known members</a></li><li><a href="../criteria/">Every criterion and its outcome</a></li><li><a href="../runs/">Every run</a></li></ul>', "more"))
-    return page("ITS: cutting poor read ends: AmpliTrim validation results", "What cutting the poor ends of ITS reads did on every ITS dataset of the AmpliTrim validation.", body, 1)
+    return page("ITS: cutting poor read ends: AmpliTrim validation results", "What cutting the poor ends of ITS reads did on every ITS dataset of the AmpliTrim validation.", body, 1, "its/")
 
 
 def trims_page(D):
@@ -361,7 +361,7 @@ def trims_page(D):
             + section("The criteria", table(["Criterion", "Trim", "Outcome", "What was measured"], [[c["id"], cell(esc(c["arm"]), "name"), (c["outcome"], "ok" if c["outcome"] == "MET" else "bad"), cell(esc(c["text"]), "name")] for c in crit]) +
                       '<p>All criteria: <a href="../../criteria/">Criteria</a>.</p>', "criteria")
             + section("Where the numbers come from", f"<p>{mono('results/31_v04_night/V04_SUMMARY.md')} (register sections 43 and 44).</p>", "sources"))
-    return page("The twelve trims compared: AmpliTrim validation results", "Twelve ways of cutting poor read ends in ITS reads, compared on the datasets with a known answer.", body, 2)
+    return page("The twelve trims compared: AmpliTrim validation results", "Twelve ways of cutting poor read ends in ITS reads, compared on the datasets with a known answer.", body, 2, "its/")
 
 
 def settings_page(D):
@@ -388,7 +388,7 @@ def settings_page(D):
                        + '<details class="more"><summary>All predictions</summary>' + table(["Dataset", "Setting", "AmpliTrim predicted", "DADA2 measured", "Difference (points)"], rows, num_cols=(2, 3, 4)) + "</details>", "predictions"))
     body = hero('<a href="../../">Results</a> &rsaquo; <a href="../">ITS</a> &rsaquo; Settings', "The other ITS settings", "What minLen, truncQ and forward reads only did on the datasets with a known answer, and how well AmpliTrim predicted the filter at each setting.") + "".join(out) \
         + section("Where the numbers come from", f"<p>{mono('results/31_v04_night/v04_metrics.tsv')}, the <code>predict.json</code> of each dataset in {mono('results/31_v04_night/')} and {mono('results/31_v04_night/V04_SUMMARY.md')}.</p>", "sources")
-    return page("The other ITS settings: AmpliTrim validation results", "minLen, truncQ, forward reads only, and AmpliTrim's predictions at each setting.", body, 2)
+    return page("The other ITS settings: AmpliTrim validation results", "minLen, truncQ, forward reads only, and AmpliTrim's predictions at each setting.", body, 2, "its/")
 
 
 def recovery_page(D):
@@ -404,7 +404,7 @@ def recovery_page(D):
             + section("Compared with the authors", f"<p>{esc(D.recovery['published'])}</p><p>Exact 16S variants recovered, pooled over the samples of each community: {esc(D.recovery['variants'])}.</p>", "published")
             + section("What \u2018found\u2019 means", '<p>A match of sequences, not a taxonomic assignment: no reference database is used and no rank is involved. See the <a href="../definitions/">definitions</a>.</p>', "meaning")
             + section("Where the numbers come from", f"<p>{mono('results/32_recovery/RECOVERY.md')} (register section 45), made from runs 31 (ITS) and 26 (16S).</p>", "sources"))
-    return page("Recovery of the known members: AmpliTrim validation results", "How many known members each mock community gave back, ITS and 16S.", body, 1)
+    return page("Recovery of the known members: AmpliTrim validation results", "How many known members each mock community gave back, ITS and 16S.", body, 1, "recovery/")
 
 
 def criteria_page(D):
@@ -422,7 +422,7 @@ def criteria_page(D):
     body = hero('<a href="../">Results</a> &rsaquo; Criteria', "Every criterion and its outcome",
                 f"Each test was written down, with what would count as success, before it ran. These are the {len(D.criteria)} criteria of the ITS runs 26 to 31 and what each found. "
                 "Run 25's criteria are in the register (sections 31 and 32).") + "".join(secs) + section("Where the numbers come from", "<p>The summary file of each run in <a href=\"" + BLOB + "results\">results</a>, and the <a href=\"" + BLOB + "TEST_REGISTER.md\">test register</a>.</p>", "sources")
-    return page("Every criterion and its outcome: AmpliTrim validation results", "The criteria of the ITS runs and what each found.", body, 1)
+    return page("Every criterion and its outcome: AmpliTrim validation results", "The criteria of the ITS runs and what each found.", body, 1, "criteria/")
 
 
 def md_inline(s):
@@ -444,7 +444,7 @@ def definitions_page(D):
         + section("The words", table(head, [[cell(md_inline(r[0]), "name"), cell(md_inline(r[1]), "name")] for r in rows]), "words") \
         + section("What \u2018found\u2019 is not", "".join(f"<p>{md_inline(p)}</p>" for p in paras[1:]), "not") \
         + section("Settings", table(["Setting", "Name"], [[cell(mono(k), ""), cell(esc(v), "name")] for k, v in N.SETTINGS.items()]) + "<p>The codes are the register's; the pages use the names.</p>", "settings")
-    return page("Definitions: AmpliTrim validation results", "What member, true, false and found mean, and that they are sequence matches, not taxonomic ranks.", body, 1)
+    return page("Definitions: AmpliTrim validation results", "What member, true, false and found mean, and that they are sequence matches, not taxonomic ranks.", body, 1, "definitions/")
 
 
 def runs_page(D):
@@ -455,7 +455,7 @@ def runs_page(D):
     body = hero('<a href="../">Results</a> &rsaquo; Runs', "Every run of the validation", "Which runs were made, under which register sections, and where the archive keeps their results.") \
         + section("The runs", table(["Run", "What", "Register sections", "Results in the archive"], rows), "runs") \
         + section("Where the numbers come from", f"<p>{mono('validation/organise_data.py')} and the <a href=\"{BLOB}TEST_REGISTER.md\">test register</a>.</p>", "sources")
-    return page("Every run of the validation: AmpliTrim validation results", "The runs, their register sections and where their results are kept.", body, 1)
+    return page("Every run of the validation: AmpliTrim validation results", "The runs, their register sections and where their results are kept.", body, 1, "runs/")
 
 
 def catalog_page(D):
@@ -473,7 +473,7 @@ def catalog_page(D):
     body = hero('<a href="../">Results</a> &rsaquo; Datasets', "All datasets", f"The {len(D.names)} public datasets of the validation, each with one ID and one name, the same in the paper, the supplementary workbook and these pages. There is no DS13.") \
         + section("The datasets", table(["ID", "Name", "Kind", "Marker", "Platform", "Accession", "Source", "Results"], rows, cls="catalog"), "datasets") \
         + section("Where the names come from", f"<p><a href=\"{BLOB}docs/DATASET_NAMES.tsv\">docs/DATASET_NAMES.tsv</a> links every ID and name to the folder on the data drive and to the code the archive's scripts use.</p>", "sources")
-    return page("All datasets: AmpliTrim validation results", "The datasets of the AmpliTrim validation, with their IDs, names and results.", body, 1)
+    return page("All datasets: AmpliTrim validation results", "The datasets of the AmpliTrim validation, with their IDs, names and results.", body, 1, "datasets/")
 
 
 def build(root):

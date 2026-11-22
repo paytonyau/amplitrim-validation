@@ -80,6 +80,24 @@ li{margin:.3rem 0}
 footer{margin-top:3rem;border-top:4px solid var(--fg);padding:1.2rem 0 2.5rem;color:var(--muted);font:.86rem/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
 footer p{margin:.2rem 0}
 @media (max-width:34rem){.bar{padding-top:.4rem;padding-bottom:.4rem}.hero{padding-top:2rem}}
+/* the header (header.py): row 1 = brand, tabs, theme button; row 2 = the links of the page, on one row */
+header.site .bar{align-items:center}
+header.site nav[aria-label="Sites"]{margin-left:auto}
+header.site nav[aria-label="Sites"] ul{flex-wrap:nowrap;align-items:center}
+header.site nav[aria-label="Sites"] li{margin:0 0 0 1.1rem;white-space:nowrap}
+header.site .tools{display:flex;align-items:center}
+header.site .tools .theme{margin:0 0 0 1.1rem}
+header.site a[aria-current="page"]{color:var(--fg);box-shadow:inset 0 -2px 0 var(--accent)}
+header.site .subbar{border-top:1px solid var(--line)}
+header.site .subbar nav ul{flex-wrap:nowrap;overflow-x:auto;padding:.4rem 0 .45rem;-webkit-overflow-scrolling:touch}
+header.site .subbar nav li{margin:0 1.3rem 0 0;white-space:nowrap}
+@media (max-width:40rem){
+header.site .brand{order:1;margin-right:auto}
+header.site .tools{order:2}
+header.site .tools .theme{margin:0}
+header.site nav[aria-label="Sites"]{order:3;flex-basis:100%;margin-left:0;margin-top:.25rem}
+header.site nav[aria-label="Sites"] li{margin:0 1.1rem 0 0}}
+@media (max-width:24rem){header.site nav[aria-label="Sites"] a{letter-spacing:.04em;font-size:.68rem}header.site nav[aria-label="Sites"] li{margin-right:.75rem}header.site .wrap{padding-left:1rem;padding-right:1rem}}
 :root{--rev:#86307a;--warn:#98380d;--ok:#2a6b3b}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--rev:#e0a4d6;--warn:#f0a77d;--ok:#7fcf93}}
 :root[data-theme="dark"]{--rev:#e0a4d6;--warn:#f0a77d;--ok:#7fcf93}
@@ -172,19 +190,11 @@ svg .open{fill:none;stroke:var(--warn);stroke-width:2}
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site"><div class="wrap bar">
-<a class="brand" href="../../">Ampli<span class="trim">Trim</span> results</a>
-<nav aria-label="Main"><ul>
-<li><a href="../../">Overview</a></li>
-<li><a href="../../datasets/">Datasets</a></li>
-<li><a href="../../its/">ITS</a></li>
-<li><a href="../../recovery/">Recovery</a></li>
-<li><a href="../../criteria/">Criteria</a></li>
-<li><a href="../../definitions/">Definitions</a></li>
-<li><a href="../../how-it-works/">How it works</a></li>
-<li><a href="https://github.com/paytonyau/amplitrim">Software</a></li>
-<li><a href="https://github.com/paytonyau/amplitrim-validation">Archive</a></li>
-</ul></nav>
-</div></header>
+<a class="brand" href="../../">Ampli<span class="trim">Trim</span></a>
+<nav aria-label="Sites"><ul><li><a href="https://paytonyau.github.io/amplitrim/">Software</a></li><li><a href="../../how-it-works/">How it works</a></li><li><a href="../../" aria-current="page">Validation</a></li></ul></nav>
+<div class="tools"></div>
+</div>
+<div class="wrap subbar"><nav aria-label="Main"><ul><li><a href="../../">Overview</a></li><li><a href="../../datasets/" aria-current="page">Datasets</a></li><li><a href="../../its/">ITS</a></li><li><a href="../../recovery/">Recovery</a></li><li><a href="../../criteria/">Criteria</a></li><li><a href="../../definitions/">Definitions</a></li><li><a href="../../runs/">Runs</a></li><li><a href="https://github.com/paytonyau/amplitrim-validation">Archive</a></li></ul></nav></div></header>
 <main id="main">
 <section class="hero"><div class="wrap">
 <p class="crumb"><a href="../../">Results</a> &rsaquo; Dataset 5 of 12</p>
@@ -217,15 +227,14 @@ svg .open{fill:none;stroke:var(--warn);stroke-width:2}
 </div></footer>
 <script>
 (function () {
-  var root = document.documentElement, list = document.querySelector('header.site nav ul');
+  var root = document.documentElement, list = document.querySelector('header.site .tools') || document.querySelector('header.site nav ul');
   if (!list) return;
   var button = document.createElement('button');
   button.type = 'button';
   button.className = 'theme';
   button.id = 'theme-toggle';
-  var item = document.createElement('li');
-  item.appendChild(button);
-  list.appendChild(item);
+  if (list.className === 'tools') list.appendChild(button);
+  else { var item = document.createElement('li'); item.appendChild(button); list.appendChild(item); }
   var query = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
   function current() {
     var chosen = root.getAttribute('data-theme');

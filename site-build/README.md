@@ -45,7 +45,8 @@ python -m pytest tests\\test_results_site.py tests\\test_its_site.py -q
 
 | file | what it holds |
 |---|---|
-| `shell.py`, `its_css.css` | the page shell shared by both builders (styles, theme switch, navigation, footer) and the styles of the new tables |
+| `header.py` | the header of **every** page of both websites (the software's home page, the how-it-works page and the results): the brand, three tabs (Software, How it works, Validation) and a second row of links; no builder writes its own |
+| `shell.py`, `its_css.css` | the page shell of the results site (styles, theme switch, footer; its header comes from `header.py`) and the styles of the new tables |
 | `build_its.py`, `names.py` | the ITS and cross-marker pages, and the names of datasets and settings |
 
 The pictures are schematic, drawn from nothing but the idea, and each is captioned so. To change one, edit its function in `design_svgs.py`.

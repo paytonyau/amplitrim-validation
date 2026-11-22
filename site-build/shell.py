@@ -2,8 +2,11 @@
 the first validation) and by build_its.py (the ITS pages, the recovery, criteria, definitions, runs and dataset catalogue pages)."""
 import html
 import pathlib
+import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+from header import SOFTWARE_SITE, header      # noqa: E402
 ARCH, SOFT = "https://github.com/paytonyau/amplitrim-validation", "https://github.com/paytonyau/amplitrim"
 BLOB, ENA = ARCH + "/blob/main/", "https://www.ebi.ac.uk/ena/browser/view/"
 esc = lambda s: html.escape(str(s), quote=True)
@@ -12,7 +15,14 @@ THEMEHEAD, THEME = (HERE / "theme_head.js").read_text(encoding="utf-8"), (HERE /
 FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231b201d'/%3E%3Ctext x='16' y='24' font-size='24' text-anchor='middle' fill='%23e8ebe6' font-family='Georgia,serif' font-weight='700'%3EA%3C/text%3E%3C/svg%3E"
 
 
-def page_shell(title, desc, body, base, source_note=None):
+SECTIONS = [("Overview", ""), ("Datasets", "datasets/"), ("ITS", "its/"), ("Recovery", "recovery/"), ("Criteria", "criteria/"), ("Definitions", "definitions/"), ("Runs", "runs/")]
+
+
+def page_shell(title, desc, body, base, source_note=None, here=None):
+    """here: the section of the results this page belongs to ('' for the overview, else 'datasets/', 'its/', ...), so that its link is marked."""
+    links = [(label, base + path) for label, path in SECTIONS] + [("Archive", ARCH)]
+    hdr = header(active="results", hrefs={"software": SOFTWARE_SITE, "how": base + "how-it-works/", "results": base}, links=links, brand=base,
+                 here=None if here is None else base + here)
     return f'''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,20 +42,7 @@ def page_shell(title, desc, body, base, source_note=None):
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<header class="site"><div class="wrap bar">
-<a class="brand" href="{base}">Ampli<span class="trim">Trim</span> results</a>
-<nav aria-label="Main"><ul>
-<li><a href="{base}">Overview</a></li>
-<li><a href="{base}datasets/">Datasets</a></li>
-<li><a href="{base}its/">ITS</a></li>
-<li><a href="{base}recovery/">Recovery</a></li>
-<li><a href="{base}criteria/">Criteria</a></li>
-<li><a href="{base}definitions/">Definitions</a></li>
-<li><a href="{base}how-it-works/">How it works</a></li>
-<li><a href="{SOFT}">Software</a></li>
-<li><a href="{ARCH}">Archive</a></li>
-</ul></nav>
-</div></header>
+{hdr}
 <main id="main">
 {body}
 </main>

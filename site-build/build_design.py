@@ -15,6 +15,7 @@ from amplitrim.config import Config
 
 REPO, BLOB = "https://github.com/paytonyau/amplitrim", "https://github.com/paytonyau/amplitrim/blob/main/"
 VAL = "https://github.com/paytonyau/amplitrim-validation/blob/main/docs/validation.md"
+import header as H
 HOME = "https://paytonyau.github.io/amplitrim/"                                    # the software's home page, on its own site
 cfg = Config(); step = {f.name: f.default for f in Settings.__dataclass_fields__.values()}["step"]
 F = dict(pairs=f"{DEFAULT_MAX_PAIRS:,}", overlap=cfg.dada2_min_overlap, unmerge=f"{cfg.max_unmergeable_frac * 100:g}%", step=step,
@@ -98,6 +99,7 @@ decisions = "\n".join([
 
 CSS = (HERE / "style.css").read_text(encoding="utf-8") + (HERE / "design_css.css").read_text(encoding="utf-8")
 THEMEHEAD, THEME = (HERE / "theme_head.js").read_text(encoding="utf-8"), (HERE / "theme.js").read_text(encoding="utf-8")
+HEADER = H.header("how", {"software": HOME, "how": "#top", "results": "../"}, [("The idea", "#idea"), ("The cut", "#cut"), ("Steps", "#steps"), ("Choices", "#choices"), ("Code", "#code"), ("GitHub", REPO)], HOME)
 page = f'''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -117,19 +119,7 @@ page = f'''<!DOCTYPE html>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<header class="site"><div class="wrap bar">
-<a class="brand" href="{HOME}">Ampli<span class="trim">Trim</span></a>
-<nav aria-label="Main"><ul>
-<li><a href="{HOME}">Home</a></li>
-<li><a href="../">Results</a></li>
-<li><a href="#idea">The idea</a></li>
-<li><a href="#cut">The cut</a></li>
-<li><a href="#steps">Steps</a></li>
-<li><a href="#choices">Choices</a></li>
-<li><a href="#code">Code</a></li>
-<li><a href="{REPO}">GitHub</a></li>
-</ul></nav>
-</div></header>
+{HEADER}
 <main id="main">
 <section class="hero" id="top"><div class="wrap">
 <h1>How Ampli<span class="trim">Trim</span> works</h1>

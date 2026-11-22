@@ -251,7 +251,7 @@ def dataset_page(i):
 <p class="pending">The report that AmpliTrim itself wrote on this dataset is not in the archive yet. It is added when the results of the runs are collected.</p>
 {pager}
 </section>'''
-    return page_shell(f"{d['name']}: AmpliTrim test results", f"How AmpliTrim did on {d['name']}: the estimate, the comparison with the other tool and the choice of maxEE.", body, "../../")
+    return page_shell(f"{d['name']}: AmpliTrim test results", f"How AmpliTrim did on {d['name']}: the estimate, the comparison with the other tool and the choice of maxEE.", body, "../../", here="datasets/")
 
 
 def dataset_report(i):
@@ -332,7 +332,7 @@ def overview_page():
 <li><a href="{ARCH}">The archive</a>: the scripts that reproduce the runs.</li>
 </ul>
 </section>'''
-    return page_shell("How well does AmpliTrim work? Test results on 12 datasets", "What held and what did not when AmpliTrim was tested against real DADA2 runs on 12 public datasets.", body, "./")
+    return page_shell("How well does AmpliTrim work? Test results on 12 datasets", "What held and what did not when AmpliTrim was tested against real DADA2 runs on 12 public datasets.", body, "./", here="")
 
 
 def main():

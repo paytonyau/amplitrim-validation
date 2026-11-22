@@ -93,6 +93,9 @@ subs = {"VERSION": VERSION,
  "ITSINTRO": inline(its_paras[0]), "ITSBLOCK": pre(its_blocks[0], True), "ITSAFTER": inline(its_paras[1]), "LIMITS": "\n".join(f"<li>{inline(b)}</li>" for b in limits),
  "CITE": inline(cite).replace("<code>LICENSE</code>", f'<a href="{REPO}/blob/main/LICENSE"><code>LICENSE</code></a>').replace("<code>CITATION.cff</code>", f'<a href="{REPO}/blob/main/CITATION.cff"><code>CITATION.cff</code></a>'),
 }
+import header as H                                                                          # the header shared by every page of both sites
+subs["HEADER"] = H.header("software", {"software": "#top", "how": HOW, "results": H.RESULTS_SITE}, [("Why use it", "#why"), ("How it compares", "#compare"), ("Quick start", "#quick-start"),
+                                                                  ("ITS reads with poor ends", "#its-trim"), ("Limits", "#limits"), ("GitHub", REPO)], "#top")
 out = TEMPLATE
 for k, v in subs.items(): out = out.replace(f"@@{k}@@", v)
 assert "@@" not in out, re.findall(r"@@\w+@@", out)
