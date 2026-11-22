@@ -15,10 +15,10 @@ THEMEHEAD, THEME = (HERE / "theme_head.js").read_text(encoding="utf-8"), (HERE /
 FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231b201d'/%3E%3Ctext x='16' y='24' font-size='24' text-anchor='middle' fill='%23e8ebe6' font-family='Georgia,serif' font-weight='700'%3EA%3C/text%3E%3C/svg%3E"
 
 
-SECTIONS = [("Overview", ""), ("Datasets", "datasets/"), ("ITS", "its/"), ("Recovery", "recovery/"), ("Criteria", "criteria/"), ("Definitions", "definitions/"), ("Runs", "runs/")]
+SECTIONS = [("Overview", ""), ("16S", "16s/"), ("ITS", "its/"), ("Datasets", "datasets/"), ("Recovery", "recovery/"), ("Criteria", "criteria/"), ("Definitions", "definitions/"), ("Runs", "runs/")]
 
 
-def page_shell(title, desc, body, base, source_note=None, here=None):
+def page_shell(title, desc, body, base, source_note=None, here=None, head_extra=""):
     """here: the section of the results this page belongs to ('' for the overview, else 'datasets/', 'its/', ...), so that its link is marked."""
     links = [(label, base + path) for label, path in SECTIONS] + [("Archive", ARCH)]
     hdr = header(active="results", hrefs={"software": SOFTWARE_SITE, "how": base + "how-it-works/", "results": base}, links=links, brand=base,
@@ -28,6 +28,7 @@ def page_shell(title, desc, body, base, source_note=None, here=None):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+{head_extra}
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
 <meta name="theme-color" content="#1b201d">

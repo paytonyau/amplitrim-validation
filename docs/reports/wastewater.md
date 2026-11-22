@@ -12,7 +12,7 @@
 
 ## In short
 
-The only real dataset in these tests with poor read quality: its reads are noisy (an estimated 54% of its pairs pass DADA2's default filter), and the loss is to read quality, not to short reads (0.6% of its pairs are shorter than the cut). Its reads were also trimmed to mixed lengths and every pair was in reverse orientation. It is the one dataset where the other tool was ahead at the same maxEE: AmpliTrim chose a cut 6 nt longer (446 against 440 nt) because its estimate rewarded the extra overlap, and the extra length cost 0.9 points at the filter. AmpliTrim's cut was the most stable of any dataset across sample sets, which we had predicted would not be so. In the first round of tests, which used a stricter margin of 1.0 point, the difference was beyond the margin, against AmpliTrim.
+The only real dataset in these tests with poor read quality: its reads are noisy (an estimated 54% of its pairs pass DADA2's default filter), and the loss is to read quality, not to short reads (0.6% of its pairs are shorter than the cut). Its reads were also trimmed to mixed lengths and every pair was in reverse orientation. It is the one dataset where FIGARO was ahead at the same maxEE: AmpliTrim chose a cut 6 nt longer (446 against 440 nt) because its estimate rewarded the extra overlap, and the extra length cost 0.9 points at the filter. AmpliTrim's cut was the most stable of any dataset across sample sets, which we had predicted would not be so. In the first round of tests, which used a stricter margin of 1.0 point, the difference was beyond the margin, against AmpliTrim.
 
 ## How good was AmpliTrim's estimate?
 
@@ -20,19 +20,19 @@ Before DADA2 runs, AmpliTrim estimates two things for each setting: the share of
 
 *How far AmpliTrim's estimate of the share of pairs passing the filter was from what DADA2 measured. Zero is exact; inside the shaded band meets the target.*
 
-| Samples | Pass-rate estimate off by (points) | Merge estimate off by (points; average and range over the settings tried) | Same order as DADA2 (1.00 = identical) | The other tool's pass-rate estimate off by (points) |
+| Samples | Pass-rate estimate off by (points) | Merge estimate off by (points; average and range over the settings tried) | Same order as DADA2 (1.00 = identical) | FIGARO's pass-rate estimate off by (points) |
 |---|---|---|---|---|
 | 9 | +0.2 | +3.9 (-2.1 to +7.2) | 0.80 | -3.3 |
 
 The merge estimate is too high because it stops before DADA2 denoises the reads. Use it to compare settings, not as a forecast.
 
-## Compared with the other tool, at the same maxEE
+## Compared with FIGARO, at the same maxEE
 
-The other tool is an existing automatic tool for choosing truncation lengths. Given the same maxEE, we compared how many read pairs DADA2 merges with AmpliTrim's cut and with the other tool's cut. A cut such as 247/199 means the forward reads are cut to 247 nt and the reverse reads to 199 nt.
+FIGARO is an existing automatic tool for choosing truncation lengths. Given the same maxEE, we compared how many read pairs DADA2 merges with AmpliTrim's cut and with FIGARO's cut. A cut such as 247/199 means the forward reads are cut to 247 nt and the reverse reads to 199 nt.
 
-*The difference in the share of read pairs DADA2 merged: AmpliTrim's cut minus the other tool's. Blue means AmpliTrim merged more, orange fewer. Inside the shaded band the two cuts are equivalent.*
+*The difference in the share of read pairs DADA2 merged: AmpliTrim's cut minus FIGARO's. Blue means AmpliTrim merged more, orange fewer. Inside the shaded band the two cuts are equivalent.*
 
-| Samples | The other tool's cut and maxEE | AmpliTrim's cut | Difference in pairs merged (points) |
+| Samples | FIGARO's cut and maxEE | AmpliTrim's cut | Difference in pairs merged (points) |
 |---|---|---|---|
 | 9 | 247/193, 5 | 247/199 | -1.0 |
 
@@ -54,24 +54,24 @@ On this dataset the rule changes the limit to **maxEE 4,3**. DADA2 merged this s
 
 We also tried relaxing the limit on the reverse read to 5 (maxEE 2,5) and measured the change in pairs merged, in points of the input pairs.
 
-*Changes in the share of pairs DADA2 merged, in points. Blue means more pairs merged, orange fewer. The lower group compares AmpliTrim with the other tool using its own choice of cut and maxEE.*
+*Changes in the share of pairs DADA2 merged, in points. Blue means more pairs merged, orange fewer. The lower group compares AmpliTrim with FIGARO using its own choice of cut and maxEE.*
 
 | Change in pairs merged (points) | Quality of the extra reads kept | Accuracy (needs expected sequences) |
 |---|---|---|
 | +7.5 | mixed | no expected sequences |
 
-Against the other tool, which picks its own cut and maxEE, DADA2 merged this many more (+) or fewer (-) pairs, in points:
+Against FIGARO, which picks its own cut and maxEE, DADA2 merged this many more (+) or fewer (-) pairs, in points:
 
-| AmpliTrim setting | Difference from the other tool's own choice (points) |
+| AmpliTrim setting | Difference from FIGARO's own choice (points) |
 |---|---|
 | Default maxEE 2 | -23.1 |
 | maxEE 2,5 | -15.7 |
 
 ## Amplicon length and the longest amplicons
 
-**The amplicon length the other tool needs**
+**The amplicon length FIGARO needs**
 
-The other tool needs you to tell it the amplicon length. We tried the longest (428 nt) and the typical (402 nt); it chose different cuts. AmpliTrim measures the lengths from your reads, so it needs no such number.
+FIGARO needs you to tell it the amplicon length. We tried the longest (428 nt) and the typical (402 nt); it chose different cuts. AmpliTrim measures the lengths from your reads, so it needs no such number.
 
 *The share of the input read pairs DADA2 merged with the cut each tool chose.*
 
@@ -93,7 +93,7 @@ AmpliTrim sets the shortest cut that can merge your amplicons, but it leaves out
 
 Each tool chose a cut again on three separate sets of samples from this dataset. The choice counts as the same if the cuts differ by at most 10 nt and the maxEE is the same. Cuts are forward/reverse; the maxEE is in brackets.
 
-| AmpliTrim's cuts | Same each time? | The other tool's cuts | Same each time? |
+| AmpliTrim's cuts | Same each time? | FIGARO's cuts | Same each time? |
 |---|---|---|---|
 | 254/186 in all three (2) | yes | 257/183 (5,4); 256/184 (5,4); 240/200 (4,5) | no |
 

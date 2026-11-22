@@ -335,14 +335,17 @@ def overview_page():
     return page_shell("How well does AmpliTrim work? Test results on 12 datasets", "What held and what did not when AmpliTrim was tested against real DADA2 runs on 12 public datasets.", body, "./", here="")
 
 
+def fig_names(text):
+    """The findings say 'the other tool'; the reports say FIGARO, as the pages do."""
+    return text.replace("The other tool's", "FIGARO's").replace("the other tool's", "FIGARO's").replace("The other tool", "FIGARO").replace("the other tool", "FIGARO")
+
+
 def main():
-    docs = ROOT / "docs"; (docs / "datasets").mkdir(parents=True, exist_ok=True); (docs / "reports").mkdir(exist_ok=True)
-    (docs / "index.html").write_text(overview_page(), encoding="utf-8"); (docs / ".nojekyll").write_text("", encoding="utf-8")
+    """Writes the per-dataset text reports only; the pages of the website are built by build_16s.py and build_its.py."""
+    docs = ROOT / "docs"; (docs / "reports").mkdir(parents=True, exist_ok=True)
     for i in ORDER:
-        (docs / "datasets" / i).mkdir(exist_ok=True)
-        (docs / "datasets" / i / "index.html").write_text(dataset_page(i), encoding="utf-8")
-        (docs / "reports" / f"{i}.md").write_text(dataset_report(i), encoding="utf-8")
-    print("written: docs/index.html,", len(ORDER), "dataset pages and", len(ORDER), "reports")
+        (docs / "reports" / f"{i}.md").write_text(fig_names(dataset_report(i)), encoding="utf-8")
+    print("written:", len(ORDER), "reports (the pages are built by build_16s.py)")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>16S: the cut and the maxEE limit: AmpliTrim validation results</title>
+<meta name="description" content="How AmpliTrim&#x27;s estimates and cuts compared with DADA2 and FIGARO on every 16S dataset.">
+<meta name="theme-color" content="#1b201d">
+<meta property="og:type" content="website">
+<meta property="og:title" content="16S: the cut and the maxEE limit: AmpliTrim validation results">
+<meta property="og:description" content="How AmpliTrim&#x27;s estimates and cuts compared with DADA2 and FIGARO on every 16S dataset.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231b201d'/%3E%3Ctext x='16' y='24' font-size='24' text-anchor='middle' fill='%23e8ebe6' font-family='Georgia,serif' font-weight='700'%3EA%3C/text%3E%3C/svg%3E">
+<script>(function(){try{var t=localStorage.getItem('amplitrim-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
+<style>
+:root{--bg:#e8ebe6;--fg:#1b201d;--muted:#4a534d;--accent:#2f3c8f;--accent-fg:#f4f6f2;--card:#dde2da;--line:#b3bcb1;--code:#dfe4dc;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b211e;--fg:#e3e8e1;--muted:#a6b0a8;--accent:#a9b8ff;--accent-fg:#141a2e;--card:#252d29;--line:#3c4741;--code:#29322d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1b211e;--fg:#e3e8e1;--muted:#a6b0a8;--accent:#a9b8ff;--accent-fg:#141a2e;--card:#252d29;--line:#3c4741;--code:#29322d;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:4.5rem;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.62 "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Charter,"Source Serif Pro",Georgia,serif}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:.18em}
+.trim{color:var(--accent);font-weight:700}
+.note{font:.88rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--muted);margin:.4rem 0 .8rem}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.theme{font:700 .72rem/1.2 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase;padding:.3rem .65rem;margin:0 0 0 1.2rem;border:1px solid var(--fg);border-radius:0;background:none;color:var(--fg);cursor:pointer;white-space:nowrap}
+.theme:hover{border-color:var(--accent);color:var(--accent)}
+.skip{position:absolute;left:-999px;top:0}
+.skip:focus{left:1rem;top:1rem;background:var(--bg);padding:.5rem .75rem;border:1px solid var(--fg);z-index:10}
+.wrap{max-width:56rem;margin:0 auto;padding:0 1.4rem}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+header.site{position:sticky;top:0;z-index:5;background:var(--bg);border-top:4px solid var(--fg);border-bottom:1px solid var(--line)}
+.bar{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;padding-top:.55rem;padding-bottom:.5rem}
+.brand{font-size:1.25rem;text-decoration:none;color:var(--fg);margin-right:1rem}
+nav ul{display:flex;flex-wrap:wrap;align-items:baseline;list-style:none;margin:0;padding:0}
+nav li{margin:0 0 0 1.2rem}
+nav a{text-decoration:none;color:var(--muted);font:700 .74rem/1.4 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase}
+nav a:hover{color:var(--accent)}
+.hero{padding:3.4rem 0 1.2rem}
+h1{font-size:clamp(2.6rem,7.5vw,4.2rem);line-height:1.04;margin:0 0 .5rem;letter-spacing:-.025em;font-weight:400}
+.tagline{font-size:clamp(1.15rem,2.6vw,1.5rem);font-style:italic;font-weight:400;margin:0 0 1rem;line-height:1.4}
+.lead{color:var(--muted);max-width:42rem;margin:0 0 1.4rem}
+.actions{margin:0 0 .6rem}
+.btn{display:inline-block;margin:0 .7rem .7rem 0;padding:.5rem 1rem;border:1.5px solid var(--fg);border-radius:0;color:var(--fg);text-decoration:none;font:700 .74rem/1.4 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--fg);color:var(--bg)}
+.btn.primary:hover{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.badges{margin:0}
+.badges a{display:inline-block;margin:0 .4rem .4rem 0}
+.badges img{display:block;height:20px}
+section.wrap{padding-top:1.9rem;padding-bottom:.6rem}
+section.wrap>h2{border-top:1px solid var(--fg);padding-top:.65rem}
+h2{font-size:1.55rem;margin:0 0 .9rem;line-height:1.25;font-weight:400}
+h3{font-size:1.08rem;margin:1.4rem 0 .4rem;font-weight:700}
+.flow{list-style:none;display:flex;flex-wrap:wrap;align-items:center;margin:1.2rem 0 .7rem;padding:0}
+.flow li{display:flex;align-items:center;margin:0 .4rem .5rem 0}
+.step{display:inline-block;padding:.4rem .85rem;border:1px solid var(--fg);border-radius:0;background:none;font:600 .9rem/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+.step.me{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.arrow{color:var(--muted);margin-left:.5rem}
+.cards{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.4rem 2.2rem}
+@media (max-width:40rem){.cards{grid-template-columns:1fr}}
+.card{background:none;border:0;border-top:2px solid var(--fg);border-radius:0;padding:.7rem 0 .2rem}
+.card h3{margin:0 0 .3rem;font-size:1.05rem}
+.card p{margin:0;color:var(--muted)}
+code{font:.88em ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;background:var(--code);padding:.08em .3em;border-radius:0}
+.codeblock{position:relative;margin:.8rem 0}
+pre{margin:0;padding:1rem;background:var(--code);border-radius:0;overflow-x:auto;font:13.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;border:1px solid var(--line)}
+pre code{background:none;padding:0;font:inherit}
+.copy{position:absolute;top:.45rem;right:.45rem;font:700 .66rem/1.2 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase;padding:.25rem .55rem;border:1px solid var(--fg);border-radius:0;background:var(--bg);color:var(--fg);cursor:pointer}
+.copy:hover{border-color:var(--accent);color:var(--accent)}
+.scroll{overflow-x:auto;margin:.9rem 0}
+table{border-collapse:collapse;width:100%;font-size:.93rem;font-variant-numeric:lining-nums tabular-nums}
+th,td{border:0;border-bottom:1px solid var(--line);padding:.5rem .8rem .5rem 0;text-align:left;vertical-align:top}
+thead th{border-top:2px solid var(--fg);border-bottom:2px solid var(--fg);background:none;font:700 .7rem/1.35 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+tbody th{font-weight:700;background:none}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:2px solid var(--fg)}
+details{margin:.8rem 0}
+summary{cursor:pointer;font:700 .74rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+ul{padding-left:1.25rem}
+li{margin:.3rem 0}
+footer{margin-top:3rem;border-top:4px solid var(--fg);padding:1.2rem 0 2.5rem;color:var(--muted);font:.86rem/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+footer p{margin:.2rem 0}
+@media (max-width:34rem){.bar{padding-top:.4rem;padding-bottom:.4rem}.hero{padding-top:2rem}}
+/* the header (header.py): row 1 = brand, tabs, theme button; row 2 = the links of the page, on one row */
+header.site .bar{align-items:center}
+header.site nav[aria-label="Sites"]{margin-left:auto}
+header.site nav[aria-label="Sites"] ul{flex-wrap:nowrap;align-items:center}
+header.site nav[aria-label="Sites"] li{margin:0 0 0 1.1rem;white-space:nowrap}
+header.site .tools{display:flex;align-items:center}
+header.site .tools .theme{margin:0 0 0 1.1rem}
+header.site a[aria-current="page"]{color:var(--fg);box-shadow:inset 0 -2px 0 var(--accent)}
+header.site .subbar{border-top:1px solid var(--line)}
+header.site .subbar nav ul{flex-wrap:nowrap;overflow-x:auto;padding:.4rem 0 .45rem;-webkit-overflow-scrolling:touch}
+header.site .subbar nav li{margin:0 1.3rem 0 0;white-space:nowrap}
+@media (max-width:40rem){
+header.site .brand{order:1;margin-right:auto}
+header.site .tools{order:2}
+header.site .tools .theme{margin:0}
+header.site nav[aria-label="Sites"]{order:3;flex-basis:100%;margin-left:0;margin-top:.25rem}
+header.site nav[aria-label="Sites"] li{margin:0 1.1rem 0 0}}
+@media (max-width:24rem){header.site nav[aria-label="Sites"] a{letter-spacing:.04em;font-size:.68rem}header.site nav[aria-label="Sites"] li{margin-right:.75rem}header.site .wrap{padding-left:1rem;padding-right:1rem}}
+:root{--rev:#86307a;--warn:#98380d;--ok:#2a6b3b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--rev:#e0a4d6;--warn:#f0a77d;--ok:#7fcf93}}
+:root[data-theme="dark"]{--rev:#e0a4d6;--warn:#f0a77d;--ok:#7fcf93}
+.intro{color:var(--muted);max-width:42rem}
+.trio,.cases{list-style:none;padding:0;margin:1rem 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.4rem 2rem}
+.trio li,.cases li{background:none;border:0;border-top:2px solid var(--fg);border-radius:0;padding:.7rem 0 0;margin:0}
+.trio h3,.cases h3{margin:.1rem 0 .3rem;font-size:1.05rem}
+.trio p,.cases p{margin:.3rem 0 0;color:var(--muted)}
+.chip{display:inline-block;position:relative;padding-left:.95em;font:700 .68rem/1.35 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap;border:0}
+.chip::before{content:"";position:absolute;left:0;top:.3em;width:.58em;height:.58em;background:currentColor}
+.chip.exact,.chip.held{color:var(--ok)}
+.chip.measured,.chip.design{color:var(--accent)}
+.chip.none,.chip.optimistic,.chip.timing,.chip.unvalidated{color:var(--warn)}
+.legend{display:flex;flex-wrap:wrap;margin:.4rem 0;color:var(--muted);font:.88rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.legend span{margin-right:1.2rem}
+.sw{display:inline-block;width:.8rem;height:.8rem;margin-right:.35rem;vertical-align:-.1rem}
+.sw.f{background:var(--accent)}.sw.r{background:var(--rev)}.sw.w{background:var(--warn)}.sw.o{background:var(--accent);opacity:.25}
+.steps{list-style:none;padding:0;margin:1rem 0;counter-reset:none}
+.step{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,19rem);gap:1rem 2rem;align-items:center;background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:1.1rem 0;margin:0;font:inherit}
+.step h3{margin:0 0 .4rem;font-size:1.12rem;display:flex;align-items:baseline}
+.num{display:inline-block;min-width:1.7rem;font-size:1.3rem;font-weight:700;color:var(--accent);margin-right:.4rem;flex:none}
+.step p{margin:.3rem 0}
+.where{font:.86rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--muted)}
+figure{margin:0}
+figcaption{font:.78rem/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--muted);text-align:left;margin-top:.25rem}
+svg{display:block;width:100%;height:auto}
+svg .t{fill:var(--fg);font:12px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+svg .tm{fill:var(--muted);font:11px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+svg .tw{fill:var(--warn);font:11px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-weight:700}
+svg .ta{fill:var(--accent);font:11px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-weight:700}
+svg .card{fill:var(--card);stroke:var(--line)}
+svg .grid{stroke:var(--line);fill:none}
+svg .ink{stroke:var(--fg);fill:none}
+svg .accs{stroke:var(--accent);fill:none}
+svg .warns{stroke:var(--warn);fill:none}
+svg .acc{fill:var(--accent)}svg .rev{fill:var(--rev)}svg .warn{fill:var(--warn)}svg .ok{fill:var(--ok)}
+svg .band{fill:var(--accent);opacity:.22}
+svg .dim{fill:var(--line)}
+svg rect{rx:0;ry:0}
+.decisions td,.decisions th{vertical-align:top}
+.decisions .chip{margin-bottom:.35rem}
+.decisions td p{margin:.2rem 0}
+.mods th:first-child{white-space:nowrap}
+@media (max-width:48rem){.trio,.cases{grid-template-columns:1fr}.step{grid-template-columns:1fr}}
+.formula{margin:.6rem 0;padding:.5rem .8rem;background:var(--card);border-left:3px solid var(--accent)}
+.formula code{white-space:normal}
+.crumb{font:.84rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--muted);margin:0 0 .5rem}
+.crumb a{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;margin:.4rem 0 .6rem}
+.chips .chip{margin:0 1.1rem .4rem 0}
+.chip.dev{color:var(--rev)}.chip.heldout{color:var(--accent)}.chip.case{color:var(--ok)}.chip.met{color:var(--ok)}.chip.notmet{color:var(--warn)}.chip.partly{color:var(--rev)}
+.facts{display:grid;grid-template-columns:minmax(0,11rem) minmax(0,1fr);gap:.35rem 1.2rem;margin:.8rem 0}
+.facts dt{color:var(--muted);font:700 .72rem/1.7 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+.facts dd{margin:0}
+.glance{list-style:none;padding:0;margin:1.2rem 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem 1.4rem}
+.glance li{background:none;border:0;border-top:2px solid var(--fg);border-radius:0;padding:.55rem 0 0;margin:0}
+.glance .big{display:block;font-size:1.5rem;font-weight:700;line-height:1.2;margin:.2rem 0;font-variant-numeric:lining-nums tabular-nums}
+.glance .lab{color:var(--muted);font:.82rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.chart{margin:1rem 0}
+.chart figcaption{text-align:left;font-size:.82rem}
+.dcards{list-style:none;padding:0;margin:1rem 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.4rem 2rem}
+.dcard{background:none;border:0;border-top:2px solid var(--fg);border-radius:0;padding:.65rem 0 0;margin:0}
+.dcard h3{margin:.1rem 0 .3rem;font-size:1.05rem}
+.dcard p{margin:.25rem 0;color:var(--muted);font-size:.92rem}
+.dcard .nums{color:var(--fg)}
+.pager{display:flex;justify-content:space-between;flex-wrap:wrap;margin:1.5rem 0 .5rem;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:.9rem}
+.pager a{margin-bottom:.4rem}
+.notebox{background:none;border:0;border-top:1px solid var(--fg);border-bottom:1px solid var(--line);border-radius:0;padding:.8rem 0;margin:1.3rem 0}
+.notebox p{margin:0}
+.pending{color:var(--muted)}
+svg .bar{fill:var(--accent)}svg .barn{fill:var(--warn)}svg .band2{fill:var(--accent);opacity:.16}
+@media (max-width:48rem){.glance{grid-template-columns:repeat(2,minmax(0,1fr))}.dcards{grid-template-columns:1fr}.facts{grid-template-columns:1fr}}
+@media (max-width:34rem){.glance{grid-template-columns:1fr}}
+.tablewrap{overflow-x:auto;margin:1rem 0}
+.tablewrap table{min-width:36rem}
+th.n,td.n{text-align:right}
+td.ok{color:var(--ok)}td.bad{color:var(--warn)}td.dim{color:var(--muted)}
+td.name{white-space:normal;min-width:11rem}
+.legend{color:var(--muted);font-size:.86rem;margin:.3rem 0 1rem}
+.catalog td:first-child,.catalog th:first-child{white-space:nowrap}
+.chip.set{color:var(--muted)}
+.tilebig{display:block;font-size:1.5rem;font-weight:700;line-height:1.2;margin:.2rem 0}
+details.more{margin:1rem 0}
+details.more summary{cursor:pointer;color:var(--accent)}
+svg .dflt{fill:var(--muted)}
+svg .open{fill:none;stroke:var(--warn);stroke-width:2}
+
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap bar">
+<a class="brand" href="../">Ampli<span class="trim">Trim</span></a>
+<nav aria-label="Sites"><ul><li><a href="https://paytonyau.github.io/amplitrim/">Software</a></li><li><a href="../how-it-works/">How it works</a></li><li><a href="../" aria-current="page">Validation</a></li></ul></nav>
+<div class="tools"></div>
+</div>
+<div class="wrap subbar"><nav aria-label="Main"><ul><li><a href="../">Overview</a></li><li><a href="../16s/" aria-current="page">16S</a></li><li><a href="../its/">ITS</a></li><li><a href="../datasets/">Datasets</a></li><li><a href="../recovery/">Recovery</a></li><li><a href="../criteria/">Criteria</a></li><li><a href="../definitions/">Definitions</a></li><li><a href="../runs/">Runs</a></li><li><a href="https://github.com/paytonyau/amplitrim-validation">Archive</a></li></ul></nav></div></header>
+<main id="main">
+<section class="hero"><div class="wrap">
+<p class="crumb"><a href="../">Results</a> &rsaquo; 16S</p>
+<h1>16S: the cut and the maxEE limit</h1>
+<ul class="glance"><li><span class="lab">Pass-rate estimate</span><span class="big">within 0.8 points</span><span class="lab">of DADA2&#x27;s measured pass rate on all 11 16S datasets (target: within 2 points)</span></li><li><span class="lab">AmpliTrim against FIGARO</span><span class="big">-1.0 to +2.6 points</span><span class="lab">pairs merged with AmpliTrim&#x27;s cut minus FIGARO&#x27;s, at the same maxEE, on the 10 datasets where FIGARO ran</span></li><li><span class="lab">The maxEE rule</span><span class="big">raises it on 5</span><span class="lab">of 11 datasets (to 2,3, 4,3, 4,8); it keeps DADA2&#x27;s default of 2 elsewhere</span></li><li><span class="lab">A looser limit (maxEE 2,5)</span><span class="big">+7.5 to +29.8 points</span><span class="lab">more pairs merged on the 5 datasets where the default passed under 70%; on Wheat Soil V4, where 99% passed, it merged 9.1 points fewer</span></li></ul><p>For 16S reads AmpliTrim recommends where to cut each read and how many expected errors to allow (maxEE). This page shows how its estimates compared with what DADA2 measured, and how its cut compared with FIGARO's, on every 16S dataset.</p>
+</div></section><section class="wrap" id="glance"><h2>Dataset by dataset</h2>
+<figure class="chart"><svg viewBox="0 0 520 356" role="img" aria-label="How far each tool&#x27;s estimate of the pass rate was from DADA2&#x27;s measured pass rate, per 16S dataset: AmpliTrim and FIGARO"><title>How far each tool&#x27;s estimate of the pass rate was from DADA2&#x27;s measured pass rate, per 16S dataset: AmpliTrim and FIGARO</title><rect class="band2" x="291.7" y="52" width="83.3" height="286"/><line class="ink" x1="250" y1="334" x2="250" y2="340"/><text class="tm" x="250" y="352" text-anchor="middle">-4</text><line class="ink" x1="292" y1="334" x2="292" y2="340"/><text class="tm" x="292" y="352" text-anchor="middle">-2</text><line class="ink" x1="333" y1="334" x2="333" y2="340"/><text class="tm" x="333" y="352" text-anchor="middle">0</text><line class="ink" x1="375" y1="334" x2="375" y2="340"/><text class="tm" x="375" y="352" text-anchor="middle">+2</text><line class="ink" x1="417" y1="334" x2="417" y2="340"/><text class="tm" x="417" y="352" text-anchor="middle">+4</text><line class="ink" x1="458" y1="334" x2="458" y2="340"/><text class="tm" x="458" y="352" text-anchor="middle">+6</text><line class="ink" x1="500" y1="334" x2="500" y2="340"/><text class="tm" x="500" y="352" text-anchor="middle">+8</text><line class="ink" x1="333" y1="48" x2="333" y2="334"/><text class="tm" x="244" y="74" text-anchor="end">Hülpüsch Mock A</text><line class="ink" x1="316.7" y1="70" x2="325.0" y2="70"/><circle class="warn" data-v="-0.4" cx="325.0" cy="70" r="5"/><circle class="acc" data-v="-0.8" cx="316.7" cy="70" r="6"/><text class="tm" x="244" y="100" text-anchor="end">Hülpüsch Mock B</text><line class="ink" x1="335.4" y1="96" x2="393.8" y2="96"/><circle class="warn" data-v="2.9" cx="393.8" cy="96" r="5"/><circle class="acc" data-v="0.1" cx="335.4" cy="96" r="6"/><text class="tm" x="244" y="126" text-anchor="end">Inter-Laboratory Mock V1-V2</text><line class="ink" x1="331.2" y1="122" x2="337.5" y2="122"/><circle class="warn" data-v="0.2" cx="337.5" cy="122" r="5"/><circle class="acc" data-v="-0.1" cx="331.2" cy="122" r="6"/><text class="tm" x="244" y="152" text-anchor="end">Inter-Laboratory Mock V4-V6</text><line class="ink" x1="329.2" y1="148" x2="352.1" y2="148"/><circle class="warn" data-v="0.9" cx="352.1" cy="148" r="5"/><circle class="acc" data-v="-0.2" cx="329.2" cy="148" r="6"/><text class="tm" x="244" y="178" text-anchor="end">D6300 V3-V4</text><line class="ink" x1="335.4" y1="174" x2="345.8" y2="174"/><circle class="warn" data-v="0.6" cx="345.8" cy="174" r="5"/><circle class="acc" data-v="0.1" cx="335.4" cy="174" r="6"/><text class="tm" x="244" y="204" text-anchor="end">D6300 V4-V5</text><circle class="acc" data-v="0.2" cx="337.5" cy="200" r="6"/><text class="tm" x="244" y="230" text-anchor="end">Human Gut V1-V2</text><line class="ink" x1="333.3" y1="226" x2="325.0" y2="226"/><circle class="warn" data-v="-0.4" cx="325.0" cy="226" r="5"/><circle class="acc" data-v="0.0" cx="333.3" cy="226" r="6"/><text class="tm" x="244" y="256" text-anchor="end">Wheat Soil V4</text><line class="ink" x1="333.3" y1="252" x2="372.9" y2="252"/><circle class="warn" data-v="1.9" cx="372.9" cy="252" r="5"/><circle class="acc" data-v="0.0" cx="333.3" cy="252" r="6"/><text class="tm" x="244" y="282" text-anchor="end">Wastewater V3-V4</text><line class="ink" x1="337.5" y1="278" x2="264.6" y2="278"/><circle class="warn" data-v="-3.3" cx="264.6" cy="278" r="5"/><circle class="acc" data-v="0.2" cx="337.5" cy="278" r="6"/><text class="tm" x="244" y="308" text-anchor="end">Mouse Gut Spike-Ins</text><line class="ink" x1="322.9" y1="304" x2="404.2" y2="304"/><circle class="warn" data-v="3.4" cx="404.2" cy="304" r="5"/><circle class="acc" data-v="-0.5" cx="322.9" cy="304" r="6"/><text class="tm" x="244" y="334" text-anchor="end">Surface Swabs</text><line class="ink" x1="331.2" y1="330" x2="493.8" y2="330"/><circle class="warn" data-v="7.7" cx="493.8" cy="330" r="5"/><circle class="acc" data-v="-0.1" cx="331.2" cy="330" r="6"/></svg><figcaption>Blue: how far AmpliTrim&#x27;s estimate of the pass rate was from DADA2&#x27;s measured pass rate, in points. Orange: how far FIGARO&#x27;s was, where it ran. The shaded band is the target set in advance, within 2 points.</figcaption></figure><div class="tablewrap"><table><thead><tr><th scope="col">Dataset</th><th scope="col">Kind</th><th scope="col" class="n">Samples</th><th scope="col" class="n">Pass at maxEE 2</th><th scope="col" class="n">Pass-rate estimate off by (points)</th><th scope="col" class="n">Merge estimate too high by (points, mean)</th><th scope="col" class="n">Same order as DADA2</th><th scope="col" class="n">AmpliTrim minus FIGARO (points)</th><th scope="col" class="n">maxEE the rule sets</th></tr></thead><tbody><tr><td class="name"><a href="datasets/ds01-hulpusch-mock-a/">DS01 Hülpüsch Mock A</a></td><td>Mock</td><td class="n">6</td><td class="n">65%</td><td class="n">-0.8</td><td class="n">+2.7</td><td class="n">0.90</td><td class="n">0.0</td><td class="n">2,3</td></tr><tr><td class="name"><a href="datasets/ds02-hulpusch-mock-b/">DS02 Hülpüsch Mock B</a></td><td>Mock</td><td class="n">8</td><td class="n">20%</td><td class="n">+0.1</td><td class="n">-2.2</td><td class="n">1.00</td><td class="n">+2.6</td><td class="n">4,8</td></tr><tr><td class="name"><a href="datasets/ds03-inter-laboratory-mock-v1-v2/">DS03 Inter-Laboratory Mock V1-V2</a></td><td>Mock</td><td class="n">6</td><td class="n">96%</td><td class="n">-0.1</td><td class="n">+0.3</td><td class="n">1.00</td><td class="n">0.0</td><td class="n">2</td></tr><tr><td class="name"><a href="datasets/ds04-inter-laboratory-mock-v4-v6/">DS04 Inter-Laboratory Mock V4-V6</a></td><td>Mock</td><td class="n">5</td><td class="n">43%</td><td class="n">-0.2</td><td class="n">-1.6</td><td class="n">1.00</td><td class="n">+0.3</td><td class="n">4,3</td></tr><tr><td class="name"><a href="datasets/ds05-d6300-v3-v4/">DS05 D6300 V3-V4</a></td><td>Mock</td><td class="n">10</td><td class="n">95%</td><td class="n">+0.1</td><td class="n">+2.9</td><td class="n">1.00</td><td class="n">0.0</td><td class="n">2</td></tr><tr><td class="name"><a href="datasets/ds06-d6300-v4-v5/">DS06 D6300 V4-V5</a></td><td>Mock</td><td class="n">3</td><td class="n">64%</td><td class="n">+0.2</td><td class="n">+6.7</td><td class="n">(3 settings)</td><td class="n">–</td><td class="n">2,3</td></tr><tr><td class="name"><a href="datasets/ds07-human-gut-v1-v2/">DS07 Human Gut V1-V2</a></td><td>Real</td><td class="n">33</td><td class="n">91%</td><td class="n">0.0</td><td class="n">+6.5</td><td class="n">1.00</td><td class="n">+1.1</td><td class="n">2</td></tr><tr><td class="name"><a href="datasets/ds08-wheat-soil-v4/">DS08 Wheat Soil V4</a></td><td>Real</td><td class="n">36</td><td class="n">99%</td><td class="n">0.0</td><td class="n">+32.1</td><td class="n">1.00</td><td class="n">0.0</td><td class="n">2</td></tr><tr><td class="name"><a href="datasets/ds10-wastewater-v3-v4/">DS10 Wastewater V3-V4</a></td><td>Real</td><td class="n">9</td><td class="n">54%</td><td class="n">+0.2</td><td class="n">+3.9</td><td class="n">0.80</td><td class="n">-1.0</td><td class="n">4,3</td></tr><tr><td class="name"><a href="datasets/ds11-mouse-gut-spike-ins/">DS11 Mouse Gut Spike-Ins</a></td><td>Real</td><td class="n">12</td><td class="n">88%</td><td class="n">-0.5</td><td class="n">+3.4</td><td class="n">1.00</td><td class="n">+1.3</td><td class="n">2</td></tr><tr><td class="name"><a href="datasets/ds12-surface-swabs/">DS12 Surface Swabs</a></td><td>Real</td><td class="n">36</td><td class="n">85%</td><td class="n">-0.1</td><td class="n">+7.0</td><td class="n">1.00</td><td class="n">0.0</td><td class="n">2</td></tr></tbody></table></div><p class="legend">Merge estimate too high: it stops before DADA2 denoises the reads, so use it to compare settings, not as a forecast. Same order: 1.00 means AmpliTrim ranks the settings as DADA2 does. A dash: FIGARO could not be run, or gave no result. Words: <a href="../definitions/">definitions</a>.</p>
+</section><section class="wrap" id="more"><h2>More on the 16S runs</h2>
+<ul><li><a href="../recovery/">Recovery of the known members</a></li><li><a href="../criteria/">Every criterion and its outcome</a></li><li><a href="../runs/">Every run</a></li><li><a href="https://github.com/paytonyau/amplitrim-validation/blob/main/docs/FINDINGS.md">The full findings</a></li></ul>
+</section>
+</main>
+<footer><div class="wrap">
+<p><a href="../">Overview</a> · <a href="https://github.com/paytonyau/amplitrim">AmpliTrim on GitHub</a> · <a href="https://github.com/paytonyau/amplitrim-validation">Validation archive</a> · <a href="https://github.com/paytonyau/amplitrim-validation/blob/main/docs/FINDINGS.md">The findings</a> · <a href="https://github.com/paytonyau/amplitrim-validation/blob/main/TEST_REGISTER.md">Test register</a></p>
+<p>By <a href="https://orcid.org/0000-0002-3283-0370">Payton (Tung On) Yau</a>. The numbers are read from the findings of the validation archive (docs/FINDINGS.md) and the results folders it lists; the register fixed every criterion before its run.</p>
+</div></footer>
+<script>
+(function () {
+  var root = document.documentElement, list = document.querySelector('header.site .tools') || document.querySelector('header.site nav ul');
+  if (!list) return;
+  var button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'theme';
+  button.id = 'theme-toggle';
+  if (list.className === 'tools') list.appendChild(button);
+  else { var item = document.createElement('li'); item.appendChild(button); list.appendChild(item); }
+  var query = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  function current() {
+    var chosen = root.getAttribute('data-theme');
+    if (chosen) return chosen;
+    return query && query.matches ? 'dark' : 'light';
+  }
+  function show() {
+    var dark = current() === 'dark';
+    button.textContent = dark ? '\u2600 Light' : '\u263E Dark';
+    button.setAttribute('aria-label', dark ? 'Switch to the light theme' : 'Switch to the dark theme');
+  }
+  button.addEventListener('click', function () {
+    var next = current() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('amplitrim-theme', next); } catch (e) {}
+    show();
+  });
+  if (query && query.addEventListener) query.addEventListener('change', show);
+  show();
+})();
+
+</script>
+</body>
+</html>

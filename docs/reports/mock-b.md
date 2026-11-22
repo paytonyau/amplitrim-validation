@@ -12,7 +12,7 @@
 
 ## In short
 
-The poorest reads in the set: only 20% of the pairs pass DADA2's default filter. A looser maxEE gave a higher share of reads that match an expected sequence exactly (68.7% at maxEE 2, 73.6% to 75.2% for AmpliTrim's looser settings, 75.2% at maxEE 4,8 which is the released rule's setting, and 78.3% for the other tool's maxEE 6,9, which also found one more variant: 7 against 6). This is the one dataset where AmpliTrim's cut differed from the other tool's by more than the 2-point margin, by +2.6 points. In the first round of tests, which used a stricter margin of 1.0 point, it was also beyond the margin in AmpliTrim's favour.
+The poorest reads in the set: only 20% of the pairs pass DADA2's default filter. A looser maxEE gave a higher share of reads that match an expected sequence exactly (68.7% at maxEE 2, 73.6% to 75.2% for AmpliTrim's looser settings, 75.2% at maxEE 4,8 which is the released rule's setting, and 78.3% for FIGARO's maxEE 6,9, which also found one more variant: 7 against 6). This is the one dataset where AmpliTrim's cut differed from FIGARO's by more than the 2-point margin, by +2.6 points. In the first round of tests, which used a stricter margin of 1.0 point, it was also beyond the margin in AmpliTrim's favour.
 
 ## How good was AmpliTrim's estimate?
 
@@ -20,19 +20,19 @@ Before DADA2 runs, AmpliTrim estimates two things for each setting: the share of
 
 *How far AmpliTrim's estimate of the share of pairs passing the filter was from what DADA2 measured. Zero is exact; inside the shaded band meets the target.*
 
-| Samples | Pass-rate estimate off by (points) | Merge estimate off by (points; average and range over the settings tried) | Same order as DADA2 (1.00 = identical) | The other tool's pass-rate estimate off by (points) |
+| Samples | Pass-rate estimate off by (points) | Merge estimate off by (points; average and range over the settings tried) | Same order as DADA2 (1.00 = identical) | FIGARO's pass-rate estimate off by (points) |
 |---|---|---|---|---|
 | 8 | +0.1 | -2.2 (-6.7 to +1.1) | 1.00 | +2.9 |
 
 The merge estimate is too high because it stops before DADA2 denoises the reads. Use it to compare settings, not as a forecast.
 
-## Compared with the other tool, at the same maxEE
+## Compared with FIGARO, at the same maxEE
 
-The other tool is an existing automatic tool for choosing truncation lengths. Given the same maxEE, we compared how many read pairs DADA2 merges with AmpliTrim's cut and with the other tool's cut. A cut such as 247/199 means the forward reads are cut to 247 nt and the reverse reads to 199 nt.
+FIGARO is an existing automatic tool for choosing truncation lengths. Given the same maxEE, we compared how many read pairs DADA2 merges with AmpliTrim's cut and with FIGARO's cut. A cut such as 247/199 means the forward reads are cut to 247 nt and the reverse reads to 199 nt.
 
-*The difference in the share of read pairs DADA2 merged: AmpliTrim's cut minus the other tool's. Blue means AmpliTrim merged more, orange fewer. Inside the shaded band the two cuts are equivalent.*
+*The difference in the share of read pairs DADA2 merged: AmpliTrim's cut minus FIGARO's. Blue means AmpliTrim merged more, orange fewer. Inside the shaded band the two cuts are equivalent.*
 
-| Samples | The other tool's cut and maxEE | AmpliTrim's cut | Difference in pairs merged (points) |
+| Samples | FIGARO's cut and maxEE | AmpliTrim's cut | Difference in pairs merged (points) |
 |---|---|---|---|
 | 8 | 279/248, 6,9 | 274/253 | +2.6 |
 
@@ -56,15 +56,15 @@ The rule has no cap. With a cap of 5 it would have set **maxEE 4,5** here, and D
 
 We also tried relaxing the limit on the reverse read to 5 (maxEE 2,5) and measured the change in pairs merged, in points of the input pairs.
 
-*Changes in the share of pairs DADA2 merged, in points. Blue means more pairs merged, orange fewer. The lower group compares AmpliTrim with the other tool using its own choice of cut and maxEE.*
+*Changes in the share of pairs DADA2 merged, in points. Blue means more pairs merged, orange fewer. The lower group compares AmpliTrim with FIGARO using its own choice of cut and maxEE.*
 
 | Change in pairs merged (points) | Quality of the extra reads kept | Accuracy (needs expected sequences) |
 |---|---|---|
 | +29.8 | noisier | more accurate |
 
-Against the other tool, which picks its own cut and maxEE, DADA2 merged this many more (+) or fewer (-) pairs, in points:
+Against FIGARO, which picks its own cut and maxEE, DADA2 merged this many more (+) or fewer (-) pairs, in points:
 
-| AmpliTrim setting | Difference from the other tool's own choice (points) |
+| AmpliTrim setting | Difference from FIGARO's own choice (points) |
 |---|---|
 | Default maxEE 2 | -54.1 |
 | maxEE 2,5 | -24.2 |
@@ -79,14 +79,14 @@ This dataset has expected sequences, so each setting can be scored.
 | AmpliTrim, maxEE 3,5 | 6 | 3 of 3 | 74.2% |
 | AmpliTrim, maxEE 5 | 6 | 3 of 3 | 73.6% |
 | AmpliTrim, maxEE 4,6 | 6 | 3 of 3 | 74.9% |
-| The other tool, maxEE 6,9 | 7 | 3 of 3 | 78.3% |
+| FIGARO, maxEE 6,9 | 7 | 3 of 3 | 78.3% |
 | No truncation, maxEE 2 | 4 | 3 of 3 | 54.3% |
 
 ## Amplicon length and the longest amplicons
 
-**The amplicon length the other tool needs**
+**The amplicon length FIGARO needs**
 
-The other tool needs you to tell it the amplicon length. We tried the longest (515 nt) and the typical (459 nt); it chose different cuts. AmpliTrim measures the lengths from your reads, so it needs no such number.
+FIGARO needs you to tell it the amplicon length. We tried the longest (515 nt) and the typical (459 nt); it chose different cuts. AmpliTrim measures the lengths from your reads, so it needs no such number.
 
 *The share of the input read pairs DADA2 merged with the cut each tool chose.*
 

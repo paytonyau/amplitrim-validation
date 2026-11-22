@@ -66,7 +66,7 @@ def test_the_second_row_has_a_few_short_links_and_marks_the_section(name):
     assert 3 <= len(p["row2"]) <= 9 and all(len(t[0]) <= 26 for t in p["row2"]), name           # a row that cannot overflow
     if family(name) == "results" and not name.startswith("how-it-works"):
         assert sum(t[2] for t in p["row2"]) == 1, name                                           # the section of this page is marked
-        want = "Datasets" if name.startswith("datasets/") else "Overview" if name == "index.html" else {"its": "ITS", "recovery": "Recovery", "criteria": "Criteria", "definitions": "Definitions", "runs": "Runs"}[name.split("/")[0]]
+        want = "Datasets" if name.startswith("datasets/") else "Overview" if name == "index.html" else {"16s": "16S", "its": "ITS", "recovery": "Recovery", "criteria": "Criteria", "definitions": "Definitions", "runs": "Runs"}[name.split("/")[0]]
         assert [t[0] for t in p["row2"] if t[2]] == [want], name
 
 

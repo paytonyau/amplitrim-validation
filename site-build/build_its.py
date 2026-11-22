@@ -291,7 +291,7 @@ def its_dataset_page(D, row):
         tl.append(("ASVs per sample (median)", f"{nn(s['asv_median'], 0)} \u2192 {nn(t['asv_median'], 0)}", "DADA2 default \u2192 after the trim"))
     facts = (f'<dl class="facts"><dt>Marker, platform</dt><dd>{esc(row["marker_region"])}, {esc(row["platform"])}</dd><dt>Kind</dt><dd>{esc(row["kind"])}</dd>'
              f'<dt>Data</dt><dd>{esc(row["accession"])}</dd><dt>Source</dt><dd>{esc(row["source"])}</dd><dt>In the archive</dt><dd>{mono(row["data_folder"])}</dd></dl>')
-    old = OLD_PAGE.get(code)
+    old = None                                                    # the 16S datasets have their pages in the 16S section; this one is an ITS dataset
     more = f'<p>The first validation (the 16S-era tests of the paper) also has a page on this dataset: <a href="../../../datasets/{old}/">{esc(row["short_name"])}</a>.</p>' if old else ""
     rec = [r for r in D.recovery["rows"] if r["code"] == code]
     recov = ""
@@ -463,8 +463,8 @@ def catalog_page(D):
     for r in D.names:
         c = r["archive_code"]
         links = []
-        if c in OLD_PAGE:
-            links.append(f'<a href="{OLD_PAGE[c]}/">first validation</a>')
+        if c in OLD_PAGE and not N.is_its(r):
+            links.append(f'<a href="../16s/datasets/{N.slug(r)}/">16S pages</a>')
         if N.is_its(r):
             links.append(f'<a href="../its/datasets/{N.slug(r)}/">ITS runs</a>')
         if any(x["code"] == c for x in D.recovery["rows"]):
