@@ -1,4 +1,4 @@
-# Spring wheat, ITS: evidence report
+# Wheat Rhizosphere ITS1: evidence report
 
 *AmpliTrim validation archive. The numbers come from [`docs/FINDINGS.md`](../FINDINGS.md) and [`docs/validation.md`](../validation.md). The tool we compare with is not named here; the findings name it.*
 

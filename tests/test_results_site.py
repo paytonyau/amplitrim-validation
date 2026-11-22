@@ -165,6 +165,7 @@ def test_no_page_or_report_names_the_other_tool_or_makes_a_claim_we_decided_not_
 
 def test_every_number_on_the_pages_is_in_the_findings_or_the_validation_page():
     known = set(NUMBER.findall(strip_commas(FINDINGS + VALIDATION)))
+    known |= set(NUMBER.findall(strip_commas((DOCS / "DATASET_NAMES.tsv").read_text(encoding="utf-8"))))                  # the IDs, years and regions of the dataset names
     ticks = {"1", "2", "3", "4", "5", "10", "20", "30", "40", "60", "100"}                              # the labels of chart axes
     accessions = set(NUMBER.findall(" ".join(a for d in R.DATASETS for a in d[2])))                     # run accessions such as SRR16961582
     for name, path in PAGES:
@@ -212,7 +213,7 @@ def test_the_overview_states_the_outcomes_as_the_data_give_them():
     t = PARSED["overview"].body_text; dv = R.derived(D); st = dv["stats"]
     fmt1 = lambda v: f"{v:.1f}"
     assert f"within {fmt1(dv['max_abs_fe'])} points of what DADA2 measured" in t and f"The average miss was {fmt1(dv['mean_abs_fe'])} points" in t
-    assert f"On {dv['n_rank_one']} of the {dv['n_rank']} datasets where the order could be compared" in t and "Mock community A (0.90)" in t and "Wastewater, V3-V4 (0.80)" in t
+    assert f"On {dv['n_rank_one']} of the {dv['n_rank']} datasets where the order could be compared" in t and f"{D['mock-a']['name']} (0.90)" in t and f"{D['wastewater']['name']} (0.80)" in t
     assert f"merged more pairs on {st['all']['ahead']} of {st['all']['n']} datasets, the same on {st['all']['tied']} and fewer on {st['all']['behind']}" in t
     assert f"chose the same cut on {dv['hold_a']} of {dv['n_t9']} datasets and the other tool on {dv['hold_o']} of {dv['n_t9']}" in t
     assert "Sensible default, independently tested in part" in t and "after seeing our test data" in t and "the author gives no ceiling" in t    # what the maxEE rule is, and what it is not
@@ -236,7 +237,7 @@ def test_the_reports_repeat_the_tables_of_the_data():
 def test_the_site_is_up_to_date_with_the_findings(tmp_path):
     """Rebuild into a copy: the pages and reports on disk must be exactly what the builder makes from the findings."""
     work = tmp_path / "archive"; (work / "docs").mkdir(parents=True)
-    for f in ("FINDINGS.md", "validation.md"): shutil.copy2(DOCS / f, work / "docs" / f)
+    for f in ("FINDINGS.md", "validation.md", "DATASET_NAMES.tsv"): shutil.copy2(DOCS / f, work / "docs" / f)
     shutil.copytree(ROOT / "site-build", work / "site-build")
     done = subprocess.run([sys.executable, str(work / "site-build" / "build_results.py"), str(work)], capture_output=True, text=True)
     assert done.returncode == 0, done.stderr[-500:]

@@ -1,0 +1,13 @@
+.tablewrap{overflow-x:auto;margin:1rem 0}
+.tablewrap table{min-width:36rem}
+th.n,td.n{text-align:right}
+td.ok{color:var(--ok)}td.bad{color:var(--warn)}td.dim{color:var(--muted)}
+td.name{white-space:normal;min-width:11rem}
+.legend{color:var(--muted);font-size:.86rem;margin:.3rem 0 1rem}
+.catalog td:first-child,.catalog th:first-child{white-space:nowrap}
+.chip.set{color:var(--muted)}
+.tilebig{display:block;font-size:1.5rem;font-weight:700;line-height:1.2;margin:.2rem 0}
+details.more{margin:1rem 0}
+details.more summary{cursor:pointer;color:var(--accent)}
+svg .dflt{fill:var(--muted)}
+svg .open{fill:none;stroke:var(--warn);stroke-width:2}

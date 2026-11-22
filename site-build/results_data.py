@@ -18,6 +18,21 @@ DATASETS = [
     ("spike-in", "Mouse gut with spike-ins, V3-V4", ["PRJNA1243306"], {"spike-in v3-v4", "spike-in", "prjna1243306"}),
     ("swabs", "Meat-processing swabs, V3-V4", ["PRJNA1261676"], {"swabs v3-v4", "swabs", "swabs of meat-processing surfaces"}),
 ]
+# the names of docs/DATASET_NAMES.tsv: the pages use the short names, and the dataset pages the ID and the full name; the findings keep their own names, which stay aliases
+_CODE = {"mock-a": "mockA_high", "mock-b": "mockB", "interlab-v1v2": "mcm_v12", "interlab-v4v6": "mcm_v46", "d6300-v3v4": "d6300_V3-V4", "d6300-v4v5": "d6300_V4-V5",
+         "v1v2": "v1v2", "soil-v4": "v4", "its": "its", "wastewater": "wastewater_V3-V4", "spike-in": "spikein_V3-V4", "swabs": "swabs_V3-V4"}
+FULL, DSID = {}, {}
+_names = pathlib.Path(__file__).resolve().parent.parent / "docs" / "DATASET_NAMES.tsv"
+if _names.is_file():
+    import csv as _csv
+    with open(_names, encoding="utf-8", newline="") as _fh:
+        _rows = {r["archive_code"]: r for r in _csv.DictReader(_fh, delimiter="\t")}
+    _new = []
+    for d in DATASETS:
+        r = _rows[_CODE[d[0]]]
+        FULL[d[0]], DSID[d[0]] = r["full_name"], r["id"]
+        _new.append((d[0], r["short_name"], d[2], set(d[3]) | {r["short_name"].lower(), re.sub(r"\s*\(.*?\)", "", r["full_name"]).strip().lower(), r["full_name"].lower()}))
+    DATASETS = _new
 IDS = [d[0] for d in DATASETS]
 ALIAS = {a: d[0] for d in DATASETS for a in d[3]}
 
@@ -81,7 +96,7 @@ def num(s):
 def load(archive):
     archive = pathlib.Path(archive)
     f = (archive / "docs" / "FINDINGS.md").read_text(encoding="utf-8"); v = (archive / "docs" / "validation.md").read_text(encoding="utf-8")
-    D = {d[0]: {"id": d[0], "name": d[1], "accessions": d[2], "notes": NOTES[d[0]], "ref": NAMED_REFS.get(d[0])} for d in DATASETS}
+    D = {d[0]: {"id": d[0], "name": d[1], "full": FULL.get(d[0], d[1]), "ds": DSID.get(d[0], ""), "accessions": d[2], "notes": NOTES[d[0]], "ref": NAMED_REFS.get(d[0])} for d in DATASETS}
     def fill(marker, stop, slot, multi=False):
         header, rows = table(f, marker, stop); header = [anon(h) for h in header]; last = None; seen = []
         if slot == "t9": header = ["Dataset", "AmpliTrim", "AmpliTrim holds", "the other tool", "the other tool holds"]      # the table has two columns called Holds

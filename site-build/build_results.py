@@ -11,14 +11,10 @@ ROOT = pathlib.Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else HERE.parent
 sys.path.insert(0, str(HERE))
 import results_data as R
 
-ARCH, SOFT = "https://github.com/paytonyau/amplitrim-validation", "https://github.com/paytonyau/amplitrim"
-BLOB, ENA = ARCH + "/blob/main/", "https://www.ebi.ac.uk/ena/browser/view/"
+from shell import ARCH, SOFT, BLOB, ENA, CSS, THEMEHEAD, THEME, FAVICON, page_shell        # noqa: E402
 esc = lambda s: html.escape(str(s), quote=True)
 D, META = R.load(ROOT)
 ORDER = R.IDS
-CSS = "".join((HERE / n).read_text(encoding="utf-8") for n in ("style.css", "design_css.css", "results_css.css"))
-THEMEHEAD, THEME = (HERE / "theme_head.js").read_text(encoding="utf-8"), (HERE / "theme.js").read_text(encoding="utf-8")
-FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231b201d'/%3E%3Ctext x='16' y='24' font-size='24' text-anchor='middle' fill='%23e8ebe6' font-family='Georgia,serif' font-weight='700'%3EA%3C/text%3E%3C/svg%3E"
 SLOT_TABLE = {"t1": "1", "t3": "3", "t4": "4", "t5": "5", "t6": "6", "t7": "7", "t8": "8", "t9": "9", "t11": "11"}
 
 
@@ -218,51 +214,6 @@ def sources_line(d):
     return f"Tables {', '.join(tabs)} of the findings" + (" and the table of the final build on the validation page" if "rule" in d else "")
 
 
-def page_shell(title, desc, body, base):
-    return f'''<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{esc(title)}</title>
-<meta name="description" content="{esc(desc)}">
-<meta name="theme-color" content="#1b201d">
-<meta property="og:type" content="website">
-<meta property="og:title" content="{esc(title)}">
-<meta property="og:description" content="{esc(desc)}">
-<link rel="icon" href="{FAVICON}">
-<script>{THEMEHEAD}</script>
-<style>
-{CSS}
-</style>
-</head>
-<body>
-<a class="skip" href="#main">Skip to content</a>
-<header class="site"><div class="wrap bar">
-<a class="brand" href="{base}">Ampli<span class="trim">Trim</span> results</a>
-<nav aria-label="Main"><ul>
-<li><a href="{base}">Overview</a></li>
-<li><a href="{base}#datasets">Datasets</a></li>
-<li><a href="{base}how-it-works/">How it works</a></li>
-<li><a href="{SOFT}">Software</a></li>
-<li><a href="{ARCH}">Archive</a></li>
-</ul></nav>
-</div></header>
-<main id="main">
-{body}
-</main>
-<footer><div class="wrap">
-<p><a href="{base}">Overview</a> · <a href="{SOFT}">AmpliTrim on GitHub</a> · <a href="{ARCH}">Validation archive</a> · <a href="{BLOB}docs/FINDINGS.md">The findings</a> · <a href="{BLOB}TEST_REGISTER.md">Test register</a></p>
-<p>By <a href="https://orcid.org/0000-0002-3283-0370">Payton (Tung On) Yau</a>. The numbers come from the findings of the validation archive. The tool we compare with is not named on these pages; the findings name it.</p>
-</div></footer>
-<script>
-{THEME}
-</script>
-</body>
-</html>
-'''
-
-
 def dataset_page(i):
     d = D[i]; n = ORDER.index(i); prev_i = ORDER[n - 1] if n else None; next_i = ORDER[n + 1] if n < len(ORDER) - 1 else None
     t1, t3 = d["t1"], d["t3"]; cls, label, desc = role_parts(d)
@@ -278,8 +229,8 @@ def dataset_page(i):
     pager = '<nav class="pager" aria-label="Datasets">' + (f'<a href="../{prev_i}/">&larr; {esc(D[prev_i]["name"])}</a>' if prev_i else "<span></span>") + (f'<a href="../{next_i}/">{esc(D[next_i]["name"])} &rarr;</a>' if next_i else "<span></span>") + "</nav>"
     body = f'''<section class="hero"><div class="wrap">
 <p class="crumb"><a href="../../">Results</a> &rsaquo; Dataset {n + 1} of {len(ORDER)}</p>
-<h1>{esc(d["name"])}</h1>
-<p class="chips"><span class="chip {cls}">{esc(label)}</span><span class="chip measured">{"Mock community" if t3["Kind"] == "mock" else "Real samples"}</span></p>
+<h1>{esc((d["ds"] + " " + d["full"]) if d["ds"] else d["name"])}</h1>
+<p class="chips"><span class="chip {cls}">{esc(label)}</span><span class="chip measured">{"Mock community" if t3["Kind"] == "mock" else "Real samples"}</span>{f'<span class="chip set">{esc(d["ds"])}</span>' if d["ds"] else ""}</p>
 <dl class="facts">
 <dt>Marker, region, platform</dt><dd>{esc(t1["Marker, region, platform"])}</dd>
 <dt>Samples</dt><dd>{esc(t1["Samples"])}</dd>

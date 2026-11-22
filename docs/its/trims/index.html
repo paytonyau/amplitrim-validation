@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The twelve trims compared: AmpliTrim validation results</title>
+<meta name="description" content="Twelve ways of cutting poor read ends in ITS reads, compared on the datasets with a known answer.">
+<meta name="theme-color" content="#1b201d">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The twelve trims compared: AmpliTrim validation results">
+<meta property="og:description" content="Twelve ways of cutting poor read ends in ITS reads, compared on the datasets with a known answer.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231b201d'/%3E%3Ctext x='16' y='24' font-size='24' text-anchor='middle' fill='%23e8ebe6' font-family='Georgia,serif' font-weight='700'%3EA%3C/text%3E%3C/svg%3E">
+<script>(function(){try{var t=localStorage.getItem('amplitrim-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
+<style>
+:root{--bg:#e8ebe6;--fg:#1b201d;--muted:#4a534d;--accent:#2f3c8f;--accent-fg:#f4f6f2;--card:#dde2da;--line:#b3bcb1;--code:#dfe4dc;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b211e;--fg:#e3e8e1;--muted:#a6b0a8;--accent:#a9b8ff;--accent-fg:#141a2e;--card:#252d29;--line:#3c4741;--code:#29322d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1b211e;--fg:#e3e8e1;--muted:#a6b0a8;--accent:#a9b8ff;--accent-fg:#141a2e;--card:#252d29;--line:#3c4741;--code:#29322d;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:4.5rem;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.62 "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Charter,"Source Serif Pro",Georgia,serif}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:.18em}
+.trim{color:var(--accent);font-weight:700}
+.note{font:.88rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--muted);margin:.4rem 0 .8rem}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.theme{font:700 .72rem/1.2 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase;padding:.3rem .65rem;margin:0 0 0 1.2rem;border:1px solid var(--fg);border-radius:0;background:none;color:var(--fg);cursor:pointer;white-space:nowrap}
+.theme:hover{border-color:var(--accent);color:var(--accent)}
+.skip{position:absolute;left:-999px;top:0}
+.skip:focus{left:1rem;top:1rem;background:var(--bg);padding:.5rem .75rem;border:1px solid var(--fg);z-index:10}
+.wrap{max-width:56rem;margin:0 auto;padding:0 1.4rem}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+header.site{position:sticky;top:0;z-index:5;background:var(--bg);border-top:4px solid var(--fg);border-bottom:1px solid var(--line)}
+.bar{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;padding-top:.55rem;padding-bottom:.5rem}
+.brand{font-size:1.25rem;text-decoration:none;color:var(--fg);margin-right:1rem}
+nav ul{display:flex;flex-wrap:wrap;align-items:baseline;list-style:none;margin:0;padding:0}
+nav li{margin:0 0 0 1.2rem}
+nav a{text-decoration:none;color:var(--muted);font:700 .74rem/1.4 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase}
+nav a:hover{color:var(--accent)}
+.hero{padding:3.4rem 0 1.2rem}
+h1{font-size:clamp(2.6rem,7.5vw,4.2rem);line-height:1.04;margin:0 0 .5rem;letter-spacing:-.025em;font-weight:400}
+.tagline{font-size:clamp(1.15rem,2.6vw,1.5rem);font-style:italic;font-weight:400;margin:0 0 1rem;line-height:1.4}
+.lead{color:var(--muted);max-width:42rem;margin:0 0 1.4rem}
+.actions{margin:0 0 .6rem}
+.btn{display:inline-block;margin:0 .7rem .7rem 0;padding:.5rem 1rem;border:1.5px solid var(--fg);border-radius:0;color:var(--fg);text-decoration:none;font:700 .74rem/1.4 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--fg);color:var(--bg)}
+.btn.primary:hover{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.badges{margin:0}
+.badges a{display:inline-block;margin:0 .4rem .4rem 0}
+.badges img{display:block;height:20px}
+section.wrap{padding-top:1.9rem;padding-bottom:.6rem}
+section.wrap>h2{border-top:1px solid var(--fg);padding-top:.65rem}
+h2{font-size:1.55rem;margin:0 0 .9rem;line-height:1.25;font-weight:400}
+h3{font-size:1.08rem;margin:1.4rem 0 .4rem;font-weight:700}
+.flow{list-style:none;display:flex;flex-wrap:wrap;align-items:center;margin:1.2rem 0 .7rem;padding:0}
+.flow li{display:flex;align-items:center;margin:0 .4rem .5rem 0}
+.step{display:inline-block;padding:.4rem .85rem;border:1px solid var(--fg);border-radius:0;background:none;font:600 .9rem/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+.step.me{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.arrow{color:var(--muted);margin-left:.5rem}
+.cards{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.4rem 2.2rem}
+@media (max-width:40rem){.cards{grid-template-columns:1fr}}
+.card{background:none;border:0;border-top:2px solid var(--fg);border-radius:0;padding:.7rem 0 .2rem}
+.card h3{margin:0 0 .3rem;font-size:1.05rem}
+.card p{margin:0;color:var(--muted)}
+code{font:.88em ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;background:var(--code);padding:.08em .3em;border-radius:0}
+.codeblock{position:relative;margin:.8rem 0}
+pre{margin:0;padding:1rem;background:var(--code);border-radius:0;overflow-x:auto;font:13.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;border:1px solid var(--line)}
+pre code{background:none;padding:0;font:inherit}
+.copy{position:absolute;top:.45rem;right:.45rem;font:700 .66rem/1.2 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase;padding:.25rem .55rem;border:1px solid var(--fg);border-radius:0;background:var(--bg);color:var(--fg);cursor:pointer}
+.copy:hover{border-color:var(--accent);color:var(--accent)}
+.scroll{overflow-x:auto;margin:.9rem 0}
+table{border-collapse:collapse;width:100%;font-size:.93rem;font-variant-numeric:lining-nums tabular-nums}
+th,td{border:0;border-bottom:1px solid var(--line);padding:.5rem .8rem .5rem 0;text-align:left;vertical-align:top}
+thead th{border-top:2px solid var(--fg);border-bottom:2px solid var(--fg);background:none;font:700 .7rem/1.35 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+tbody th{font-weight:700;background:none}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:2px solid var(--fg)}
+details{margin:.8rem 0}
+summary{cursor:pointer;font:700 .74rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+ul{padding-left:1.25rem}
+li{margin:.3rem 0}
+footer{margin-top:3rem;border-top:4px solid var(--fg);padding:1.2rem 0 2.5rem;color:var(--muted);font:.86rem/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+footer p{margin:.2rem 0}
+@media (max-width:34rem){.bar{padding-top:.4rem;padding-bottom:.4rem}.hero{padding-top:2rem}}
+:root{--rev:#86307a;--warn:#98380d;--ok:#2a6b3b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--rev:#e0a4d6;--warn:#f0a77d;--ok:#7fcf93}}
+:root[data-theme="dark"]{--rev:#e0a4d6;--warn:#f0a77d;--ok:#7fcf93}
+.intro{color:var(--muted);max-width:42rem}
+.trio,.cases{list-style:none;padding:0;margin:1rem 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.4rem 2rem}
+.trio li,.cases li{background:none;border:0;border-top:2px solid var(--fg);border-radius:0;padding:.7rem 0 0;margin:0}
+.trio h3,.cases h3{margin:.1rem 0 .3rem;font-size:1.05rem}
+.trio p,.cases p{margin:.3rem 0 0;color:var(--muted)}
+.chip{display:inline-block;position:relative;padding-left:.95em;font:700 .68rem/1.35 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap;border:0}
+.chip::before{content:"";position:absolute;left:0;top:.3em;width:.58em;height:.58em;background:currentColor}
+.chip.exact,.chip.held{color:var(--ok)}
+.chip.measured,.chip.design{color:var(--accent)}
+.chip.none,.chip.optimistic,.chip.timing,.chip.unvalidated{color:var(--warn)}
+.legend{display:flex;flex-wrap:wrap;margin:.4rem 0;color:var(--muted);font:.88rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.legend span{margin-right:1.2rem}
+.sw{display:inline-block;width:.8rem;height:.8rem;margin-right:.35rem;vertical-align:-.1rem}
+.sw.f{background:var(--accent)}.sw.r{background:var(--rev)}.sw.w{background:var(--warn)}.sw.o{background:var(--accent);opacity:.25}
+.steps{list-style:none;padding:0;margin:1rem 0;counter-reset:none}
+.step{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,19rem);gap:1rem 2rem;align-items:center;background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:1.1rem 0;margin:0;font:inherit}
+.step h3{margin:0 0 .4rem;font-size:1.12rem;display:flex;align-items:baseline}
+.num{display:inline-block;min-width:1.7rem;font-size:1.3rem;font-weight:700;color:var(--accent);margin-right:.4rem;flex:none}
+.step p{margin:.3rem 0}
+.where{font:.86rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--muted)}
+figure{margin:0}
+figcaption{font:.78rem/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--muted);text-align:left;margin-top:.25rem}
+svg{display:block;width:100%;height:auto}
+svg .t{fill:var(--fg);font:12px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+svg .tm{fill:var(--muted);font:11px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+svg .tw{fill:var(--warn);font:11px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-weight:700}
+svg .ta{fill:var(--accent);font:11px ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-weight:700}
+svg .card{fill:var(--card);stroke:var(--line)}
+svg .grid{stroke:var(--line);fill:none}
+svg .ink{stroke:var(--fg);fill:none}
+svg .accs{stroke:var(--accent);fill:none}
+svg .warns{stroke:var(--warn);fill:none}
+svg .acc{fill:var(--accent)}svg .rev{fill:var(--rev)}svg .warn{fill:var(--warn)}svg .ok{fill:var(--ok)}
+svg .band{fill:var(--accent);opacity:.22}
+svg .dim{fill:var(--line)}
+svg rect{rx:0;ry:0}
+.decisions td,.decisions th{vertical-align:top}
+.decisions .chip{margin-bottom:.35rem}
+.decisions td p{margin:.2rem 0}
+.mods th:first-child{white-space:nowrap}
+@media (max-width:48rem){.trio,.cases{grid-template-columns:1fr}.step{grid-template-columns:1fr}}
+.formula{margin:.6rem 0;padding:.5rem .8rem;background:var(--card);border-left:3px solid var(--accent)}
+.formula code{white-space:normal}
+.crumb{font:.84rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--muted);margin:0 0 .5rem}
+.crumb a{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;margin:.4rem 0 .6rem}
+.chips .chip{margin:0 1.1rem .4rem 0}
+.chip.dev{color:var(--rev)}.chip.heldout{color:var(--accent)}.chip.case{color:var(--ok)}.chip.met{color:var(--ok)}.chip.notmet{color:var(--warn)}.chip.partly{color:var(--rev)}
+.facts{display:grid;grid-template-columns:minmax(0,11rem) minmax(0,1fr);gap:.35rem 1.2rem;margin:.8rem 0}
+.facts dt{color:var(--muted);font:700 .72rem/1.7 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+.facts dd{margin:0}
+.glance{list-style:none;padding:0;margin:1.2rem 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem 1.4rem}
+.glance li{background:none;border:0;border-top:2px solid var(--fg);border-radius:0;padding:.55rem 0 0;margin:0}
+.glance .big{display:block;font-size:1.5rem;font-weight:700;line-height:1.2;margin:.2rem 0;font-variant-numeric:lining-nums tabular-nums}
+.glance .lab{color:var(--muted);font:.82rem/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.chart{margin:1rem 0}
+.chart figcaption{text-align:left;font-size:.82rem}
+.dcards{list-style:none;padding:0;margin:1rem 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.4rem 2rem}
+.dcard{background:none;border:0;border-top:2px solid var(--fg);border-radius:0;padding:.65rem 0 0;margin:0}
+.dcard h3{margin:.1rem 0 .3rem;font-size:1.05rem}
+.dcard p{margin:.25rem 0;color:var(--muted);font-size:.92rem}
+.dcard .nums{color:var(--fg)}
+.pager{display:flex;justify-content:space-between;flex-wrap:wrap;margin:1.5rem 0 .5rem;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:.9rem}
+.pager a{margin-bottom:.4rem}
+.notebox{background:none;border:0;border-top:1px solid var(--fg);border-bottom:1px solid var(--line);border-radius:0;padding:.8rem 0;margin:1.3rem 0}
+.notebox p{margin:0}
+.pending{color:var(--muted)}
+svg .bar{fill:var(--accent)}svg .barn{fill:var(--warn)}svg .band2{fill:var(--accent);opacity:.16}
+@media (max-width:48rem){.glance{grid-template-columns:repeat(2,minmax(0,1fr))}.dcards{grid-template-columns:1fr}.facts{grid-template-columns:1fr}}
+@media (max-width:34rem){.glance{grid-template-columns:1fr}}
+.tablewrap{overflow-x:auto;margin:1rem 0}
+.tablewrap table{min-width:36rem}
+th.n,td.n{text-align:right}
+td.ok{color:var(--ok)}td.bad{color:var(--warn)}td.dim{color:var(--muted)}
+td.name{white-space:normal;min-width:11rem}
+.legend{color:var(--muted);font-size:.86rem;margin:.3rem 0 1rem}
+.catalog td:first-child,.catalog th:first-child{white-space:nowrap}
+.chip.set{color:var(--muted)}
+.tilebig{display:block;font-size:1.5rem;font-weight:700;line-height:1.2;margin:.2rem 0}
+details.more{margin:1rem 0}
+details.more summary{cursor:pointer;color:var(--accent)}
+svg .dflt{fill:var(--muted)}
+svg .open{fill:none;stroke:var(--warn);stroke-width:2}
+
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap bar">
+<a class="brand" href="../../">Ampli<span class="trim">Trim</span> results</a>
+<nav aria-label="Main"><ul>
+<li><a href="../../">Overview</a></li>
+<li><a href="../../datasets/">Datasets</a></li>
+<li><a href="../../its/">ITS</a></li>
+<li><a href="../../recovery/">Recovery</a></li>
+<li><a href="../../criteria/">Criteria</a></li>
+<li><a href="../../definitions/">Definitions</a></li>
+<li><a href="../../how-it-works/">How it works</a></li>
+<li><a href="https://github.com/paytonyau/amplitrim">Software</a></li>
+<li><a href="https://github.com/paytonyau/amplitrim-validation">Archive</a></li>
+</ul></nav>
+</div></header>
+<main id="main">
+<section class="hero"><div class="wrap">
+<p class="crumb"><a href="../../">Results</a> &rsaquo; <a href="../">ITS</a> &rsaquo; Trims</p>
+<h1>The twelve trims compared</h1>
+<p>A trim cuts each read before the first window of bases whose mean quality is below a limit. Twelve were compared on the eight datasets with a known answer: windows of 2 to 20 bases at mean quality 15, and mean quality 12 and 18 at window 4.</p>
+</div></section><section class="wrap" id="trims"><h2>What each trim kept and cost</h2>
+<figure class="chart"><svg viewBox="0 0 520 300" role="img" aria-label="Twelve trims: mean reads kept against mean bases cut per read; filled points are safe on every dataset with a known answer"><title>Twelve trims: mean reads kept against mean bases cut per read; filled points are safe on every dataset with a known answer</title><line class="ink" x1="70" y1="250" x2="480" y2="250"/><text class="tm" x="64" y="254" text-anchor="end">70%</text><line class="ink" x1="70" y1="200" x2="480" y2="200"/><text class="tm" x="64" y="204" text-anchor="end">75%</text><line class="ink" x1="70" y1="150" x2="480" y2="150"/><text class="tm" x="64" y="154" text-anchor="end">80%</text><line class="ink" x1="70" y1="100" x2="480" y2="100"/><text class="tm" x="64" y="104" text-anchor="end">85%</text><line class="ink" x1="70" y1="50" x2="480" y2="50"/><text class="tm" x="64" y="54" text-anchor="end">90%</text><text class="tm" x="70" y="272" text-anchor="middle">0</text><text class="tm" x="161" y="272" text-anchor="middle">10</text><text class="tm" x="252" y="272" text-anchor="middle">20</text><text class="tm" x="343" y="272" text-anchor="middle">30</text><text class="tm" x="434" y="272" text-anchor="middle">40</text><circle class="acc" data-v="88.53" cx="287.8" cy="64.7" r="7"/><text class="tm" x="275.8" y="68.7" text-anchor="end">Window 4, Quality 15 (best)</text><circle class="open" data-v="84.75" cx="442.6" cy="102.5" r="5"/><text class="tm" x="442.6" y="124.5" text-anchor="middle">Window 2</text><circle class="open" data-v="88.64" cx="345.2" cy="63.6" r="5"/><text class="tm" x="355.2" y="61.6" text-anchor="start">Window 3</text><circle class="acc" data-v="87.02" cx="253.1" cy="79.8" r="5"/><text class="tm" x="262.1" y="93.8" text-anchor="start">Window 5</text><circle class="open" data-v="84.61" cx="231.3" cy="103.9" r="5"/><text class="tm" x="222.3" y="107.9" text-anchor="end">Window 6</text><circle class="acc" data-v="80.61" cx="199.4" cy="143.9" r="5"/><text class="tm" x="190.4" y="139.9" text-anchor="end">Window 8</text><circle class="acc" data-v="77.72" cx="179.3" cy="172.8" r="5"/><text class="tm" x="188.3" y="176.8" text-anchor="start">Window 10</text><circle class="acc" data-v="75.69" cx="165.7" cy="193.1" r="5"/><text class="tm" x="174.7" y="197.1" text-anchor="start">Window 12</text><circle class="acc" data-v="73.53" cx="150.2" cy="214.7" r="5"/><text class="tm" x="159.2" y="218.7" text-anchor="start">Window 16</text><circle class="acc" data-v="72.1" cx="141.1" cy="229.0" r="5"/><text class="tm" x="150.1" y="233.0" text-anchor="start">Window 20</text><circle class="acc" data-v="80.09" cx="202.1" cy="149.1" r="5"/><text class="tm" x="211.1" y="159.1" text-anchor="start">Quality 12</text><circle class="open" data-v="87.59" cx="378.0" cy="74.1" r="5"/><text class="tm" x="387.0" y="88.1" text-anchor="start">Quality 18</text><text class="tm" x="275" y="292" text-anchor="middle">Mean bases cut per read</text></svg><figcaption>Mean reads kept against mean bases cut per read. Filled points: safe on every dataset with a known answer. Open points: not safe. Larger point: the best by the rule fixed beforehand.</figcaption></figure><div class="tablewrap"><table><thead><tr><th scope="col">Trim</th><th scope="col">Safe on every dataset</th><th scope="col" class="n">Mean reads kept</th><th scope="col" class="n">Reads kept: ATCC Standard ITS2</th><th scope="col" class="n">Mean bases cut per read</th><th scope="col" class="n">Mean merge share</th><th scope="col" class="n">Against window 4, quality 15 (points)</th></tr></thead><tbody><tr><td class="name">Trim: Window 4, Quality 15 (best)</td><td class="ok">Yes</td><td class="n">88.53%</td><td class="n">83.01%</td><td class="n">23.9</td><td class="n">96.10%</td><td class="n">0.00</td></tr><tr><td class="name">Trim: Window 2, Quality 15</td><td class="bad">No</td><td class="n">84.75%</td><td class="n">82.99%</td><td class="n">40.9</td><td class="n">94.34%</td><td class="n">-3.78</td></tr><tr><td class="name">Trim: Window 3, Quality 15</td><td class="bad">No</td><td class="n">88.64%</td><td class="n">83.66%</td><td class="n">30.2</td><td class="n">95.78%</td><td class="n">+0.11</td></tr><tr><td class="name">Trim: Window 5, Quality 15</td><td class="ok">Yes</td><td class="n">87.02%</td><td class="n">79.07%</td><td class="n">20.1</td><td class="n">96.37%</td><td class="n">-1.51</td></tr><tr><td class="name">Trim: Window 6, Quality 15</td><td class="bad">No</td><td class="n">84.61%</td><td class="n">72.61%</td><td class="n">17.7</td><td class="n">96.28%</td><td class="n">-3.92</td></tr><tr><td class="name">Trim: Window 8, Quality 15</td><td class="ok">Yes</td><td class="n">80.61%</td><td class="n">63.98%</td><td class="n">14.2</td><td class="n">96.66%</td><td class="n">-7.92</td></tr><tr><td class="name">Trim: Window 10, Quality 15</td><td class="ok">Yes</td><td class="n">77.72%</td><td class="n">56.27%</td><td class="n">12.0</td><td class="n">96.94%</td><td class="n">-10.81</td></tr><tr><td class="name">Trim: Window 12, Quality 15</td><td class="ok">Yes</td><td class="n">75.69%</td><td class="n">50.33%</td><td class="n">10.5</td><td class="n">96.92%</td><td class="n">-12.84</td></tr><tr><td class="name">Trim: Window 16, Quality 15</td><td class="ok">Yes</td><td class="n">73.53%</td><td class="n">45.14%</td><td class="n">8.8</td><td class="n">97.54%</td><td class="n">-15.00</td></tr><tr><td class="name">Trim: Window 20, Quality 15</td><td class="ok">Yes</td><td class="n">72.10%</td><td class="n">40.81%</td><td class="n">7.8</td><td class="n">97.80%</td><td class="n">-16.43</td></tr><tr><td class="name">Trim: Window 4, Quality 12</td><td class="ok">Yes</td><td class="n">80.09%</td><td class="n">62.79%</td><td class="n">14.5</td><td class="n">96.45%</td><td class="n">-8.44</td></tr><tr><td class="name">Trim: Window 4, Quality 18</td><td class="bad">No</td><td class="n">87.59%</td><td class="n">83.57%</td><td class="n">33.8</td><td class="n">95.76%</td><td class="n">-0.94</td></tr></tbody></table></div><p class="legend">Safe: false reads rose by at most 1 point and members found fell by at most 2 points, against the default, on every dataset with a known answer. The best: the highest mean reads kept among the safe trims; trims within 0.5 points are tied, and the one that cuts the fewest bases wins.</p>
+</section><section class="wrap" id="criteria"><h2>The criteria</h2>
+<div class="tablewrap"><table><thead><tr><th scope="col">Criterion</th><th scope="col">Trim</th><th scope="col">Outcome</th><th scope="col">What was measured</th></tr></thead><tbody><tr><td>P119</td><td class="name">Trim: Window 2, Quality 15</td><td class="bad">NOT MET</td><td class="name">ATCC Standard ITS1 spurious +0.00, recall +16.7; ATCC Standard ITS2 spurious +0.00, recall +11.1; Arfken Mixes ITS1 spurious -0.00, recall +0.0; Arfken Mixes ITS2 spurious +0.00, recall +0.0; Bakker ITS1 (PCR) spurious -0.03, recall -3.1; Bakker ITS1 (Polymerases) spurious +0.00, recall +4.5; Bakker ITS2 (Polymerases) spurious +0.00, recall -11.9; Pauvert Mock spurious -0.21, recall -1.5</td></tr><tr><td>P120</td><td class="name">Trim: Window 2, Quality 15</td><td class="bad">NOT MET</td><td class="name">ATCC ITS2 yield -0.0 points against Trim: Window 4, Quality 15 (at least +2), lowest -18.4 (at least -1)</td></tr><tr><td>P119</td><td class="name">Trim: Window 3, Quality 15</td><td class="bad">NOT MET</td><td class="name">ATCC Standard ITS1 spurious +0.00, recall +16.7; ATCC Standard ITS2 spurious +0.00, recall +27.8; Arfken Mixes ITS1 spurious -0.00, recall +0.0; Arfken Mixes ITS2 spurious +0.00, recall -2.2; Bakker ITS1 (PCR) spurious -0.03, recall -1.4; Bakker ITS1 (Polymerases) spurious +0.00, recall +2.5; Bakker ITS2 (Polymerases) spurious +0.00, recall -1.9; Pauvert Mock spurious -0.03, recall -1.3</td></tr><tr><td>P120</td><td class="name">Trim: Window 3, Quality 15</td><td class="bad">NOT MET</td><td class="name">ATCC ITS2 yield +0.6 points against Trim: Window 4, Quality 15 (at least +2), lowest -0.6 (at least -1)</td></tr><tr><td>P119</td><td class="name">Trim: Window 5, Quality 15</td><td class="ok">MET</td><td class="name">ATCC Standard ITS1 spurious +0.00, recall +16.7; ATCC Standard ITS2 spurious +0.00, recall +27.8; Arfken Mixes ITS1 spurious -0.00, recall +0.0; Arfken Mixes ITS2 spurious +0.00, recall +0.0; Bakker ITS1 (PCR) spurious -0.03, recall -0.4; Bakker ITS1 (Polymerases) spurious +0.00, recall +4.1; Bakker ITS2 (Polymerases) spurious +0.00, recall -0.2; Pauvert Mock spurious +0.00, recall -0.4</td></tr><tr><td>P120</td><td class="name">Trim: Window 5, Quality 15</td><td class="bad">NOT MET</td><td class="name">ATCC ITS2 yield -3.9 points against Trim: Window 4, Quality 15 (at least +2), lowest -3.9 (at least -1)</td></tr><tr><td>P119</td><td class="name">Trim: Window 6, Quality 15</td><td class="bad">NOT MET</td><td class="name">ATCC Standard ITS1 spurious +0.00, recall +16.7; ATCC Standard ITS2 spurious +0.00, recall +16.7; Arfken Mixes ITS1 spurious -0.00, recall +0.0; Arfken Mixes ITS2 spurious +0.00, recall -2.2; Bakker ITS1 (PCR) spurious -0.03, recall +0.6; Bakker ITS1 (Polymerases) spurious +0.00, recall +3.9; Bakker ITS2 (Polymerases) spurious +0.00, recall +0.0; Pauvert Mock spurious +0.03, recall -0.2</td></tr><tr><td>P120</td><td class="name">Trim: Window 6, Quality 15</td><td class="bad">NOT MET</td><td class="name">ATCC ITS2 yield -10.4 points against Trim: Window 4, Quality 15 (at least +2), lowest -10.4 (at least -1)</td></tr><tr><td>P119</td><td class="name">Trim: Window 8, Quality 15</td><td class="ok">MET</td><td class="name">ATCC Standard ITS1 spurious +0.00, recall +11.1; ATCC Standard ITS2 spurious +0.00, recall +22.2; Arfken Mixes ITS1 spurious -0.00, recall +0.0; Arfken Mixes ITS2 spurious +0.00, recall +0.0; Bakker ITS1 (PCR) spurious -0.02, recall +0.6; Bakker ITS1 (Polymerases) spurious +0.00, recall +1.9; Bakker ITS2 (Polymerases) spurious +0.00, recall -0.4; Pauvert Mock spurious +0.04, recall +0.0</td></tr><tr><td>P120</td><td class="name">Trim: Window 8, Quality 15</td><td class="bad">NOT MET</td><td class="name">ATCC ITS2 yield -19.0 points against Trim: Window 4, Quality 15 (at least +2), lowest -19.0 (at least -1)</td></tr><tr><td>P119</td><td class="name">Trim: Window 10, Quality 15</td><td class="ok">MET</td><td class="name">ATCC Standard ITS1 spurious +0.00, recall +16.7; ATCC Standard ITS2 spurious +0.00, recall +22.2; Arfken Mixes ITS1 spurious -0.00, recall +0.0; Arfken Mixes ITS2 spurious +0.00, recall +0.0; Bakker ITS1 (PCR) spurious -0.02, recall +0.6; Bakker ITS1 (Polymerases) spurious +0.00, recall +1.9; Bakker ITS2 (Polymerases) spurious +0.00, recall -0.2; Pauvert Mock spurious +0.05, recall -0.4</td></tr><tr><td>P120</td><td class="name">Trim: Window 10, Quality 15</td><td class="bad">NOT MET</td><td class="name">ATCC ITS2 yield -26.7 points against Trim: Window 4, Quality 15 (at least +2), lowest -26.7 (at least -1)</td></tr><tr><td>P119</td><td class="name">Trim: Window 12, Quality 15</td><td class="ok">MET</td><td class="name">ATCC Standard ITS1 spurious +0.00, recall +11.1; ATCC Standard ITS2 spurious +0.00, recall +11.1; Arfken Mixes ITS1 spurious -0.00, recall +0.0; Arfken Mixes ITS2 spurious +0.00, recall +0.0; Bakker ITS1 (PCR) spurious -0.01, recall +0.2; Bakker ITS1 (Polymerases) spurious +0.00, recall +1.9; Bakker ITS2 (Polymerases) spurious +0.00, recall -0.2; Pauvert Mock spurious +0.04, recall +0.2</td></tr><tr><td>P120</td><td class="name">Trim: Window 12, Quality 15</td><td class="bad">NOT MET</td><td class="name">ATCC ITS2 yield -32.7 points against Trim: Window 4, Quality 15 (at least +2), lowest -32.7 (at least -1)</td></tr><tr><td>P119</td><td class="name">Trim: Window 16, Quality 15</td><td class="ok">MET</td><td class="name">ATCC Standard ITS1 spurious +0.00, recall +11.1; ATCC Standard ITS2 spurious +0.00, recall +16.7; Arfken Mixes ITS1 spurious -0.00, recall +0.0; Arfken Mixes ITS2 spurious +0.00, recall +0.0; Bakker ITS1 (PCR) spurious -0.01, recall +0.0; Bakker ITS1 (Polymerases) spurious +0.00, recall +1.4; Bakker ITS2 (Polymerases) spurious +0.00, recall -0.2; Pauvert Mock spurious +0.03, recall +0.2</td></tr><tr><td>P120</td><td class="name">Trim: Window 16, Quality 15</td><td class="bad">NOT MET</td><td class="name">ATCC ITS2 yield -37.9 points against Trim: Window 4, Quality 15 (at least +2), lowest -37.9 (at least -1)</td></tr><tr><td>P119</td><td class="name">Trim: Window 20, Quality 15</td><td class="ok">MET</td><td class="name">ATCC Standard ITS1 spurious +0.00, recall +11.1; ATCC Standard ITS2 spurious +0.00, recall +11.1; Arfken Mixes ITS1 spurious -0.00, recall +0.0; Arfken Mixes ITS2 spurious +0.00, recall +0.0; Bakker ITS1 (PCR) spurious -0.01, recall +0.2; Bakker ITS1 (Polymerases) spurious +0.00, recall +1.0; Bakker ITS2 (Polymerases) spurious +0.00, recall +0.0; Pauvert Mock spurious +0.01, recall +0.0</td></tr><tr><td>P120</td><td class="name">Trim: Window 20, Quality 15</td><td class="bad">NOT MET</td><td class="name">ATCC ITS2 yield -42.2 points against Trim: Window 4, Quality 15 (at least +2), lowest -42.2 (at least -1)</td></tr><tr><td>P119</td><td class="name">Trim: Window 4, Quality 12</td><td class="ok">MET</td><td class="name">ATCC Standard ITS1 spurious +0.00, recall +11.1; ATCC Standard ITS2 spurious +0.00, recall +11.1; Arfken Mixes ITS1 spurious -0.00, recall +0.0; Arfken Mixes ITS2 spurious +0.00, recall +0.0; Bakker ITS1 (PCR) spurious -0.02, recall +0.2; Bakker ITS1 (Polymerases) spurious +0.00, recall +0.0; Bakker ITS2 (Polymerases) spurious +0.00, recall +0.0; Pauvert Mock spurious +0.03, recall -0.2</td></tr><tr><td>P120</td><td class="name">Trim: Window 4, Quality 12</td><td class="bad">NOT MET</td><td class="name">ATCC ITS2 yield -20.2 points against Trim: Window 4, Quality 15 (at least +2), lowest -20.2 (at least -1)</td></tr><tr><td>P119</td><td class="name">Trim: Window 4, Quality 18</td><td class="bad">NOT MET</td><td class="name">ATCC Standard ITS1 spurious +0.00, recall +16.7; ATCC Standard ITS2 spurious +0.00, recall +11.1; Arfken Mixes ITS1 spurious -0.00, recall +0.0; Arfken Mixes ITS2 spurious +0.00, recall -2.2; Bakker ITS1 (PCR) spurious -0.04, recall -2.5; Bakker ITS1 (Polymerases) spurious +0.00, recall +4.5; Bakker ITS2 (Polymerases) spurious +0.00, recall -5.5; Pauvert Mock spurious -0.05, recall -1.1</td></tr><tr><td>P120</td><td class="name">Trim: Window 4, Quality 18</td><td class="bad">NOT MET</td><td class="name">ATCC ITS2 yield +0.6 points against Trim: Window 4, Quality 15 (at least +2), lowest -3.0 (at least -1)</td></tr><tr><td>P130</td><td class="name"></td><td class="ok">MET</td><td class="name">the best trim: Trim: Window 4, Quality 15 (tied within 0.5 points: Trim: Window 4, Quality 15)</td></tr></tbody></table></div><p>All criteria: <a href="../../criteria/">Criteria</a>.</p>
+</section><section class="wrap" id="sources"><h2>Where the numbers come from</h2>
+<p><code>results/31_v04_night/V04_SUMMARY.md</code> (register sections 43 and 44).</p>
+</section>
+</main>
+<footer><div class="wrap">
+<p><a href="../../">Overview</a> · <a href="https://github.com/paytonyau/amplitrim">AmpliTrim on GitHub</a> · <a href="https://github.com/paytonyau/amplitrim-validation">Validation archive</a> · <a href="https://github.com/paytonyau/amplitrim-validation/blob/main/docs/FINDINGS.md">The findings</a> · <a href="https://github.com/paytonyau/amplitrim-validation/blob/main/TEST_REGISTER.md">Test register</a></p>
+<p>By <a href="https://orcid.org/0000-0002-3283-0370">Payton (Tung On) Yau</a>. The numbers are read from the files the runs committed to the validation archive (the paths are given on each page); the register fixed every criterion before its run.</p>
+</div></footer>
+<script>
+(function () {
+  var root = document.documentElement, list = document.querySelector('header.site nav ul');
+  if (!list) return;
+  var button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'theme';
+  button.id = 'theme-toggle';
+  var item = document.createElement('li');
+  item.appendChild(button);
+  list.appendChild(item);
+  var query = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  function current() {
+    var chosen = root.getAttribute('data-theme');
+    if (chosen) return chosen;
+    return query && query.matches ? 'dark' : 'light';
+  }
+  function show() {
+    var dark = current() === 'dark';
+    button.textContent = dark ? '\u2600 Light' : '\u263E Dark';
+    button.setAttribute('aria-label', dark ? 'Switch to the light theme' : 'Switch to the dark theme');
+  }
+  button.addEventListener('click', function () {
+    var next = current() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('amplitrim-theme', next); } catch (e) {}
+    show();
+  });
+  if (query && query.addEventListener) query.addEventListener('change', show);
+  show();
+})();
+
+</script>
+</body>
+</html>

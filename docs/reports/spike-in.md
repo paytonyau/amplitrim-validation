@@ -1,4 +1,4 @@
-# Mouse gut with spike-ins, V3-V4: evidence report
+# Mouse Gut Spike-Ins: evidence report
 
 *AmpliTrim validation archive. The numbers come from [`docs/FINDINGS.md`](../FINDINGS.md) and [`docs/validation.md`](../validation.md). The tool we compare with is not named here; the findings name it.*
 

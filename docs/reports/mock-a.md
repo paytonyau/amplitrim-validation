@@ -1,4 +1,4 @@
-# Mock community A: evidence report
+# Hülpüsch Mock A: evidence report
 
 *AmpliTrim validation archive. The numbers come from [`docs/FINDINGS.md`](../FINDINGS.md) and [`docs/validation.md`](../validation.md). The tool we compare with is not named here; the findings name it.*
 

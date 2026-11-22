@@ -33,4 +33,19 @@ python -m pytest tests\test_results_site.py -q
 | `theme_head.js`, `theme.js` | the light/dark switch: the first sets the saved theme before the page is drawn, the second adds the button |
 | `build_results.py`, `results_data.py`, `results_css.css` | the results site of the archive: its data, its pages and charts, and its styles |
 
+The **ITS pages and the pages for both markers** (`docs/its/`, `docs/its/datasets/<dataset>/`, `docs/recovery/`, `docs/criteria/`, `docs/definitions/`, `docs/runs/`, `docs/datasets/index.html`) are built from the files the runs committed, not from the findings:
+
+```bat
+python site-build\\build_results.py
+python site-build\\build_its.py
+python -m pytest tests\\test_results_site.py tests\\test_its_site.py -q
+```
+
+`build_its.py` reads `results/*` (the metrics tables, `V04_SUMMARY.md`, `RECOVERY.md`, the criteria of each run's summary, `predict.json`), `docs/DATASET_NAMES.tsv` and `docs/DEFINITIONS.md`, and writes every page; nothing is typed in. Datasets and settings have readable names (`names.py`; the archive's codes appear only inside `<code>` paths). To add a dataset, add a row to `docs/DATASET_NAMES.tsv`; to name a new setting, add it to `SETTINGS` in `names.py`. The test rebuilds every page from the files and fails, naming the page, until you rebuild.
+
+| file | what it holds |
+|---|---|
+| `shell.py`, `its_css.css` | the page shell shared by both builders (styles, theme switch, navigation, footer) and the styles of the new tables |
+| `build_its.py`, `names.py` | the ITS and cross-marker pages, and the names of datasets and settings |
+
 The pictures are schematic, drawn from nothing but the idea, and each is captioned so. To change one, edit its function in `design_svgs.py`.
